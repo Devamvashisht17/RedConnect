@@ -1,0 +1,56 @@
+[
+  {
+    "name": "RIYA SAINI",
+    "email": "riya3321.beai24@chitkara.edu.in",
+    "password": "hello",
+    "activity": "Donor"
+  },
+  {
+    "name": "devam",
+    "email": "devamvashisht1704@gmail.com",
+    "password": "1234",
+    "activity": "Donor"
+  },
+  {
+    "name": "japnoor kaur",
+    "email": "japnoorkd@gmail.com",
+    "password": "1313",
+    "activity": "Requester"
+  },
+  {
+    "name": "ridampreetkaur dang",
+    "email": "dangridam1313@gmail.com",
+    "password": "1234567",
+    "activity": "Donor"
+  },
+  {
+    "name": "devam",
+    "email": "devam@gmail.com",
+    "password": "dev",
+    "activity": "Donor"
+  },
+  {
+    "name": "divya",
+    "email": "divya@gmail.com",
+    "password": "123",
+    "activity": "Requester"
+  },
+  {
+    "name": "devam",
+    "email": "devamvashisht4@gmail.com",
+    "password": "1",
+    "activity": "Donor"
+  },
+  {
+    "name": "Devam Vashisht",
+    "email": "devamvashisht@gmail.com",
+    "password": "1",
+    "activity": "Volunteer"
+  },
+  {
+    "name": "Japnoor Kaur",
+    "email": "japnoor1106.becse24@chitkara.edu.in",
+    "password": "123",
+    "activity": "Donor"
+  }
+]

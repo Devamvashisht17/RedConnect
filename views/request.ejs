@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Blood - RedConnect</title>
+  <link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+  <div class="quote-section">
+    <h2>"Every Request Matters"</h2>
+    <p>We understand the urgency. Submit your blood requirement and we'll connect you with donors immediately.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="faq-section">
+      <h3>Request Guidelines</h3>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>How quickly will I get blood?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>We notify matching donors immediately. Response time depends on availability in your area.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Is there any cost?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Blood donation is voluntary and free. We only connect you with willing donors.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What information do I need?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Patient details, required blood group, hospital name, and urgency level.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Can I request for someone else?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Yes, you can request blood on behalf of a patient. Provide accurate contact details.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="register-container">
+      <div class="register-header">
+        <h1>🩸 Request Blood</h1>
+        <p>Fill in the details and we'll help you find donors.</p>
+      </div>
+
+      <form method="POST" action="/request" class="register-form">
+        <div class="form-group">
+          <label for="name">Patient Name *</label>
+          <input type="text" id="name" name="name" required placeholder="Enter patient name">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Contact Email *</label>
+          <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Contact Phone *</label>
+          <input type="tel" id="phone" name="phone" required placeholder="1234567890">
+        </div>
+
+        <div class="form-group">
+          <label for="bloodGroup">Blood Group Required *</label>
+          <select id="bloodGroup" name="bloodGroup" required>
+            <option value="">Select Blood Group</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City *</label>
+          <select id="city" name="city" required>
+            <option value="">Select City</option>
+            <option value="Rajpura">Rajpura</option>
+            <option value="Lucknow">Lucknow</option>
+            <option value="Patiala">Patiala</option>
+            <option value="Mohali">Mohali</option>
+            <option value="Ludhiana">Ludhiana</option>
+            <option value="Amritsar">Amritsar</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="hospital">Hospital Name *</label>
+          <input type="text" id="hospital" name="hospital" required placeholder="Enter hospital name">
+        </div>
+
+        <div class="form-group">
+          <label for="urgency">Urgency Level *</label>
+          <select id="urgency" name="urgency" required>
+            <option value="">Select Urgency</option>
+            <option value="Critical">Critical (Within 24 hours)</option>
+            <option value="Urgent">Urgent (Within 2-3 days)</option>
+            <option value="Normal">Normal (Within a week)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Request</button>
+      </form>
+
+      <a href="/" class="back-link">← Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    function toggleFaq(element) {
+      const faqItem = element.parentElement;
+      const answer = faqItem.querySelector('.faq-answer');
+      const arrow = element.querySelector('.arrow');
+      
+      faqItem.classList.toggle('active');
+      
+      if (faqItem.classList.contains('active')) {
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        answer.style.maxHeight = '0';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+  </script>
+</body>
+</html>

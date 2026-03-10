@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Become a Volunteer - RedConnect</title>
+  <link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+  <div class="quote-section">
+    <h2>"Be the Change You Want to See"</h2>
+    <p>Join our team of dedicated volunteers and help us save lives every day. Your time and effort can make a real difference.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="faq-section">
+      <h3>Volunteer Benefits</h3>
+      
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What do volunteers do?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Volunteers help organize blood donation camps, spread awareness, and assist in donor registration.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Time commitment required?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Flexible hours. You can volunteer as per your availability - weekly, monthly, or for specific events.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Do I need experience?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>No prior experience needed. We provide training and guidance to all volunteers.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What will I gain?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Certificate, community service hours, networking opportunities, and the satisfaction of saving lives.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="register-container">
+      <div class="register-header">
+        <h1>🩸 Volunteer Registration</h1>
+        <p>Join our mission to save lives through blood donation.</p>
+      </div>
+
+      <form method="POST" action="/volunteer" class="register-form">
+        <div class="form-group">
+          <label for="name">Your Name *</label>
+          <input type="text" id="name" name="name" required placeholder="Enter your full name">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" name="phone" required placeholder="1234567890">
+        </div>
+
+        <div class="form-group">
+          <label for="age">Age *</label>
+          <input type="number" id="age" name="age" required placeholder="18" min="16">
+        </div>
+
+        <div class="form-group">
+          <label for="city">City *</label>
+          <select id="city" name="city" required>
+            <option value="">Select City</option>
+            <option value="Rajpura">Rajpura</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Patiala">Patiala</option>
+            <option value="Mohali">Mohali</option>
+            <option value="Ludhiana">Ludhiana</option>
+            <option value="Amritsar">Amritsar</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="availability">Availability *</label>
+          <select id="availability" name="availability" required>
+            <option value="">Select Availability</option>
+            <option value="Weekends">Weekends Only</option>
+            <option value="Weekdays">Weekdays</option>
+            <option value="Flexible">Flexible</option>
+            <option value="Events">Events Only</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="skills">Skills/Experience (Optional)</label>
+          <input type="text" id="skills" name="skills" placeholder="e.g., Event management, Social media">
+        </div>
+
+        <button type="submit" class="submit-btn">Register as Volunteer</button>
+      </form>
+
+      <a href="/" class="back-link">← Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    function toggleFaq(element) {
+      const faqItem = element.parentElement;
+      const answer = faqItem.querySelector('.faq-answer');
+      const arrow = element.querySelector('.arrow');
+      
+      faqItem.classList.toggle('active');
+      
+      if (faqItem.classList.contains('active')) {
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        answer.style.maxHeight = '0';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+  </script>
+</body>
+</html>

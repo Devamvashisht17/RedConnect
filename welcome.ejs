@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome - RedConnect</title>
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">🩸RedConnect</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card welcome-card">
+      <% if (activity === 'Donor') { %>
+        <h1>Welcome Donor <%= name %> 🩸</h1>
+      <% } else if (activity === 'Requester') { %>
+        <h1>Welcome <%= name %>. We hope you find a donor soon.</h1>
+      <% } else if (activity === 'Volunteer') { %>
+        <h1>Welcome Volunteer <%= name %> 🤝</h1>
+      <% } %>
+      
+      <a href="/" class="auth-btn">Go to Home</a>
+    </div>
+  </div>
+</body>
+</html>

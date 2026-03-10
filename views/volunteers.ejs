@@ -1,0 +1,30 @@
+<section class="volunteers-section">
+  <div class="volunteers-container">
+    <div class="section-header">
+      <h2>OUR VOLUNTEERS</h2>
+    <div class="divider">
+    <span class="line"></span>
+    <span class="blood-icon"></span>
+    <span class="line"></span>
+  </div>
+      <p>Meet our dedicated team working to save lives every day</p>
+    </div>
+
+    <div class="volunteers-grid">
+      <% volunteers.forEach(volunteer => { %>
+        <div class="volunteer-card">
+          <div class="volunteer-image">
+            <div class="profile-icon">👤</div>
+          </div>
+          <h3><%= volunteer.name %></h3>
+          <p class="role"><%= volunteer.role %></p>
+          <div class="social-links">
+            <a href="<%= volunteer.linkedin %>" target="_blank">in</a>
+            <a href="<%= volunteer.twitter %>" target="_blank">𝕏</a>
+            <a href="<%= volunteer.facebook %>" target="_blank">f</a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - RedConnect</title>
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">🩸RedConnect</div>
+    <div class="nav-links">
+      <b><a href="/">Back to Home</a></b>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>🩸 Welcome Back</h1>
+      
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-msg"><%= error %></div>
+      <% } %>
+
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+          <label>Select Activity</label>
+          <select name="activity" required>
+            <option value="">Choose...</option>
+            <option value="Donor">Donor</option>
+            <option value="Requester">Requester</option>
+            <option value="Volunteer">Volunteer</option>
+          </select>
+        </div>
+
+        <button type="submit" class="auth-btn">Login</button>
+      </form>
+
+      <p class="switch-link">Don't have an account? <a href="/signup">Sign Up</a></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,317 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+.navbar {
+  background-color: #fff;
+  padding: 15px 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blood-drop {
+  color: #e74c3c;
+  font-size: 24px;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.nav-menu {
+  list-style: none;
+  display: flex;
+  gap: 35px;
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  transition: color 0.3s;
+}
+
+.nav-menu a:hover {
+  color: #e74c3c;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #666;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  min-width: 120px;
+  z-index: 1000;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 12px 20px;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.dropdown-menu a:hover {
+  background: #f5f5f5;
+  color: #e74c3c;
+}
+
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+              url('https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.hero-content {
+  max-width: 900px;
+  padding: 20px;
+}
+
+.blood-drop-image {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 40px;
+  filter: drop-shadow(0 10px 20px rgba(231, 76, 60, 0.5));
+}
+
+.hero h1 {
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  line-height: 1.3;
+}
+
+.hero p {
+  font-size: 18px;
+  line-height: 1.8;
+  margin-bottom: 40px;
+  color: #ddd;
+}
+
+.appointment-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 18px 45px;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s;
+  margin: 0 20px;
+}
+
+.navbar .appointment-btn {
+  padding: 10px 30px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.appointment-btn:hover {
+  background-color: #c0392b;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(231, 76, 60, 0.4);
+}
+
+.volunteer-section {
+  height: 400px;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),url('/images/volunteer.avif');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.volunteer-content h2 {
+  color: white;
+  font-size: 42px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.volunteer-btn {
+  background-color: #ff3b3b;
+  color: white;
+  border: none;
+  padding: 18px 45px;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.volunteer-btn:hover {
+  background-color: #d63031;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(255, 59, 59, 0.4);
+}
+
+.donation-header {
+  text-align: center;
+  padding: 40px 20px 0px;
+  background-color: #f9f9f9;
+}
+
+.donation-header h2 {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+.donation-header .divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.donation-header .line {
+  width: 60px;
+  height: 2px;
+  background-color: #e74c3c;
+}
+
+.donation-header .blood-icon {
+  color: #e74c3c;
+  font-size: 24px;
+  position: relative;
+  display: inline-block;
+}
+
+.donation-header .blood-icon::before {
+  content: '🩸';
+}
+
+.donation-header .blood-icon::after {
+  content: '+';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  
+}
+
+.donation-header p {
+  font-size: 16px;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .nav-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .blood-drop-image {
+    width: 100px;
+    height: 100px;
+  }
+}
