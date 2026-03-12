@@ -9,7 +9,7 @@
     "name": "devam",
     "email": "devamvashisht1704@gmail.com",
     "password": "1234",
-    "activity": "Requester"
+    "activity": "Donor"
   },
   {
     "name": "japnoor kaur",
@@ -54,15 +54,9 @@
     "activity": "Donor"
   },
   {
-    "name": "Devam Vashisht",
-    "email": "devamvashisht704@gmail.com",
-    "password": "1",
-    "activity": "Volunteer"
-  },
-  {
-    "name": "dev12",
-    "email": "devat1704@gmail.com",
+    "name": "sneha",
+    "email": "sneha2980.beai24@chitkara.edu.in",
     "password": "123",
-    "activity": "Requester"
+    "activity": "Donor"
   }
 ]

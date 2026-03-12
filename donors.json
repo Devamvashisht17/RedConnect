@@ -106,5 +106,14 @@
     "bloodGroup": "B+",
     "city": "Amritsar",
     "registeredAt": "2026-03-09T15:34:40.474Z"
+  },
+  {
+    "name": "Sneha",
+    "email": "sneha2980.beai24@chitkara.edu.in",
+    "phone": "9253144969",
+    "dob": "2026-03-11",
+    "bloodGroup": "O+",
+    "city": "Rajpura",
+    "registeredAt": "2026-03-10T09:22:43.458Z"
   }
 ]
