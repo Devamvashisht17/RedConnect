@@ -8,56 +8,63 @@
 </head>
 <body>
   <nav class="navbar">
-    <div class="logo">🩸RedConnect</div>
+    <div class="logo">🩸 RedConnect</div>
     <div class="nav-links">
-    <b> <a href="/"> Back to Home</a> </b> 
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
     </div>
   </nav>
 
   <div class="auth-container">
     <div class="auth-card">
       <h1>🩸 Join RedConnect</h1>
-      
-      <% if (typeof error !== 'undefined' && error) { %>
+
+      <% if (error) { %>
         <div class="error-msg"><%= error %></div>
       <% } %>
 
-      <form action="/signup" method="POST">
+      <!-- enctype="multipart/form-data" required for file upload (multer) -->
+      <form action="/signup" method="POST" enctype="multipart/form-data">
+
         <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" name="name" required>
+          <label>Full Name *</label>
+          <input type="text" name="name" placeholder="Enter your name" required>
         </div>
 
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" name="email" required>
+          <label>Email *</label>
+          <input type="email" name="email" placeholder="Enter your email" required>
         </div>
 
         <div class="form-group">
-          <label>Password</label>
-          <input type="password" name="password" required>
+          <label>Password *</label>
+          <input type="password" name="password" placeholder="Create password" required>
         </div>
 
         <div class="form-group">
-          <label>Confirm Password</label>
-          <input type="password" name="confirmPassword" required>
+          <label>Confirm Password *</label>
+          <input type="password" name="confirmPassword" placeholder="Confirm password" required>
         </div>
 
         <div class="form-group">
-          <label>Select Activity</label>
-          <select name="activity" required>
-            <option value="">Choose...</option>
-            <option value="Donor">Donor</option>
-            <option value="Requester">Requester</option>
-            <option value="Volunteer">Volunteer</option>
-          </select>
+          <label>Profile Picture</label>
+          <input type="file" name="profilePic" accept="image/*">
         </div>
 
         <button type="submit" class="auth-btn">Sign Up</button>
       </form>
 
+      <div class="divider">or</div>
+
+      <!-- Google OAuth login -->
+      <a href="/auth/google" class="google-btn">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+        Continue with Google
+      </a>
+
       <p class="switch-link">Already have an account? <a href="/login">Login</a></p>
     </div>
   </div>
+
 </body>
 </html>

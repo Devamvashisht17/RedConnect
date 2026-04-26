@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - RedConnect</title>
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">🩸 RedConnect</div>
+    <div class="nav-links">
+      <a href="/">Website</a>
+      <a href="/logout" class="logout-link">Logout</a>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card dashboard-card">
+
+      <!-- Profile Picture -->
+      <div class="profile-pic-wrapper">
+        <% if (user.profilePic) { %>
+          <img src="<%= user.profilePic %>" alt="Profile" class="profile-pic">
+        <% } else { %>
+          <div class="profile-avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+        <% } %>
+      </div>
+
+      <!-- Personalized welcome based on activity -->
+      <% if (user.activity === 'Donor') { %>
+        <h1>Welcome Donor, <%= user.name %> 🩸</h1>
+        <p class="welcome-msg">Thank you for being a lifesaver. Your blood can save up to 3 lives.</p>
+      <% } else if (user.activity === 'Requester') { %>
+        <h1>Welcome, <%= user.name %> 🙏</h1>
+        <p class="welcome-msg">We hope you find a donor soon. Stay strong.</p>
+      <% } else { %>
+        <h1>Welcome Volunteer, <%= user.name %> 🤝</h1>
+        <p class="welcome-msg">Your dedication helps us save more lives every day.</p>
+      <% } %>
+
+      <!-- User details from MongoDB -->
+      <div class="user-details">
+        <p><span>📧</span> <%= user.email %></p>
+        <p><span>🏷️</span> <%= user.activity %></p>
+        <p><span>📅</span> Joined <%= new Date(user.createdAt).toDateString() %></p>
+      </div>
+
+      <!-- Quick action buttons -->
+      <div class="dashboard-actions">
+        <a href="/register"  class="action-btn">🩸 Donate Blood</a>
+        <a href="/request"   class="action-btn">🏥 Request Blood</a>
+        <a href="/volunteer" class="action-btn">🤝 Volunteer</a>
+      </div>
+
+      <a href="/logout" class="auth-btn logout-btn">Logout</a>
+    </div>
+  </div>
+</body>
+</html>

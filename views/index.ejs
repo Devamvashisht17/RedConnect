@@ -10,37 +10,10 @@
   <link rel="stylesheet" href="/css/donation-process.css">
   <link rel="stylesheet" href="/css/volunteers.css">
   <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/donors-group.css">
 </head>
 <body>
-  <nav class="navbar">
-    <div class="logo">
-      <span class="logo-text">🩸RedConnect</span>
-    </div>
-    <ul class="nav-menu">
-      <li><a href="#">ABOUT US</a></li>
-      <li><a href="#">ORGANIZE A CAMPAIGN</a></li>
-      <li><a href="#">SPREAD AWARENESS</a></li>
-      <li><a href="#">JOIN US</a></li>
-    </ul>
-    <div class="nav-buttons">
-      <% if (typeof user !== 'undefined' && user) { %>
-        <div class="user-profile">
-          <div class="avatar" onclick="toggleDropdown()">
-            <%= user.name.charAt(0).toUpperCase() %>
-          </div>
-          <div class="user-info" onclick="toggleDropdown()">
-            <span class="user-name"><%= user.name %></span>
-            <span class="user-role"><%= user.activity %></span>
-          </div>
-          <div class="dropdown-menu" id="dropdownMenu">
-            <a href="/logout">Logout</a>
-          </div>
-        </div>
-      <% } else { %>
-        <a href="/login"><button class="appointment-btn">LOGIN</button></a><a href="/signup"><button class="appointment-btn">SIGN UP</button></a>
-      <% } %>
-    </div>
-  </nav>
+  <%- include('partials/header') %>
 
   <section class="hero">
     <div class="hero-content">
@@ -55,6 +28,30 @@
 
   <%- include('donation-process') %>
 
+  <!-- FIND DONORS SECTION -->
+  <section class="find-donors-section">
+    <div class="find-donors-header">
+      <h2>Find Donors by Blood Group</h2>
+      <p>Discover available donors for each blood type in your area</p>
+    </div>
+    <div class="donors-grid">
+      <% const cardColors = {'O+':'#e53935','A+':'#8e24aa','B+':'#1e88e5','AB+':'#00897b','O-':'#f4511e','A-':'#6d4c41','B-':'#3949ab','AB-':'#00acc1'}; %>
+      <% bloodGroups.forEach(group => { %>
+        <a href="/donors/<%= encodeURIComponent(group) %>" class="donor-card">
+          <div class="donor-badge" style="background:<%= cardColors[group] %>">
+            <%= group %>
+          </div>
+          <h3><%= group %> Blood Group</h3>
+          <p class="donor-count"><%= counts[group] || 0 %> donors available</p>
+          <span class="find-btn">Find Donors →</span>
+        </a>
+      <% }) %>
+    </div>
+    <div class="compat-guide-btn">
+      <a href="/blood" class="compat-btn">Blood Compatibility Guide</a>
+    </div>
+  </section>
+
   <%- include('volunteers') %>
 
   <section class="volunteer-section">
@@ -66,20 +63,5 @@
 
   <%- include('partials/footer') %>
 
-  <script>
-    function toggleDropdown() {
-      const dropdown = document.getElementById('dropdownMenu');
-      dropdown.classList.toggle('show');
-    }
-
-    window.onclick = function(event) {
-      if (!event.target.matches('.avatar') && !event.target.matches('.user-info') && !event.target.matches('.user-name') && !event.target.matches('.user-role')) {
-        const dropdown = document.getElementById('dropdownMenu');
-        if (dropdown && dropdown.classList.contains('show')) {
-          dropdown.classList.remove('show');
-        }
-      }
-    }
-  </script>
 </body>
 </html>

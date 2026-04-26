@@ -282,15 +282,17 @@ body {
 
 @media (max-width: 768px) {
   .quote-section h2 {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .quote-section p {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .content-wrapper {
     flex-direction: column;
+    padding: 0 12px;
+    margin: 20px auto;
   }
 
   .faq-section {
@@ -299,15 +301,19 @@ body {
 
   .register-container,
   .thankyou-container {
-    padding: 30px 20px;
+    padding: 24px 16px;
   }
 
   .register-header h1,
   .thankyou-container h1 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .action-buttons {
     flex-direction: column;
+  }
+
+  .submit-btn {
+    font-size: 16px;
   }
 }

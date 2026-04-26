@@ -291,27 +291,47 @@ body {
 
 @media (max-width: 768px) {
   .navbar {
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 10px;
   }
 
   .nav-menu {
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 12px;
+    width: 100%;
+    order: 3;
+  }
+
+  .nav-buttons {
+    order: 2;
   }
 
   .hero h1 {
-    font-size: 32px;
+    font-size: 28px;
   }
 
   .hero p {
-    font-size: 16px;
+    font-size: 15px;
+  }
+
+  .appointment-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    margin: 5px 6px;
+  }
+
+  .volunteer-content h2 {
+    font-size: 26px;
   }
 
   .blood-drop-image {
     width: 100px;
     height: 100px;
+  }
+
+  .user-info {
+    display: none;
   }
 }

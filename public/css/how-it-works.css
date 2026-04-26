@@ -1,0 +1,427 @@
+/* ── USP SECTION ── */
+.usp-section {
+  padding: 80px 20px;
+  background: #fff5f5;
+  text-align: center;
+  overflow: hidden;
+}
+
+.usp-header {
+  margin-bottom: 50px;
+}
+
+.usp-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 6px 22px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.usp-header h2 {
+  font-size: 38px;
+  font-weight: 800;
+  color: #c0392b;
+  margin-bottom: 10px;
+  position: relative;
+  display: inline-block;
+}
+
+.usp-header h2::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 4px;
+  background: #e74c3c;
+  border-radius: 2px;
+  margin: 10px auto 0;
+}
+
+.usp-header p {
+  color: #888;
+  font-size: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.usp-flow {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  max-width: 1300px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.usp-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 180px;
+  max-width: 220px;
+}
+
+.usp-card {
+  background: white;
+  border: 2px solid #ffcdd2;
+  border-radius: 16px;
+  padding: 30px 20px 24px;
+  width: 100%;
+  height: 100%;
+  box-shadow: 0 4px 16px rgba(231,76,60,0.1);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.usp-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 14px 32px rgba(231,76,60,0.22);
+  border-color: #e74c3c;
+  background: linear-gradient(135deg, #fff5f5, #fff);
+}
+
+.usp-icon {
+  font-size: 40px;
+  display: block;
+}
+
+.usp-card h4 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #c0392b;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.usp-card p {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.usp-connector {
+  font-size: 28px;
+  color: #e74c3c;
+  align-self: center;
+  padding: 0 6px;
+  opacity: 0.5;
+  font-weight: bold;
+}
+
+/* ── FADE IN ANIMATION ── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── HERO ── */
+.hiw-hero {
+  background: linear-gradient(135deg, rgba(180,0,0,0.88), rgba(0,0,0,0.75)),
+              url('https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  text-align: center;
+  padding: 100px 20px 80px;
+}
+
+.hiw-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.hiw-hero-content h1 {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 18px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+.hiw-hero-content p {
+  font-size: 18px;
+  max-width: 650px;
+  margin: 0 auto 50px;
+  opacity: 0.9;
+  line-height: 1.7;
+  color: #f0d0d0;
+}
+
+.hiw-features {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hiw-feature-card {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 14px;
+  padding: 28px 20px;
+  transition: background 0.3s, transform 0.3s;
+  backdrop-filter: blur(4px);
+}
+
+.hiw-feature-card:hover {
+  background: rgba(255,255,255,0.22);
+  transform: translateY(-5px);
+}
+
+.hiw-feature-card .hiw-icon {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.hiw-feature-card h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.hiw-feature-card p {
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── SECTIONS ── */
+.hiw-section {
+  padding: 80px 20px;
+  background: #fff5f5;
+}
+
+.hiw-section-alt {
+  background: white;
+}
+
+.hiw-section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hiw-section-header {
+  text-align: left;
+  margin-bottom: 40px;
+  padding-left: 20px;
+  border-left: 5px solid #e74c3c;
+}
+
+.hiw-section-tag {
+  display: inline-block;
+  padding: 5px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  background: #ffebee;
+  color: #c0392b;
+}
+
+.hiw-section-header h2 {
+  font-size: 38px;
+  font-weight: 800;
+  color: #c0392b;
+  margin-bottom: 10px;
+}
+
+.hiw-section-header p {
+  font-size: 16px;
+  color: #888;
+  max-width: 600px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── STEP CARDS ── */
+.hiw-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.hiw-steps-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.hiw-step-card {
+  background: white;
+  border: 2px solid #ffcdd2;
+  border-radius: 16px;
+  padding: 30px 24px;
+  box-shadow: 0 4px 16px rgba(231,76,60,0.08);
+  position: relative;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  text-align: left;
+}
+
+.hiw-step-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(231,76,60,0.2);
+  border-color: #e74c3c;
+}
+
+.hiw-section-alt .hiw-step-card {
+  background: #fff5f5;
+}
+
+.step-number {
+  position: absolute;
+  top: -14px;
+  left: 24px;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(231,76,60,0.4);
+}
+
+.recipient-num {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.step-icon {
+  font-size: 34px;
+  margin-bottom: 14px;
+  margin-top: 8px;
+}
+
+.hiw-step-card h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #c0392b;
+  margin-bottom: 8px;
+}
+
+.hiw-step-card p {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.donor-card-style:hover    { border-color: #e74c3c; }
+.recipient-card-style:hover { border-color: #e74c3c; }
+
+/* ── CTA ── */
+.hiw-cta {
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.hiw-cta h2 {
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.hiw-cta p {
+  font-size: 16px;
+  opacity: 0.9;
+  max-width: 550px;
+  margin: 0 auto 35px;
+  line-height: 1.6;
+  color: #f0d0d0;
+}
+
+.hiw-cta-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hiw-btn-primary {
+  background: white;
+  color: #c0392b;
+  padding: 15px 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.hiw-btn-primary:hover {
+  background: #ffebee;
+  transform: translateY(-3px);
+}
+
+.hiw-btn-outline {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 15px 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.hiw-btn-outline:hover {
+  background: white;
+  color: #c0392b;
+  transform: translateY(-3px);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .hiw-features        { grid-template-columns: repeat(2, 1fr); }
+  .hiw-steps-grid      { grid-template-columns: repeat(2, 1fr); }
+  .hiw-steps-grid-4    { grid-template-columns: repeat(2, 1fr); }
+  .usp-connector       { display: none; }
+  .usp-flow            { gap: 20px; }
+  .usp-item            { min-width: 160px; max-width: 200px; }
+}
+
+@media (max-width: 600px) {
+  .hiw-hero-content h1   { font-size: 30px; }
+  .hiw-features          { grid-template-columns: 1fr; }
+  .hiw-steps-grid        { grid-template-columns: 1fr; }
+  .hiw-steps-grid-4      { grid-template-columns: 1fr; }
+  .hiw-section-header h2 { font-size: 28px; }
+  .hiw-cta h2            { font-size: 28px; }
+  .usp-item              { max-width: 100%; width: 100%; }
+  .usp-connector         { display: none; }
+}

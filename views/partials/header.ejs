@@ -1,0 +1,46 @@
+<nav class="navbar">
+  <div class="logo">
+    <a href="/"><img src="/images/logo.svg" alt="RedConnect" style="height:52px;"></a></a>
+  </div>
+  <ul class="nav-menu">
+    <li><a href="/">HOME</a></li>
+    <li><a href="/blood">COMPATIBILITY</a></li>
+    <li><a href="/how-it-works">HOW IT WORKS</a></li>
+    <li><a href="/register">DONATE</a></li>
+    <li><a href="/request">REQUEST</a></li>
+  </ul>
+  <div class="nav-buttons">
+    <% if (typeof user !== 'undefined' && user) { %>
+      <div class="user-profile">
+        <div class="avatar" onclick="toggleDropdown()">
+          <% if (user.profilePic) { %>
+            <img src="<%= user.profilePic %>" alt="profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+          <% } else { %>
+            <%= user.name.charAt(0).toUpperCase() %>
+          <% } %>
+        </div>
+        <div class="user-info" onclick="toggleDropdown()">
+          <span class="user-name"><%= user.name %></span>
+        </div>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="/logout">Logout</a>
+        </div>
+      </div>
+    <% } else { %>
+      <a href="/login"><button class="appointment-btn">LOGIN</button></a>
+      <a href="/signup"><button class="appointment-btn">SIGN UP</button></a>
+    <% } %>
+  </div>
+</nav>
+
+<script>
+  function toggleDropdown() {
+    document.getElementById('dropdownMenu').classList.toggle('show');
+  }
+  window.onclick = function(e) {
+    if (!e.target.matches('.avatar') && !e.target.matches('.user-info') && !e.target.matches('.user-name') && !e.target.matches('.user-role')) {
+      const d = document.getElementById('dropdownMenu');
+      if (d && d.classList.contains('show')) d.classList.remove('show');
+    }
+  }
+</script>

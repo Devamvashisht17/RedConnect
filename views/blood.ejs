@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Compatibility - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/blood.css">
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <!-- HERO -->
+  <section class="blood-hero">
+    <div class="blood-hero-content">
+      <h1>Blood Compatibility Guide</h1>
+      <p>Understand safe blood transfusion compatibility between donors and recipients to save lives effectively.</p>
+      <div class="floating-badges">
+        <% Object.keys(bloodData).forEach(type => { %>
+          <span class="badge"><%= type %></span>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPATIBILITY CHECKER -->
+  <section class="checker-section">
+    <h2>Check Compatibility</h2>
+    <div class="checker-box">
+      <div class="checker-group">
+        <label>Donor Blood Type</label>
+        <select id="donorSelect">
+          <% Object.keys(bloodData).forEach(type => { %>
+            <option value="<%= type %>"><%= type %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="checker-arrow">→</div>
+      <div class="checker-group">
+        <label>Recipient Blood Type</label>
+        <select id="recipientSelect">
+          <% Object.keys(bloodData).forEach(type => { %>
+            <option value="<%= type %>"><%= type %></option>
+          <% }) %>
+        </select>
+      </div>
+      <button class="check-btn" onclick="checkCompatibility()">Check Compatibility</button>
+    </div>
+    <div id="checkerResult" class="checker-result hidden"></div>
+  </section>
+
+  <!-- BLOOD TYPE CARDS -->
+  <section class="cards-section">
+    <h2>Blood Type Information</h2>
+    <p class="section-subtitle">Click on a card to highlight compatibility details</p>
+    <div class="cards-grid">
+      <% for (let type in bloodData) { %>
+        <div class="blood-card" onclick="highlightCard(this, '<%= type %>')">
+          <div class="card-header">
+            <h3><%= type %></h3>
+            <span class="population"><%= bloodData[type].population %></span>
+          </div>
+          <div class="card-body">
+            <p><strong>Donate To:</strong><br><%= bloodData[type].donateTo.join(', ') %></p>
+            <p><strong>Receive From:</strong><br><%= bloodData[type].receiveFrom.join(', ') %></p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- QUICK TABLE -->
+  <section class="table-section">
+    <h2>Quick Compatibility Table</h2>
+    <div class="table-wrapper">
+      <table class="compat-table">
+        <thead>
+          <tr>
+            <th>Blood Type</th>
+            <th>Population</th>
+            <th>Can Donate To</th>
+            <th>Can Receive From</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (let type in bloodData) { %>
+            <tr>
+              <td class="type-cell"><%= type %></td>
+              <td><%= bloodData[type].population %></td>
+              <td><%= bloodData[type].donateTo.join(', ') %></td>
+              <td><%= bloodData[type].receiveFrom.join(', ') %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- RH FACTOR -->
+  <section class="rh-section">
+    <h2>Special Rules & Rh Factor</h2>
+    <div class="rh-cards">
+      <div class="rh-card">
+        <h4>🔴 Rh Positive</h4>
+        <p>Can receive both Rh+ and Rh- blood. About 85% of people are Rh positive.</p>
+      </div>
+      <div class="rh-card">
+        <h4>⚪ Rh Negative</h4>
+        <p>Can only receive Rh- blood. Rh- donors are critical for emergencies.</p>
+      </div>
+      <div class="rh-card">
+        <h4>🌍 Universal Donor</h4>
+        <p>O- can donate to all blood types. Most valuable in emergency situations.</p>
+      </div>
+      <div class="rh-card">
+        <h4>💉 Universal Recipient</h4>
+        <p>AB+ can receive from all blood types. Most flexible recipient.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-blood-section">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What happens if wrong blood type is transfused?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Transfusing incompatible blood can cause a severe immune reaction, leading to kidney failure or even death. Always verify blood type before transfusion.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Why is O- called the universal donor?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>O- red blood cells lack A, B, and Rh antigens, so they can be safely given to any patient regardless of their blood type.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Can blood type change over time?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>No, your blood type is determined by genetics and remains the same throughout your life.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What is the rarest blood type?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>AB- is the rarest blood type, found in only about 0.6% of the population. AB+ donors are the universal plasma donors.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+
+  <!-- Inline JavaScript -->
+  <script>
+    const bloodData = <%- JSON.stringify(bloodData) %>;
+
+    function checkCompatibility() {
+      const donor = document.getElementById('donorSelect').value;
+      const recipient = document.getElementById('recipientSelect').value;
+      const result = document.getElementById('checkerResult');
+      const compatible = bloodData[donor].donateTo.includes(recipient);
+      result.className = 'checker-result ' + (compatible ? 'compatible' : 'incompatible');
+      result.innerHTML = compatible
+        ? `✅ <strong>${donor}</strong> can donate to <strong>${recipient}</strong>. Compatible!`
+        : `❌ <strong>${donor}</strong> cannot donate to <strong>${recipient}</strong>. Incompatible!`;
+    }
+
+    function highlightCard(card) {
+      document.querySelectorAll('.blood-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    }
+
+    function toggleFaq(element) {
+      const item = element.parentElement;
+      const answer = item.querySelector('.faq-answer');
+      const arrow = element.querySelector('.arrow');
+      item.classList.toggle('active');
+      answer.style.maxHeight = item.classList.contains('active') ? answer.scrollHeight + 'px' : '0';
+      arrow.style.transform = item.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+  </script>
+</body>
+</html>

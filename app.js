@@ -1,220 +1,374 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const session = require('express-session');
-const app = express();
-const PORT = 3000;
+// ─────────────────────────────────────────────────────────
+//  app.js  –  RedConnect | Everything in ONE file
+
+require('dotenv').config();
+
+const express      = require('express');
+const path         = require('path');
+const mongoose     = require('mongoose');
+const bcrypt       = require('bcryptjs');
+const jwt          = require('jsonwebtoken');
+const multer       = require('multer');
+const session      = require('express-session');
+const flash        = require('connect-flash');
+const cookieParser = require('cookie-parser');
+
+const app  = express();
+const PORT = process.env.PORT || 3000;
+
+// ════════════════════════════════════════════════════════
+//  1. MONGODB CONNECTION
+// ════════════════════════════════════════════════════════
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => { console.error('❌ MongoDB error:', err.message); process.exit(1); });
+
+// ════════════════════════════════════════════════════════
+//  2. MONGOOSE SCHEMAS (inline — no separate model files)
+// ════════════════════════════════════════════════════════
+
+// ── User Schema ──────────────────────────────────────────
+const userSchema = new mongoose.Schema({
+  name:       { type: String, required: true },
+  email:      { type: String, required: true, unique: true },
+  password:   { type: String },           // empty for Google OAuth users
+  profilePic: { type: String, default: '' },
+  googleId:   { type: String },           // only for Google OAuth
+  activity:   { type: String },
+  createdAt:  { type: Date, default: Date.now }
+});
+
+// Auto-hash password before saving
+userSchema.pre('save', async function () {
+  if (!this.isModified('password') || !this.password) return;
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+// Compare entered password with hashed
+userSchema.methods.matchPassword = async function (entered) {
+  return await bcrypt.compare(entered, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
+
+const passport = require('./auth/google');
+
+// ── Donor Schema ─────────────────────────────────────────
+const Donor = mongoose.model('Donor', new mongoose.Schema({
+  name:        { type: String, required: true },
+  email:       { type: String, required: true },
+  phone:       { type: String, required: true },
+  dob:         String,
+  bloodGroup:  { type: String, required: true },
+  city:        { type: String, required: true },
+  registeredAt:{ type: Date, default: Date.now }
+}));
+
+// ── BloodRequest Schema ──────────────────────────────────
+const BloodRequest = mongoose.model('BloodRequest', new mongoose.Schema({
+  patientName:     { type: String, required: true },
+  patientAge:      Number,
+  bloodGroup:      { type: String, default: '' },
+  unitsRequired:   Number,
+  requiredBefore:  String,
+  emergencyLevel:  { type: String, default: 'Normal' },
+  hospitalName:    String,
+  hospitalAddress: String,
+  city:            String,
+  state:           String,
+  pincode:         String,
+  contactName:     String,
+  contactPhone:    String,
+  status:          { type: String, default: 'Pending' },
+  timestamp:       { type: Date, default: Date.now }
+}));
+
+// ── Volunteer Schema ─────────────────────────────────────
+const Volunteer = mongoose.model('Volunteer', new mongoose.Schema({
+  name:           { type: String, required: true },
+  email:          { type: String, required: true },
+  phone:          { type: String, required: true },
+  age:            Number,
+  city:           String,
+  availability:   String,
+  skills:         String,
+  education:      String,
+  graduationYear: String,
+  organization:   String,
+  interest:       String,
+  motivation:     String,
+  source:         String,
+  hasContact:     String,
+  contactName:    String,
+  hasExperience:  String,
+  experience:     String,
+  registeredAt:   { type: Date, default: Date.now }
+}));
+
+// ════════════════════════════════════════════════════════
+//  3. MULTER – local disk storage for profile pics
+// ════════════════════════════════════════════════════════
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'public/uploads/'),
+  filename:    (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
+
+// ════════════════════════════════════════════════════════
+//  4. MIDDLEWARE SETUP
+// ════════════════════════════════════════════════════════
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: 'redconnect-secret-key',
-  resave: false,
-  saveUninitialized: false
-}));
+app.use(cookieParser());
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false, cookie: { secure: false } }));
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.get('/', (req, res) => {
-  const volunteers = [
-    {
-      name: 'JAPNOOR KAUR',
-      role: 'Blood Donation Manager',
-      linkedin: '#',
-      twitter: '#',
-      facebook: '#'
-    },
-    {
-      name: 'DEVAM VASHISHT',
-      role: 'Donor Relations Manager',
-      linkedin: '#',
-      twitter: '#',
-      facebook: '#'
-    },
-    {
-      name: 'DEVANSHU GARG',
-      role: 'Volunteer Coordinator',
-      linkedin: '#',
-      twitter: '#',
-      facebook: '#'
+// ── Custom Middleware: Request Logger ────────────────────
+app.use((req, res, next) => {
+  console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// ── Custom Middleware: Attach JWT user to res.locals ─────
+app.use(async (req, res, next) => {
+  const token = req.cookies?.token;
+  res.locals.user = null;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      res.locals.user = await User.findById(decoded.id).select('-password');
+    } catch (err) {
+      res.clearCookie('token');
     }
-  ];
-  res.render('index', { volunteers, user: req.session.user || null });
-});
-
-app.get('/volunteer', (req, res) => {
-  res.render('volunteer');
-});
-
-app.post('/volunteer', (req, res) => {
-  const volunteerData = {
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.phone,
-    age: req.body.age,
-    city: req.body.city,
-    availability: req.body.availability,
-    skills: req.body.skills,
-    registeredAt: new Date().toISOString()
-  };
-
-  const filePath = path.join(__dirname, 'volunteers.json');
-  
-  let volunteers = [];
-  if (fs.existsSync(filePath)) {
-    const fileData = fs.readFileSync(filePath, 'utf8');
-    volunteers = JSON.parse(fileData);
   }
-  
-  volunteers.push(volunteerData);
-  fs.writeFileSync(filePath, JSON.stringify(volunteers, null, 2));
-  
-  app.get('/thankyou', (req, res) => {
-  res.render('thankyou', { name: req.session.name });
-});
+  next();
 });
 
-app.get('/request', (req, res) => {
-  res.render('request');
-});
-
-app.post('/request', (req, res) => {
-  const requestData = {
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.phone,
-    bloodGroup: req.body.bloodGroup,
-    city: req.body.city,
-    hospital: req.body.hospital,
-    urgency: req.body.urgency,
-    requestedAt: new Date().toISOString()
-  };
-
-  const filePath = path.join(__dirname, 'requests.json');
-  
-  let requests = [];
-  if (fs.existsSync(filePath)) {
-    const fileData = fs.readFileSync(filePath, 'utf8');
-    requests = JSON.parse(fileData);
+// ── JWT Protect Middleware (for protected routes) ────────
+const protect = async (req, res, next) => {
+  const token = req.cookies?.token;
+  if (!token) return res.redirect('/login');
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id).select('-password');
+    next();
+  } catch (err) {
+    res.clearCookie('token');
+    res.redirect('/login');
   }
-  
-  requests.push(requestData);
-  fs.writeFileSync(filePath, JSON.stringify(requests, null, 2));
-  
- req.session.name = requestData.name;
-res.redirect('/request-success');
-});
+};
 
-app.get('/signup', (req, res) => {
-  res.render('signup', { error: null });
-});
+// ── Helper: Generate JWT ─────────────────────────────────
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-app.post('/signup', (req, res) => {
-  const { name, email, password, confirmPassword, activity } = req.body;
-  
+// ════════════════════════════════════════════════════════
+//  6. AUTH ROUTES
+// ════════════════════════════════════════════════════════
+
+// GET /signup
+app.get('/signup', (req, res) =>
+  res.render('signup', { error: req.flash('error')[0] || null })
+);
+
+// POST /signup
+app.post('/signup', upload.single('profilePic'), async (req, res) => {
+  const { name, email, password, confirmPassword } = req.body;
+
   if (password !== confirmPassword) {
-    return res.render('signup', { error: 'Passwords do not match' });
+    req.flash('error', 'Passwords do not match');
+    return res.redirect('/signup');
   }
-  
-  const usersPath = path.join(__dirname, 'users.json');
-  let users = [];
-  
-  if (fs.existsSync(usersPath)) {
-    users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+
+  try {
+    if (await User.findOne({ email })) {
+      req.flash('error', 'User already registered. Please login.');
+      return res.redirect('/signup');
+    }
+
+    const profilePic = req.file ? '/uploads/' + req.file.filename : '';
+    await User.create({ name, email, password, profilePic });
+    res.render('success', { name });
+  } catch (err) {
+    console.error('Signup error:', err.message);
+    req.flash('error', err.message || 'Something went wrong. Try again.');
+    res.redirect('/signup');
   }
-  
-  const existingUser = users.find(u => u.email === email);
-  if (existingUser) {
-    return res.render('signup', { error: 'User already registered. Please login.' });
-  }
-  
-  users.push({ name, email, password, activity });
-  fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
-  
-  res.render('success', { name });
 });
 
-app.get('/login', (req, res) => {
-  res.render('login', { error: null });
-});
+// GET /login
+app.get('/login', (req, res) =>
+  res.render('login', { error: req.flash('error')[0] || null })
+);
 
-app.post('/login', (req, res) => {
+// POST /login
+app.post('/login', async (req, res) => {
   const { email, password, activity } = req.body;
-  
-  const usersPath = path.join(__dirname, 'users.json');
-  let users = [];
-  
-  if (fs.existsSync(usersPath)) {
-    users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      req.flash('error', 'You are not registered. Please Signup first.');
+      return res.redirect('/login');
+    }
+    if (!user.password) {
+      req.flash('error', 'Please login with Google.');
+      return res.redirect('/login');
+    }
+    if (!await user.matchPassword(password)) {
+      req.flash('error', 'Incorrect password. Try again.');
+      return res.redirect('/login');
+    }
+
+    res.cookie('token', generateToken(user._id), {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+    res.redirect('/');
+  } catch (err) {
+    req.flash('error', 'Something went wrong. Try again.');
+    res.redirect('/login');
   }
-  
-  const user = users.find(u => u.email === email);
-  
-  if (!user) {
-    return res.render('login', { error: 'You are not registered. Please Signup first.' });
-  }
-  
-  if (user.password !== password) {
-    return res.render('login', { error: 'Incorrect password. Try again.' });
-  }
-  
-  user.activity = activity;
-  fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
-  
-  req.session.user = {
-    name: user.name,
-    email: user.email,
-    activity: activity
-  };
-  
-  res.redirect('/');
 });
 
+// GET /home – protected
+app.get('/home', protect, (req, res) =>
+  res.render('home', { user: req.user })
+);
+
+// GET /logout
 app.get('/logout', (req, res) => {
+  res.clearCookie('token');
   req.session.destroy();
   res.redirect('/');
 });
 
-app.get('/register', (req, res) => {
-  res.render('register');
-});
+// ── Google OAuth ─────────────────────────────────────────
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
-app.post('/register', (req, res) => {
-  const donorData = {
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.phone,
-    dob: req.body.dob,
-    bloodGroup: req.body.bloodGroup,
-    city: req.body.city,
-    registeredAt: new Date().toISOString()
-  };
-
-  const filePath = path.join(__dirname, 'donors.json');
-  
-  let donors = [];
-  if (fs.existsSync(filePath)) {
-    const fileData = fs.readFileSync(filePath, 'utf8');
-    donors = JSON.parse(fileData);
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.cookie('token', generateToken(req.user._id), {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+    res.redirect('/');
   }
-  
-  donors.push(donorData);
-  fs.writeFileSync(filePath, JSON.stringify(donors, null, 2));
-  
-  res.redirect(`/thankyou?name=${encodeURIComponent(donorData.name)}`);
+);
+
+// ════════════════════════════════════════════════════════
+//  7. WEBSITE ROUTES
+// ════════════════════════════════════════════════════════
+
+app.get('/', async (req, res) => {
+  const volunteers = [
+    { name: 'JAPNOOR KAUR',   role: 'Blood Donation Manager',  linkedin: '#', twitter: '#', facebook: '#' },
+    { name: 'DEVAM VASHISHT', role: 'Donor Relations Manager', linkedin: '#', twitter: '#', facebook: '#' },
+    { name: 'DEVANSHU GARG',  role: 'Volunteer Coordinator',   linkedin: '#', twitter: '#', facebook: '#' }
+  ];
+  const bloodGroups = ['O+','A+','B+','AB+','O-','A-','B-','AB-'];
+  const counts = {};
+  for (const g of bloodGroups) counts[g] = await Donor.countDocuments({ bloodGroup: g });
+  res.render('index', { volunteers, counts, bloodGroups });
 });
 
-app.get('/thankyou', (req, res) => {
-  const donorName = req.query.name || 'Valued Donor';
-  res.render('thankyou', { donorName: donorName });
+const bloodData = {
+  'O-':  { donateTo: ['A+','A-','B+','B-','AB+','AB-','O+','O-'], receiveFrom: ['O-'],                                    population: '6.6%'  },
+  'O+':  { donateTo: ['A+','B+','AB+','O+'],                      receiveFrom: ['O+','O-'],                                population: '37.4%' },
+  'A-':  { donateTo: ['A+','A-','AB+','AB-'],                     receiveFrom: ['A-','O-'],                                population: '6.3%'  },
+  'A+':  { donateTo: ['A+','AB+'],                                 receiveFrom: ['A+','A-','O+','O-'],                      population: '35.7%' },
+  'B-':  { donateTo: ['B+','B-','AB+','AB-'],                     receiveFrom: ['B-','O-'],                                population: '1.5%'  },
+  'B+':  { donateTo: ['B+','AB+'],                                 receiveFrom: ['B+','B-','O+','O-'],                      population: '8.5%'  },
+  'AB-': { donateTo: ['AB+','AB-'],                                receiveFrom: ['AB-','A-','B-','O-'],                     population: '0.6%'  },
+  'AB+': { donateTo: ['AB+'],                                      receiveFrom: ['A+','A-','B+','B-','AB+','AB-','O+','O-'], population: '3.4%' }
+};
+
+app.get('/blood',        (req, res) => res.render('blood', { bloodData }));
+app.get('/how-it-works', (req, res) => res.render('how-it-works'));
+
+app.get('/donors/:group', async (req, res) => {
+  const group       = req.params.group;
+  const groupDonors = await Donor.find({ bloodGroup: group });
+  res.render('donors-group', { group, groupDonors, compat: bloodData[group] || null });
 });
 
-
-// 404 Error Handler - Must be at the end
-app.use((req, res) => {
-  res.status(404).render('404');
+app.get('/register', (req, res) => res.render('register'));
+app.post('/register', async (req, res) => {
+  try {
+    const donor = await Donor.create({
+      name: req.body.name, email: req.body.email, phone: req.body.phone,
+      dob: req.body.dob, bloodGroup: req.body.bloodGroup, city: req.body.city
+    });
+    res.redirect(`/thankyou?name=${encodeURIComponent(donor.name)}`);
+  } catch (err) { res.redirect('/register'); }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.get('/request', (req, res) => res.render('request', { success: false }));
+app.post('/request-blood', async (req, res) => {
+  try {
+    await BloodRequest.create({
+      patientName:    req.body.patientName,
+      bloodGroup:     req.body.bloodGroup,
+      hospitalName:   req.body.hospitalName,
+      city:           req.body.city,
+      contactName:    req.body.contactName,
+      contactPhone:   req.body.contactPhone,
+      emergencyLevel: req.body.emergencyLevel
+    });
+    res.redirect('/thankyou?name=' + encodeURIComponent(req.body.contactName || 'User'));
+  } catch (err) {
+    console.error('Blood request error:', err.message);
+    res.redirect('/request');
+  }
 });
+
+app.get('/volunteer', (req, res) => res.render('volunteer'));
+app.post('/volunteer', async (req, res) => {
+  try {
+    const v = await Volunteer.create({
+      name:         req.body.name,
+      email:        req.body.email,
+      phone:        req.body.phone,
+      age:          req.body.age,
+      city:         req.body.city,
+      availability: req.body.availability,
+      skills:       req.body.skills
+    });
+    res.redirect('/thankyou?name=' + encodeURIComponent(v.name));
+  } catch (err) {
+    console.error('Volunteer error:', err.message);
+    res.redirect('/volunteer');
+  }
+});
+
+app.get('/thankyou',        (req, res) => res.render('thankyou', { donorName: req.query.name || 'Valued Donor' }));
+app.get('/request-success', (req, res) => res.render('request-success'));
+
+// ════════════════════════════════════════════════════════
+//  8. ERROR HANDLING MIDDLEWARE
+// ════════════════════════════════════════════════════════
+
+app.use((req, res) => res.status(404).render('404'));
+
+app.use((err, req, res, next) => {
+  console.error('❌ Error:', err.stack);
+  res.status(500).send('Something went wrong.');
+});
+
+// ════════════════════════════════════════════════════════
+//  9. START SERVER
+// ════════════════════════════════════════════════════════
+
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
+  <!-- Blood drop -->
+  <path d="M24 4 C24 4 10 20 10 31 C10 42 16 50 24 50 C32 50 38 42 38 31 C38 20 24 4 24 4Z"
+        fill="#e74c3c"/>
+  <!-- White plus inside drop -->
+  <rect x="21" y="27" width="6" height="14" rx="1.5" fill="white"/>
+  <rect x="16" y="31" width="16" height="6" rx="1.5" fill="white"/>
+  <!-- Red -->
+  <text x="48" y="38" font-family="Arial Black, Arial, sans-serif" font-size="26" font-weight="900" fill="#e74c3c">Red</text>
+  <!-- Connect — separate text element with enough x gap -->
+  <text x="103" y="38" font-family="Arial Black, Arial, sans-serif" font-size="26" font-weight="900" fill="#222" letter-spacing="1">Connect</text>
+</svg>

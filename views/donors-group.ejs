@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= group %> Donors - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/donors-group.css">
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <!-- HERO -->
+  <div class="group-hero">
+    <a href="/" class="back-link">← Back to Home</a>
+    <div class="group-badge"><%= group %></div>
+    <h1><%= group %> Blood Group Donors</h1>
+    <p><%= groupDonors.length %> donor<%= groupDonors.length !== 1 ? 's' : '' %> available in our network</p>
+  </div>
+
+  <div class="group-content">
+
+    <!-- COMPATIBILITY INFO -->
+    <% if (compat) { %>
+    <div class="compat-info">
+      <h2>Compatibility Info</h2>
+      <div class="compat-cards">
+        <div class="compat-card donate">
+          <h4>🩸 Can Donate To</h4>
+          <div class="tags">
+            <% compat.donateTo.forEach(t => { %><span class="tag"><%= t %></span><% }) %>
+          </div>
+        </div>
+        <div class="compat-card receive">
+          <h4>💉 Can Receive From</h4>
+          <div class="tags">
+            <% compat.receiveFrom.forEach(t => { %><span class="tag"><%= t %></span><% }) %>
+          </div>
+        </div>
+        <div class="compat-card population">
+          <h4>🌍 Population</h4>
+          <p class="pop-value"><%= compat.population %></p>
+          <p>of world population</p>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- DONORS LIST -->
+    <div class="donors-list-section">
+      <h2>Available Donors</h2>
+      <% if (groupDonors.length === 0) { %>
+        <div class="no-donors">
+          <p>😔 No donors registered for <strong><%= group %></strong> yet.</p>
+          <a href="/register" class="register-link">Be the first to register →</a>
+        </div>
+      <% } else { %>
+        <div class="donors-table-wrapper">
+          <table class="donors-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>Blood Group</th>
+                <th>Registered On</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% groupDonors.forEach((donor, i) => { %>
+                <tr>
+                  <td><%= i + 1 %></td>
+                  <td><div class="donor-avatar"><%= donor.name.charAt(0) %></div> <%= donor.name %></td>
+                  <td><%= donor.city %></td>
+                  <td><span class="group-tag"><%= donor.bloodGroup %></span></td>
+                  <td><%= new Date(donor.registeredAt).toLocaleDateString() %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="bottom-actions">
+      <a href="/register" class="action-btn donate-btn">Register as Donor</a>
+      <a href="/blood" class="action-btn compat-btn-outline">View Compatibility Guide</a>
+    </div>
+
+  </div>
+
+  <%- include('partials/footer') %>
+
+</body>
+</html>

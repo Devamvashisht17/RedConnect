@@ -1,2 +1,22 @@
+# Dependencies
 node_modules/
+
+# Environment variables — NEVER commit this
 .env
+
+# Uploaded files — ephemeral on Render anyway
+public/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# JSON data files (if used locally)
+donors.json
+requests.json
+volunteers.json
+users.json

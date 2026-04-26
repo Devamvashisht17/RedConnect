@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How It Works - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/how-it-works.css">
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <!-- HERO -->
+  <section class="hiw-hero">
+    <div class="hiw-hero-content">
+      <span class="hiw-tag">Simple · Fast · Life-Saving</span>
+      <h1>Connecting Lives,<br>One Drop at a Time</h1>
+      <p>RedConnect bridges the gap between blood donors and recipients — making every request faster, safer, and more reliable across your city.</p>
+    </div>
+    <div class="hiw-features">
+      <div class="hiw-feature-card">
+        <span class="hiw-icon">🔔</span>
+        <h4>Real-time Notifications</h4>
+        <p>Donors get instant alerts for nearby requests</p>
+      </div>
+      <div class="hiw-feature-card">
+        <span class="hiw-icon">📍</span>
+        <h4>City / PIN Matching</h4>
+        <p>Smart location-based donor matching</p>
+      </div>
+      <div class="hiw-feature-card">
+        <span class="hiw-icon">🕐</span>
+        <h4>24/7 Availability</h4>
+        <p>Round-the-clock access for emergencies</p>
+      </div>
+      <div class="hiw-feature-card">
+        <span class="hiw-icon">✅</span>
+        <h4>100% Verified Requests</h4>
+        <p>Every request is reviewed before going live</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- USP SECTION -->
+  <section class="usp-section">
+    <div class="usp-header">
+      
+      <h2>Why Choose Us</h2>
+      <p>Our unique strengths that make RedConnect the most reliable blood donation platform</p>
+    </div>
+
+    <%
+      const usps = [
+        { icon: '🏥', title: 'Hospital Integration APIs',              desc: 'Shows users where the needed blood type is available in nearby hospitals in real time.' },
+        { icon: '📍', title: 'Real-Time Donor Matching via Geolocation', desc: 'Reduces search time drastically by instantly matching donors based on live location.' },
+        { icon: '🔔', title: 'Live Donor Tracking + Instant Alerts',    desc: 'Nearby donors get instant SMS and app notifications the moment a request is raised.' },
+        { icon: '🏆', title: 'Gamification — Badges & Leaderboards',   desc: 'Encourages regular donation behavior through rewards, badges and community rankings.' },
+        { icon: '📊', title: 'Smart Analytics Dashboard',              desc: 'Helps track trends and donation data used by hospitals and NGOs for better planning.' }
+      ];
+    %>
+
+    <div class="usp-flow">
+      <% usps.forEach((usp, i) => { %>
+        <div class="usp-item fade-in" style="animation-delay: <%= i * 0.15 %>s">
+          <div class="usp-card">
+            <div class="usp-icon"><%= usp.icon %></div>
+            <h4><%= usp.title %></h4>
+            <p><%= usp.desc %></p>
+          </div>
+        </div>
+        <% if (i < usps.length - 1) { %>
+          <div class="usp-connector">→</div>
+        <% } %>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- DONOR JOURNEY -->
+  <section class="hiw-section">
+    <div class="hiw-section-inner">
+      <div class="hiw-section-header">
+        <span class="hiw-section-tag donor-tag">For Donors</span>
+        <h2>Your Journey as a Life Saver</h2>
+        <p>Follow these simple steps to register as a donor and start saving lives in your community.</p>
+      </div>
+
+    <%
+      const donorSteps = [
+        { icon: '👤', title: 'Create Profile',             desc: 'Sign up and create your donor profile with basic personal details.' },
+        { icon: '📋', title: 'Complete Address Details',   desc: 'Add your city, PIN code and location for accurate donor matching.' },
+        { icon: '🔔', title: 'Enable Push Notifications',  desc: 'Turn on notifications to receive instant blood request alerts near you.' },
+        { icon: '🔍', title: 'Search Requests',            desc: 'Browse active blood requests in your area filtered by blood group.' },
+        { icon: '📞', title: 'Contact Receiver',           desc: 'Reach out directly to the recipient or hospital to confirm donation.' },
+        { icon: '❤️', title: 'Save Lives',                 desc: 'Donate blood and become a hero — your single donation can save up to 3 lives.' }
+      ];
+    %>
+
+    <div class="hiw-steps-grid">
+      <% donorSteps.forEach((step, i) => { %>
+        <div class="hiw-step-card donor-card-style">
+          <div class="step-number"><%= i + 1 %></div>
+          <div class="step-icon"><%= step.icon %></div>
+          <h3><%= step.title %></h3>
+          <p><%= step.desc %></p>
+        </div>
+      <% }) %>
+    </div>
+    </div>
+  </section>
+
+  <!-- RECIPIENT JOURNEY -->
+  <section class="hiw-section hiw-section-alt">
+    <div class="hiw-section-inner">
+      <div class="hiw-section-header">
+        <span class="hiw-section-tag recipient-tag">For Recipients</span>
+        <h2>How to Get Life-Saving Blood</h2>
+        <p>A simple 8-step process to connect you with the right donor at the right time.</p>
+      </div>
+
+    <%
+      const recipientSteps = [
+        { icon: '📝', title: 'Register & Verify',       desc: 'Register on the platform and verify your phone number to ensure authenticity.' },
+        { icon: '🩸', title: 'Submit Blood Request',    desc: 'Submit an urgent blood request with required details like blood group and units.' },
+        { icon: '📱', title: 'Enter Contact Info',      desc: 'Enter accurate contact information for quick communication with donors.' },
+        { icon: '🔎', title: 'Request Reviewed',        desc: 'Your request is reviewed and approved by the system before going live.' },
+        { icon: '📍', title: 'Location Matching',       desc: 'The system matches your request with nearby donors based on your location.' },
+        { icon: '🔔', title: 'Donors Notified',         desc: 'Eligible donors receive instant notifications about your blood request.' },
+        { icon: '🤝', title: 'Connect with Donors',     desc: 'You can view and connect with available donor contacts directly.' },
+        { icon: '💪', title: 'Receive Help',            desc: 'Monitor responses and coordinate with donors until help is received.' }
+      ];
+    %>
+
+    <div class="hiw-steps-grid hiw-steps-grid-4">
+      <% recipientSteps.forEach((step, i) => { %>
+        <div class="hiw-step-card recipient-card-style">
+          <div class="step-number recipient-num"><%= i + 1 %></div>
+          <div class="step-icon"><%= step.icon %></div>
+          <h3><%= step.title %></h3>
+          <p><%= step.desc %></p>
+        </div>
+      <% }) %>
+    </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="hiw-cta">
+    <h2>Ready to Make a Difference?</h2>
+    <p>Join thousands of donors and recipients already using RedConnect to save lives every day.</p>
+    <div class="hiw-cta-buttons">
+      <a href="/register" class="hiw-btn-primary">Register as Donor</a>
+      <a href="/request"  class="hiw-btn-outline">Request Blood</a>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+
+</body>
+</html>
