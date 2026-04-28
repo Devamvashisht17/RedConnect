@@ -1,10 +1,9 @@
-// ─────────────────────────────────────────────────────────
-//  app.js  –  RedConnect | Everything in ONE file
-
+//  app.js  –  RedConnect
 require('dotenv').config();
 
 const express      = require('express');
 const path         = require('path');
+const fs           = require('fs');
 const mongoose     = require('mongoose');
 const bcrypt       = require('bcryptjs');
 const jwt          = require('jsonwebtoken');
@@ -16,36 +15,33 @@ const cookieParser = require('cookie-parser');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ════════════════════════════════════════════════════════
-//  1. MONGODB CONNECTION
-// ════════════════════════════════════════════════════════
 
+//  1. MONGODB CONNECTION
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => { console.error('❌ MongoDB error:', err.message); process.exit(1); });
 
-// ════════════════════════════════════════════════════════
-//  2. MONGOOSE SCHEMAS (inline — no separate model files)
-// ════════════════════════════════════════════════════════
 
-// ── User Schema ──────────────────────────────────────────
+//  2. MONGOOSE SCHEMAS 
+
+// ── User Schema 
 const userSchema = new mongoose.Schema({
   name:       { type: String, required: true },
   email:      { type: String, required: true, unique: true },
-  password:   { type: String },           // empty for Google OAuth users
+  password:   { type: String },           
   profilePic: { type: String, default: '' },
-  googleId:   { type: String },           // only for Google OAuth
+  googleId:   { type: String },          
   activity:   { type: String },
   createdAt:  { type: Date, default: Date.now }
 });
 
-// Auto-hash password before saving
+
 userSchema.pre('save', async function () {
   if (!this.isModified('password') || !this.password) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-// Compare entered password with hashed
+
 userSchema.methods.matchPassword = async function (entered) {
   return await bcrypt.compare(entered, this.password);
 };
@@ -54,7 +50,7 @@ const User = mongoose.model('User', userSchema);
 
 const passport = require('./auth/google');
 
-// ── Donor Schema ─────────────────────────────────────────
+// ── Donor Schema 
 const Donor = mongoose.model('Donor', new mongoose.Schema({
   name:        { type: String, required: true },
   email:       { type: String, required: true },
@@ -65,7 +61,7 @@ const Donor = mongoose.model('Donor', new mongoose.Schema({
   registeredAt:{ type: Date, default: Date.now }
 }));
 
-// ── BloodRequest Schema ──────────────────────────────────
+// ── BloodRequest Schema 
 const BloodRequest = mongoose.model('BloodRequest', new mongoose.Schema({
   patientName:     { type: String, required: true },
   patientAge:      Number,
@@ -84,7 +80,7 @@ const BloodRequest = mongoose.model('BloodRequest', new mongoose.Schema({
   timestamp:       { type: Date, default: Date.now }
 }));
 
-// ── Volunteer Schema ─────────────────────────────────────
+// ── Volunteer Schema 
 const Volunteer = mongoose.model('Volunteer', new mongoose.Schema({
   name:           { type: String, required: true },
   email:          { type: String, required: true },
@@ -106,19 +102,26 @@ const Volunteer = mongoose.model('Volunteer', new mongoose.Schema({
   registeredAt:   { type: Date, default: Date.now }
 }));
 
-// ════════════════════════════════════════════════════════
-//  3. MULTER – local disk storage for profile pics
-// ════════════════════════════════════════════════════════
+
+//  3. MULTER 
+
+const uploadPath = path.join(__dirname, 'public', 'uploads');
+console.log('Upload path:', uploadPath);
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'public/uploads/'),
-  filename:    (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+  destination: (req, file, cb) => cb(null, uploadPath),
+  filename:    (req, file, cb) => {
+    const sanitized = file.originalname.replace(/\s+/g, '-');
+    cb(null, Date.now() + '-' + sanitized);
+  }
 });
 const upload = multer({ storage });
 
-// ════════════════════════════════════════════════════════
+
 //  4. MIDDLEWARE SETUP
-// ════════════════════════════════════════════════════════
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -132,13 +135,13 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ── Custom Middleware: Request Logger ────────────────────
+// ── Custom Middleware: Request Logger
 app.use((req, res, next) => {
   console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
   next();
 });
 
-// ── Custom Middleware: Attach JWT user to res.locals ─────
+// ── Custom Middleware: Attach JWT user to res.locals 
 app.use(async (req, res, next) => {
   const token = req.cookies?.token;
   res.locals.user = null;
@@ -153,7 +156,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// ── JWT Protect Middleware (for protected routes) ────────
+// ── JWT Protect Middleware (for protected routes) 
 const protect = async (req, res, next) => {
   const token = req.cookies?.token;
   if (!token) return res.redirect('/login');
@@ -167,13 +170,11 @@ const protect = async (req, res, next) => {
   }
 };
 
-// ── Helper: Generate JWT ─────────────────────────────────
+// ── Helper: Generate JWT
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-// ════════════════════════════════════════════════════════
 //  6. AUTH ROUTES
-// ════════════════════════════════════════════════════════
 
 // GET /signup
 app.get('/signup', (req, res) =>
@@ -196,7 +197,10 @@ app.post('/signup', upload.single('profilePic'), async (req, res) => {
     }
 
     const profilePic = req.file ? '/uploads/' + req.file.filename : '';
+    console.log('req.file:', req.file);         // confirms multer received the file
+    console.log('profilePic to save:', profilePic); // confirms path being stored in MongoDB
     await User.create({ name, email, password, profilePic });
+    console.log('User created with profilePic:', profilePic); // confirms saved to Atlas
     res.render('success', { name });
   } catch (err) {
     console.error('Signup error:', err.message);
@@ -252,7 +256,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-// ── Google OAuth ─────────────────────────────────────────
+// ── Google OAuth 
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
@@ -268,9 +272,9 @@ app.get('/auth/google/callback',
   }
 );
 
-// ════════════════════════════════════════════════════════
+// 
 //  7. WEBSITE ROUTES
-// ════════════════════════════════════════════════════════
+// 
 
 app.get('/', async (req, res) => {
   const volunteers = [
@@ -298,13 +302,13 @@ const bloodData = {
 app.get('/blood',        (req, res) => res.render('blood', { bloodData }));
 app.get('/how-it-works', (req, res) => res.render('how-it-works'));
 
+
+app.get('/register', (req, res) => res.render('register'));
 app.get('/donors/:group', async (req, res) => {
-  const group       = req.params.group;
+  const group = decodeURIComponent(req.params.group);
   const groupDonors = await Donor.find({ bloodGroup: group });
   res.render('donors-group', { group, groupDonors, compat: bloodData[group] || null });
 });
-
-app.get('/register', (req, res) => res.render('register'));
 app.post('/register', async (req, res) => {
   try {
     const donor = await Donor.create({
@@ -356,9 +360,9 @@ app.post('/volunteer', async (req, res) => {
 app.get('/thankyou',        (req, res) => res.render('thankyou', { donorName: req.query.name || 'Valued Donor' }));
 app.get('/request-success', (req, res) => res.render('request-success'));
 
-// ════════════════════════════════════════════════════════
+
 //  8. ERROR HANDLING MIDDLEWARE
-// ════════════════════════════════════════════════════════
+
 
 app.use((req, res) => res.status(404).render('404'));
 
@@ -367,8 +371,11 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something went wrong.');
 });
 
-// ════════════════════════════════════════════════════════
-//  9. START SERVER
-// ════════════════════════════════════════════════════════
+
 
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
+
+app.get('/ping', (req, res) => {
+  res.status(200).send("OK");
+});

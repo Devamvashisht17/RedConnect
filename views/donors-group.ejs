@@ -6,20 +6,20 @@
   <title><%= group %> Donors - RedConnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/footer.css">
   <link rel="stylesheet" href="/css/donors-group.css">
+  <link rel="stylesheet" href="/css/footer.css">
 </head>
 <body>
 
   <%- include('partials/header') %>
 
   <!-- HERO -->
-  <div class="group-hero">
+  <section class="group-hero">
     <a href="/" class="back-link">← Back to Home</a>
     <div class="group-badge"><%= group %></div>
     <h1><%= group %> Blood Group Donors</h1>
-    <p><%= groupDonors.length %> donor<%= groupDonors.length !== 1 ? 's' : '' %> available in our network</p>
-  </div>
+    <p><%= groupDonors.length %> donor<%= groupDonors.length !== 1 ? 's' : '' %> registered in this group</p>
+  </section>
 
   <div class="group-content">
 
@@ -42,7 +42,7 @@
         </div>
         <div class="compat-card population">
           <h4>🌍 Population</h4>
-          <p class="pop-value"><%= compat.population %></p>
+          <div class="pop-value"><%= compat.population %></div>
           <p>of world population</p>
         </div>
       </div>
@@ -51,10 +51,10 @@
 
     <!-- DONORS LIST -->
     <div class="donors-list-section">
-      <h2>Available Donors</h2>
+      <h2>Registered Donors</h2>
       <% if (groupDonors.length === 0) { %>
         <div class="no-donors">
-          <p>😔 No donors registered for <strong><%= group %></strong> yet.</p>
+          <p>😔 No donors registered for <strong><%= group %></strong> blood group yet.</p>
           <a href="/register" class="register-link">Be the first to register →</a>
         </div>
       <% } else { %>
@@ -62,22 +62,25 @@
           <table class="donors-table">
             <thead>
               <tr>
-                <th>#</th>
                 <th>Name</th>
-                <th>City</th>
                 <th>Blood Group</th>
-                <th>Registered On</th>
+                <th>City</th>
+                <th>Phone</th>
+                <th>Registered</th>
               </tr>
             </thead>
             <tbody>
-              <% groupDonors.forEach((donor, i) => { %>
-                <tr>
-                  <td><%= i + 1 %></td>
-                  <td><div class="donor-avatar"><%= donor.name.charAt(0) %></div> <%= donor.name %></td>
-                  <td><%= donor.city %></td>
-                  <td><span class="group-tag"><%= donor.bloodGroup %></span></td>
-                  <td><%= new Date(donor.registeredAt).toLocaleDateString() %></td>
-                </tr>
+              <% groupDonors.forEach(donor => { %>
+              <tr>
+                <td>
+                  <span class="donor-avatar"><%= donor.name.charAt(0).toUpperCase() %></span>
+                  <%= donor.name %>
+                </td>
+                <td><span class="group-tag"><%= donor.bloodGroup %></span></td>
+                <td><%= donor.city %></td>
+                <td><%= donor.phone %></td>
+                <td><%= new Date(donor.registeredAt).toLocaleDateString() %></td>
+              </tr>
               <% }) %>
             </tbody>
           </table>
@@ -86,8 +89,8 @@
     </div>
 
     <div class="bottom-actions">
-      <a href="/register" class="action-btn donate-btn">Register as Donor</a>
-      <a href="/blood" class="action-btn compat-btn-outline">View Compatibility Guide</a>
+      <a href="/register" class="action-btn donate-btn">🩸 Register as Donor</a>
+      <a href="/blood" class="action-btn compat-btn-outline">Blood Compatibility Guide</a>
     </div>
 
   </div>
