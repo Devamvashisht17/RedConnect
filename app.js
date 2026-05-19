@@ -33,8 +33,12 @@ app.use(session({
   secret:            process.env.SESSION_SECRET || 'fallback-secret',
   resave:            false,
   saveUninitialized: false,
-  store:             MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-  cookie:            { secure: process.env.NODE_ENV === 'production', httpOnly: true }
+  store:             MongoStore.create({
+    mongoUrl:        process.env.MONGO_URI,
+    collectionName:  'sessions',
+    ttl:             7 * 24 * 60 * 60
+  }),
+  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true }
 }));
 app.use(flash());
 app.use(passport.initialize());
