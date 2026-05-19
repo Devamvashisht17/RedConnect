@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital Dashboard - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo"><span class="logo-text">🩸 RedConnect</span></div>
+    <div class="nav-buttons">
+      <a href="/hospital/logout"><button class="appointment-btn">Logout</button></a>
+    </div>
+  </nav>
+
+  <div class="admin-wrapper">
+
+    <!-- HEADER -->
+    <div class="admin-page-header">
+      <div>
+        <h1>🏥 <%= hospital.name %></h1>
+        <p>📍 <%= hospital.address %>, <%= hospital.city %></p>
+      </div>
+      <span class="hospital-verified-badge">✅ Verified Hospital</span>
+    </div>
+
+    <div class="admin-grid">
+
+      <!-- EMERGENCY REQUEST FORM -->
+      <div class="admin-card admin-full-width">
+        <div class="admin-card-header">
+          <h3>🚨 Create Emergency Request</h3>
+        </div>
+        <div style="display:flex; gap:30px; flex-wrap:wrap;">
+          <form id="emergencyForm" style="flex:1; min-width:280px;">
+            <div class="form-group">
+              <label>Patient Name</label>
+              <input type="text" name="patientName" required placeholder="Patient full name">
+            </div>
+            <div class="form-group">
+              <label>Blood Group Required</label>
+              <select name="bloodGroup" required onchange="showBloodStock(this.value)">
+                <option value="">Select</option>
+                <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(g => { %>
+                  <option value="<%= g %>"><%= g %></option>
+                <% }) %>
+              </select>
+            </div>
+            <!-- Live stock check -->
+            <div id="stockInfo" style="display:none; margin-bottom:14px; padding:12px; border-radius:8px; background:#f8f9fa; border-left:4px solid #e74c3c;">
+              <strong>Current Stock:</strong> <span id="stockVal"></span>
+            </div>
+            <div class="form-group">
+              <label>Emergency Level</label>
+              <select name="emergencyLevel" required>
+                <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Patient Age</label>
+              <input type="number" name="patientAge" placeholder="Age (optional)">
+            </div>
+            <div class="form-group">
+              <label>Contact Phone</label>
+              <input type="tel" name="contactPhone" required placeholder="Contact number">
+            </div>
+            <button type="submit" class="h-submit-btn">🚨 Broadcast Emergency Request</button>
+          </form>
+
+          <!-- BLOOD INVENTORY (compact) -->
+          <div style="flex:1; min-width:260px;">
+            <h4 style="margin-bottom:14px; color:#333;">🩸 Update Blood Stock</h4>
+            <% const groups = ['A+','A-','B+','B-','AB+','AB-','O+','O-']; %>
+            <% groups.forEach(g => { %>
+              <% const item = hospital.inventory.find(i => i.bloodGroup === g); %>
+              <% const units = item ? item.units : 0; %>
+              <div class="inv-row" id="inv-row-<%= g.replace('+','plus').replace('-','minus') %>">
+                <span class="blood-tag"><%= g %></span>
+                <div class="inv-bar-wrap">
+                  <div class="inv-bar" style="width:<%= Math.min(units * 5, 100) %>%"></div>
+                </div>
+                <span class="inv-unit-display" id="display-<%= g.replace('+','plus').replace('-','minus') %>"><%= units %></span>
+                <div class="inv-controls">
+                  <input type="number" id="inv-<%= g %>" value="<%= units %>" min="0" class="inv-input">
+                  <button class="inv-update-btn" onclick="updateInventory('<%= g %>')">Save</button>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+        <div id="emergencyResult" style="display:none; margin-top:15px; padding:12px; border-radius:8px;"></div>
+      </div>
+
+      <!-- RECENT REQUESTS -->
+      <div class="admin-card admin-full-width">
+        <div class="admin-card-header">
+          <h3>📋 Recent Blood Requests</h3>
+        </div>
+        <% if (requests.length === 0) { %>
+          <div class="admin-empty">No requests yet.</div>
+        <% } else { %>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Blood</th>
+                <th>Level</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% requests.forEach(r => { %>
+                <tr id="req-<%= r._id %>">
+                  <td><%= r.patientName %></td>
+                  <td><span class="blood-tag"><%= r.bloodGroup %></span></td>
+                  <td>
+                    <span class="level-badge level-<%= r.emergencyLevel?.toLowerCase() %>">
+                      <%= r.emergencyLevel %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge status-<%= (r.status || 'Pending').toLowerCase() %>">
+                      <%= r.status || 'Pending' %>
+                    </span>
+                  </td>
+                  <td><%= new Date(r.createdAt).toLocaleDateString() %></td>
+                  <td>
+                    <% if (r.status !== 'Fulfilled') { %>
+                      <button class="admin-btn-verify" onclick="fulfillRequest('<%= r._id %>')">
+                        ✅ Mark Fulfilled
+                      </button>
+                    <% } else { %>
+                      <span style="color:#27ae60; font-size:13px;">✅ Done</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.emit('join_hospital', '<%= hospital._id %>');
+
+    // Show current stock when blood group is selected
+    const inventory = <%- JSON.stringify(hospital.inventory || []) %>;
+    function showBloodStock(group) {
+      const stockInfo = document.getElementById('stockInfo');
+      const stockVal  = document.getElementById('stockVal');
+      if (!group) { stockInfo.style.display = 'none'; return; }
+      const item  = inventory.find(i => i.bloodGroup === group);
+      const units = item ? item.units : 0;
+      stockVal.textContent = `${units} units of ${group} available in your hospital`;
+      stockInfo.style.display = 'block';
+      stockInfo.style.borderLeftColor = units === 0 ? '#e74c3c' : '#27ae60';
+      stockInfo.style.background      = units === 0 ? '#ffebee' : '#e8f5e9';
+    }
+
+    // Emergency form submit
+    document.getElementById('emergencyForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      const r    = await fetch('/hospital/emergency', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+      });
+      const res = await r.json();
+      const el  = document.getElementById('emergencyResult');
+      el.style.display = 'block';
+      if (res.success) {
+        el.style.background = '#e8f5e9';
+        el.style.color = '#27ae60';
+        el.style.border = '1px solid #27ae60';
+        el.textContent = `✅ Request created! ${res.notifiedDonors} donors notified.`;
+        e.target.reset();
+      } else {
+        el.style.background = '#ffebee';
+        el.style.color = '#e74c3c';
+        el.style.border = '1px solid #e74c3c';
+        el.textContent = `❌ Error: ${res.error}`;
+      }
+    });
+
+    // Update inventory with visual feedback
+    async function updateInventory(bloodGroup) {
+      const units = document.getElementById(`inv-${bloodGroup}`).value;
+      const key   = bloodGroup.replace('+','plus').replace('-','minus');
+      const r = await fetch('/hospital/inventory', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bloodGroup, units })
+      });
+      const res = await r.json();
+      if (res.success) {
+        // Update display text
+        document.getElementById(`display-${key}`).textContent = `${units} units`;
+        // Update bar width
+        const bar = document.querySelector(`#inv-row-${key} .inv-bar`);
+        if (bar) bar.style.width = Math.min(units * 5, 100) + '%';
+        // Flash green
+        const row = document.getElementById(`inv-row-${key}`);
+        row.style.background = '#e8f5e9';
+        setTimeout(() => row.style.background = '', 1500);
+      }
+    }
+
+    // Mark request as fulfilled — removes from queue
+    async function fulfillRequest(requestId) {
+      if (!confirm('Mark this request as fulfilled? It will be removed from the queue.')) return;
+      const r = await fetch(`/hospital/fulfill/${requestId}`, { method: 'POST' });
+      const d = await r.json();
+      if (d.success) {
+        const row = document.getElementById(`req-${requestId}`);
+        if (row) {
+          row.querySelector('td:nth-child(4)').innerHTML = '<span class="status-badge status-fulfilled">Fulfilled</span>';
+          row.querySelector('td:last-child').innerHTML   = '<span style="color:#27ae60;font-size:13px;">✅ Done</span>';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="admin-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="admin-page-header">
+      <div>
+        <h1>⚙️ Admin Dashboard</h1>
+        <p>Manage the RedConnect emergency blood response system</p>
+      </div>
+      <a href="/admin/queue" class="admin-queue-btn">📋 Live Queue Monitor</a>
+    </div>
+
+    <!-- STATS -->
+    <div class="admin-stats-row">
+      <div class="admin-stat-card" style="border-top:4px solid #e74c3c">
+        <div class="admin-stat-icon" style="background:#fff0f0">👥</div>
+        <div class="admin-stat-value"><%= totalUsers %></div>
+        <div class="admin-stat-label">Total Users</div>
+      </div>
+      <div class="admin-stat-card" style="border-top:4px solid #27ae60">
+        <div class="admin-stat-icon" style="background:#f0fff4">🩸</div>
+        <div class="admin-stat-value"><%= totalDonors %></div>
+        <div class="admin-stat-label">Active Donors</div>
+      </div>
+      <div class="admin-stat-card" style="border-top:4px solid #e67e22">
+        <div class="admin-stat-icon" style="background:#fff8f0">📋</div>
+        <div class="admin-stat-value"><%= activeRequests %></div>
+        <div class="admin-stat-label">Active Requests</div>
+      </div>
+      <div class="admin-stat-card" style="border-top:4px solid #2980b9">
+        <div class="admin-stat-icon" style="background:#f0f8ff">🏥</div>
+        <div class="admin-stat-value"><%= pendingHospitals.length %></div>
+        <div class="admin-stat-label">Pending Hospitals</div>
+      </div>
+    </div>
+
+    <div class="admin-grid">
+
+      <!-- PENDING DONATIONS -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>🩸 Pending Donation Verifications</h3>
+          <span class="admin-badge red"><%= pendingDonations.length %></span>
+        </div>
+        <% if (pendingDonations.length === 0) { %>
+          <div class="admin-empty">✅ No pending donations</div>
+        <% } else { %>
+          <% pendingDonations.forEach(d => { %>
+            <div class="admin-pending-item">
+              <div class="admin-pending-info">
+                <strong><%= d.donor?.name %></strong>
+                <span class="blood-tag"><%= d.bloodGroup %></span>
+                <% if (d.isEmergency) { %><span class="admin-emergency-tag">🚨 Emergency</span><% } %>
+                <div class="admin-pending-sub"><%= d.hospital %>, <%= d.city %></div>
+              </div>
+              <div class="admin-action-btns">
+                <button class="admin-btn-verify" onclick="verifyDonation('<%= d._id %>')">✓ Verify</button>
+                <button class="admin-btn-reject" onclick="rejectDonation('<%= d._id %>')">✗ Reject</button>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+
+      <!-- PENDING HOSPITALS -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>🏥 Hospitals Awaiting Verification</h3>
+          <span class="admin-badge orange"><%= pendingHospitals.length %></span>
+        </div>
+        <% if (pendingHospitals.length === 0) { %>
+          <div class="admin-empty">✅ No pending hospitals</div>
+        <% } else { %>
+          <% pendingHospitals.forEach(h => { %>
+            <div class="admin-pending-item">
+              <div class="admin-pending-info">
+                <strong><%= h.name %></strong>
+                <div class="admin-pending-sub"><%= h.address %>, <%= h.city %></div>
+                <div class="admin-pending-sub"><%= h.email %> | <%= h.phone %></div>
+              </div>
+              <button class="admin-btn-verify" onclick="verifyHospital('<%= h._id %>')">✓ Verify</button>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+
+      <!-- LIVE QUEUE SUMMARY -->
+      <div class="admin-card admin-full-width">
+        <div class="admin-card-header">
+          <h3>📊 Live Queue Summary</h3>
+          <a href="/admin/queue" class="admin-view-all">Full View →</a>
+        </div>
+        <div class="admin-queue-summary">
+          <div class="admin-queue-box critical">
+            <div class="aq-icon">🚨</div>
+            <div class="aq-count"><%= queueSnapshot['critical']?.length || 0 %></div>
+            <div class="aq-label">Critical</div>
+          </div>
+          <div class="admin-queue-box emergency">
+            <div class="aq-icon">⚠️</div>
+            <div class="aq-count"><%= queueSnapshot['emergency']?.length || 0 %></div>
+            <div class="aq-label">Emergency</div>
+          </div>
+          <div class="admin-queue-box priority">
+            <div class="aq-icon">⭐</div>
+            <div class="aq-count"><%= queueSnapshot['priority']?.length || 0 %></div>
+            <div class="aq-label">Priority</div>
+          </div>
+          <div class="admin-queue-box normal">
+            <div class="aq-icon">📋</div>
+            <div class="aq-count"><%= queueSnapshot['normal']?.length || 0 %></div>
+            <div class="aq-label">Normal</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.emit('join_admin');
+    socket.on('queue_snapshot', data => {
+      ['critical','emergency','priority','normal'].forEach(level => {
+        const el = document.querySelector(`.admin-queue-box.${level} .aq-count`);
+        if (el) el.textContent = data[level]?.length || 0;
+      });
+    });
+
+    async function verifyDonation(id) {
+      const r = await fetch(`/admin/verify-donation/${id}`, { method: 'POST' });
+      const d = await r.json();
+      if (d.success) { alert(`✅ Verified! +${d.pointsEarned} pts. Level: ${d.newLevel}`); location.reload(); }
+    }
+    async function rejectDonation(id) {
+      if (!confirm('Reject this donation?')) return;
+      await fetch(`/admin/reject-donation/${id}`, { method: 'POST' });
+      location.reload();
+    }
+    async function verifyHospital(id) {
+      const r = await fetch(`/admin/verify-hospital/${id}`, { method: 'POST' });
+      const d = await r.json();
+      if (d.success) { alert('✅ Hospital verified!'); location.reload(); }
+    }
+  </script>
+</body>
+</html>

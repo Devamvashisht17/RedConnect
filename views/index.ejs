@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/css/volunteers.css">
   <link rel="stylesheet" href="/css/footer.css">
   <link rel="stylesheet" href="/css/donors-group.css">
+  <link rel="stylesheet" href="/css/hospital.css">
 </head>
 <body>
   <%- include('partials/header') %>
@@ -49,6 +50,34 @@
     </div>
     <div class="compat-guide-btn">
       <a href="/blood" class="compat-btn">Blood Compatibility Guide</a>
+    </div>
+  </section>
+
+  <!-- HOSPITAL / BLOOD BANK SECTION -->
+  <section class="hospital-section">
+    <div class="hospital-header">
+      <h2>Are You a Hospital or Blood Bank?</h2>
+      <p>Join RedConnect's network to manage blood inventory, post emergency requests and connect with donors instantly.</p>
+    </div>
+    <div class="hospital-cards">
+      <div class="hospital-card">
+        <div class="hospital-card-icon">🏥</div>
+        <h3>Register Your Hospital</h3>
+        <p>Onboard your hospital to access real-time donor database, manage blood inventory and broadcast emergency requests.</p>
+        <a href="/hospital/register" class="hospital-card-btn">Register Now</a>
+      </div>
+      <div class="hospital-card">
+        <div class="hospital-card-icon">🔍</div>
+        <h3>Already Registered?</h3>
+        <p>Login to your hospital dashboard to manage blood requests, update inventory and connect with nearby donors.</p>
+        <a href="/hospital/login" class="hospital-card-btn outline">Hospital Login</a>
+      </div>
+      <div class="hospital-card">
+        <div class="hospital-card-icon">🚑</div>
+        <h3>Emergency Requests</h3>
+        <p>Broadcast critical blood requirements instantly to thousands of registered donors in your city.</p>
+        <a href="/request" class="hospital-card-btn outline">Request Blood</a>
+      </div>
     </div>
   </section>
 

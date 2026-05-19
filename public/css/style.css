@@ -78,6 +78,8 @@ body {
   justify-content: center;
   font-weight: bold;
   font-size: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .user-info {

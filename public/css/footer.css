@@ -112,6 +112,40 @@
   box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
 }
 
+.footer-socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.social-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.social-icon:hover {
+  background: #e74c3c;
+  transform: translateY(-3px);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding-top: 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #777;
+}
+
 .scroll-top {
   position: fixed;
   bottom: 30px;

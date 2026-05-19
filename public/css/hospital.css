@@ -1,0 +1,330 @@
+/* ── Hospital Auth Pages ─────────────────────────────── */
+.hospital-auth-container {
+  display: flex;
+  min-height: 85vh;
+}
+
+/* Left image side */
+.hospital-image-side {
+  flex: 1;
+  background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+              url('https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=900&q=80');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hospital-image-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 30px;
+}
+
+.hospital-image-content {
+  color: white;
+  text-align: center;
+  max-width: 380px;
+}
+
+.hospital-big-icon {
+  font-size: 52px;
+  margin-bottom: 14px;
+}
+
+.hospital-image-content h1 {
+  font-size: 1.9rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.hospital-image-content p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.hospital-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  margin-top: 20px;
+}
+
+.feature-item {
+  background: rgba(255,255,255,0.1);
+  padding: 9px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  border-left: 3px solid #e74c3c;
+}
+
+/* Right form side */
+.hospital-form-side {
+  flex: 1;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 30px;
+}
+
+.hospital-form-card {
+  background: white;
+  padding: 45px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 460px;
+}
+
+.hospital-form-header {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.hospital-form-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.hospital-form-header h2 {
+  font-size: 1.8rem;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.hospital-form-header p {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.hospital-error {
+  background: #fdecea;
+  color: #c0392b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  border-left: 4px solid #e74c3c;
+}
+
+/* Form inputs */
+.hospital-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.h-form-group {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #e9ecef;
+  transition: border-color 0.3s;
+  padding-bottom: 6px;
+}
+
+.h-form-group:focus-within {
+  border-bottom-color: #e74c3c;
+}
+
+.h-input-icon {
+  font-size: 18px;
+  margin-right: 12px;
+  width: 24px;
+  text-align: center;
+}
+
+.h-form-group input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  padding: 10px 0;
+  background: transparent;
+  color: #333;
+}
+
+.h-form-group input::placeholder {
+  color: #aaa;
+}
+
+.h-submit-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+}
+
+.h-submit-btn:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231,76,60,0.35);
+}
+
+.h-switch-link {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.h-switch-link a {
+  color: #e74c3c;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.h-switch-link a:hover {
+  text-decoration: underline;
+}
+
+/* ── Homepage Hospital Section ───────────────────────── */
+.hospital-section {
+  padding: 80px 20px;
+  background: #f8f9fa;
+}
+
+.hospital-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.hospital-header h2 {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 14px;
+  letter-spacing: 1px;
+}
+
+.hospital-header p {
+  font-size: 1rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.hospital-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hospital-card {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: all 0.3s;
+  border-top: 4px solid #e74c3c;
+}
+
+.hospital-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.13);
+}
+
+.hospital-card-icon {
+  font-size: 52px;
+  margin-bottom: 20px;
+}
+
+.hospital-card h3 {
+  font-size: 1.3rem;
+  color: #222;
+  margin-bottom: 14px;
+  font-weight: bold;
+}
+
+.hospital-card p {
+  font-size: 0.92rem;
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 25px;
+}
+
+.hospital-card-btn {
+  display: inline-block;
+  background: #e74c3c;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
+}
+
+.hospital-card-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(231,76,60,0.35);
+}
+
+.hospital-card-btn.outline {
+  background: transparent;
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
+}
+
+.hospital-card-btn.outline:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+/* Navbar hospital link */
+.hospital-nav-link {
+  color: #e74c3c !important;
+  font-weight: bold;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 992px) {
+  .hospital-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hospital-auth-container {
+    flex-direction: column;
+  }
+
+  .hospital-image-side {
+    min-height: 280px;
+  }
+
+  .hospital-image-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .hospital-form-card {
+    padding: 30px 20px;
+  }
+
+  .hospital-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .hospital-header h2 {
+    font-size: 1.7rem;
+  }
+}

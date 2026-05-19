@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Donor Registration - RedConnect</title>
   <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <%- include('partials/header') %>
   <div class="quote-section">
     <h2>"Give Blood, Give Life"</h2>
     <p>Every donation can save up to three lives. Your generosity today will be someone's hope tomorrow.</p>
@@ -74,14 +76,21 @@
       </div>
 
       <form method="POST" action="/register" class="register-form">
+        <% if (typeof cooldownUntil !== 'undefined' && cooldownUntil) { %>
+          <div style="background:#fff3e0;border:2px solid #e67e22;color:#a04000;padding:18px;border-radius:8px;margin-bottom:20px;text-align:center;">
+            <strong>⏳ Cooldown Period Active</strong><br>
+            You cannot donate again until <strong><%= new Date(cooldownUntil).toDateString() %></strong>.<br>
+            <small>Blood donation requires a 90-day gap between donations.</small>
+          </div>
+        <% } else { %>
         <div class="form-group">
           <label for="name">Your Name *</label>
-          <input type="text" id="name" name="name" required placeholder="Enter your full name">
+          <input type="text" id="name" name="name" required placeholder="Enter your full name" value="<%= typeof user !== 'undefined' && user ? user.name : '' %>">
         </div>
 
         <div class="form-group">
           <label for="email">Email Address *</label>
-          <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+          <input type="email" id="email" name="email" required placeholder="your.email@example.com" value="<%= typeof user !== 'undefined' && user ? user.email : '' %>" <%= typeof user !== 'undefined' && user ? 'readonly' : '' %>>
         </div>
 
         <div class="form-group">
@@ -125,6 +134,7 @@
         </div>
 
         <button type="submit" class="submit-btn">Register as Donor</button>
+        <% } %>
       </form>
 
       <a href="/" class="back-link">← Back to Home</a>

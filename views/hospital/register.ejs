@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital Register - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/hospital.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="hospital-auth-container">
+    <!-- Left Side -->
+    <div class="hospital-image-side">
+      <div class="hospital-image-overlay">
+        <div class="hospital-image-content">
+          <div class="hospital-big-icon">🏥</div>
+          <h1>Join RedConnect Network</h1>
+          <p>Connect your hospital with thousands of blood donors. Manage inventory, broadcast emergencies and save more lives.</p>
+          <div class="hospital-features">
+            <div class="feature-item">✅ Real-time donor database</div>
+            <div class="feature-item">✅ Emergency broadcast system</div>
+            <div class="feature-item">✅ Blood inventory management</div>
+            <div class="feature-item">✅ Admin verified listing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side -->
+    <div class="hospital-form-side">
+      <div class="hospital-form-card">
+        <div class="hospital-form-header">
+          <span class="hospital-form-icon">🏥</span>
+          <h2>Register Hospital</h2>
+          <p>Fill in your hospital details to get started</p>
+        </div>
+
+        <% if (error) { %>
+          <div class="hospital-error"><%= error %></div>
+        <% } %>
+
+        <form action="/hospital/register" method="POST" class="hospital-form">
+          <div class="h-form-group">
+            <span class="h-input-icon">🏥</span>
+            <input type="text" name="name" required placeholder="Hospital / Blood Bank Name">
+          </div>
+          <div class="h-form-group">
+            <span class="h-input-icon">📧</span>
+            <input type="email" name="email" required placeholder="Official Email Address">
+          </div>
+          <div class="h-form-group">
+            <span class="h-input-icon">🔒</span>
+            <input type="password" name="password" required placeholder="Create Password">
+          </div>
+          <div class="h-form-group">
+            <span class="h-input-icon">📞</span>
+            <input type="tel" name="phone" required placeholder="Contact Phone Number">
+          </div>
+          <div class="h-form-group">
+            <span class="h-input-icon">📍</span>
+            <input type="text" name="address" required placeholder="Hospital Address">
+          </div>
+          <div class="h-form-group">
+            <span class="h-input-icon">🏙️</span>
+            <input type="text" name="city" required placeholder="City">
+          </div>
+          <button type="submit" class="h-submit-btn">Register Hospital →</button>
+        </form>
+
+        <p class="h-switch-link">Already registered? <a href="/hospital/login">Login here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

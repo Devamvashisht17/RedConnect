@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital Login - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/hospital.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="hospital-auth-container">
+    <!-- Left Side -->
+    <div class="hospital-image-side">
+      <div class="hospital-image-overlay">
+        <div class="hospital-image-content">
+          <div class="hospital-big-icon">🩸</div>
+          <h1>Welcome Back</h1>
+          <p>Login to your hospital dashboard to manage blood requests, update inventory and connect with donors in real-time.</p>
+          <div class="hospital-features">
+            <div class="feature-item">📊 View blood inventory</div>
+            <div class="feature-item">🚨 Broadcast emergencies</div>
+            <div class="feature-item">👥 Connect with donors</div>
+            <div class="feature-item">📋 Manage requests</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side -->
+    <div class="hospital-form-side">
+      <div class="hospital-form-card">
+        <div class="hospital-form-header">
+          <span class="hospital-form-icon">🔐</span>
+          <h2>Hospital Login</h2>
+          <p>Access your hospital dashboard</p>
+        </div>
+
+        <% if (error) { %>
+          <div class="hospital-error"><%= error %></div>
+        <% } %>
+
+        <form action="/hospital/login" method="POST" class="hospital-form">
+          <div class="h-form-group">
+            <span class="h-input-icon">📧</span>
+            <input type="email" name="email" required placeholder="Hospital Email Address">
+          </div>
+          <div class="h-form-group">
+            <span class="h-input-icon">🔒</span>
+            <input type="password" name="password" required placeholder="Password">
+          </div>
+          <button type="submit" class="h-submit-btn">Login to Dashboard →</button>
+        </form>
+
+        <p class="h-switch-link">Not registered yet? <a href="/hospital/register">Register your hospital</a></p>
+        <p class="h-switch-link"><a href="/">← Back to Home</a></p>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

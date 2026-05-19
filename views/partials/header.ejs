@@ -23,6 +23,15 @@
           <span class="user-name"><%= user.name %></span>
         </div>
         <div class="dropdown-menu" id="dropdownMenu">
+          <% 
+            const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+            const isAdmin = adminEmails.includes(user.email);
+          %>
+          <% if (isAdmin) { %>
+            <a href="/admin/dashboard">⚙️ Admin Dashboard</a>
+          <% } else { %>
+            <a href="/donor/dashboard">🩸 My Dashboard</a>
+          <% } %>
           <a href="/logout">Logout</a>
         </div>
       </div>

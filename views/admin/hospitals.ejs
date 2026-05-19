@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hospitals - Admin - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <div class="dashboard-wrapper">
+    <div class="page-header">
+      <h1>🏥 Hospital Management</h1>
+      <a href="/admin/dashboard" class="btn-back">← Back to Dashboard</a>
+    </div>
+    <div class="dash-card">
+      <table class="mini-table">
+        <thead>
+          <tr><th>Name</th><th>City</th><th>Email</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <% hospitals.forEach(h => { %>
+            <tr>
+              <td><%= h.name %></td>
+              <td><%= h.city %></td>
+              <td><%= h.email %></td>
+              <td><span class="<%= h.isVerified ? 'badge-verified' : 'badge-pending' %>"><%= h.isVerified ? '✅ Verified' : '⏳ Pending' %></span></td>
+              <td>
+                <% if (!h.isVerified) { %>
+                  <button class="btn-green btn-sm" onclick="verifyHospital('<%= h._id %>')">Verify</button>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <%- include('../partials/footer') %>
+  <script>
+    async function verifyHospital(id) {
+      const r = await fetch(`/admin/verify-hospital/${id}`, { method: 'POST' });
+      const d = await r.json();
+      if (d.success) { alert('✅ Hospital verified!'); location.reload(); }
+    }
+  </script>
+</body>
+</html>
