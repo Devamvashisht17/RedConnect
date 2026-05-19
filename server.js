@@ -17,6 +17,6 @@ app.set('io', io);
 const socketEmitters = require('./sockets/queueSocket')(io);
 app.set('socketEmitters', socketEmitters);
 
-server.listen(PORT, () =>
-  console.log(`🚀 RedConnect running on http://localhost:${PORT}`)
+server.listen(PORT, '0.0.0.0', () =>
+  console.log(`🚀 RedConnect running on port ${PORT}`)
 );

@@ -3,6 +3,7 @@ require('dotenv').config();
 const express      = require('express');
 const path         = require('path');
 const session      = require('express-session');
+const MongoStore   = require('connect-mongo');
 const flash        = require('connect-flash');
 const cookieParser = require('cookie-parser');
 const jwt          = require('jsonwebtoken');
@@ -28,7 +29,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false, cookie: { secure: false } }));
+app.use(session({
+  secret:            process.env.SESSION_SECRET || 'fallback-secret',
+  resave:            false,
+  saveUninitialized: false,
+  store:             MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie:            { secure: process.env.NODE_ENV === 'production', httpOnly: true }
+}));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -53,6 +60,9 @@ app.use((req, res, next) => {
   console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
   next();
 });
+
+// ── Health check — Render pings this to verify app is alive
+app.get('/health', (req, res) => res.status(200).send('OK'));
 
 // ── Routes
 app.use('/', require('./routes/auth'));
