@@ -59,9 +59,25 @@ exports.dashboard = async (req, res) => {
 exports.createEmergencyRequest = async (req, res) => {
   try {
     const BloodRequest = mongoose.model('BloodRequest');
-    const { patientName, bloodGroup, emergencyLevel, contactPhone, patientAge } = req.body;
+    const {
+      patientName,
+      bloodGroup,
+      bloodGroupRequired,
+      emergencyLevel,
+      contactPhone,
+      contactNumber,
+      patientAge
+    } = req.body;
+    const resolvedBloodGroup = bloodGroupRequired || bloodGroup;
+    const resolvedContactNumber = contactNumber || contactPhone;
     const request = await BloodRequest.create({
-      patientName, bloodGroup, emergencyLevel, contactPhone,
+      patientName,
+      bloodGroupRequired: resolvedBloodGroup,
+      bloodGroup: resolvedBloodGroup,
+      emergencyLevel,
+      contactNumber: resolvedContactNumber,
+      contactPhone: resolvedContactNumber,
+      unitsRequired: 1,
       patientAge: parseInt(patientAge) || null,
       hospitalName: req.hospital.name, city: req.hospital.city,
       hospitalRef: req.hospital._id, hospitalVerified: true,

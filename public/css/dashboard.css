@@ -2,6 +2,15 @@
 
 .dashboard-wrapper { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
 
+.register-container.dashboard-page .dash-card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eee;
+}
+
+.register-container.dashboard-page .stat-card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
 .page-header { margin-bottom: 30px; }
 .page-header h1 { font-size: 32px; color: #c0392b; font-weight: 800; }
 .page-header p  { color: #777; margin-top: 6px; }

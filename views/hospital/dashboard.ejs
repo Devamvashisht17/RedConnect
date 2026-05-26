@@ -11,6 +11,13 @@
   <link rel="stylesheet" href="/css/footer.css">
 </head>
 <body>
+  <% const inventoryGroups = ['A+','A-','B+','B-','AB+','AB-','O+','O-']; %>
+  <% const inventoryMap = Object.fromEntries((hospital.inventory || []).map(item => [item.bloodGroup, item.units || 0])); %>
+  <% const totalUnits = inventoryGroups.reduce((sum, group) => sum + (inventoryMap[group] || 0), 0); %>
+  <% const lowStockGroups = inventoryGroups.filter(group => (inventoryMap[group] || 0) <= 4); %>
+  <% const criticalRequests = requests.filter(r => (r.emergencyLevel || '').toLowerCase() === 'critical').length; %>
+  <% const urgentRequests = requests.filter(r => (r.emergencyLevel || '').toLowerCase() === 'urgent').length; %>
+  <% const fulfilledRequests = requests.filter(r => (r.status || '').toLowerCase() === 'fulfilled').length; %>
 
   <nav class="navbar">
     <div class="logo"><span class="logo-text">🩸 RedConnect</span></div>
@@ -19,134 +26,183 @@
     </div>
   </nav>
 
-  <div class="admin-wrapper">
-
-    <!-- HEADER -->
-    <div class="admin-page-header">
-      <div>
+  <div class="admin-wrapper hospital-dashboard-shell">
+    <div class="hospital-hero">
+      <div class="hospital-hero-copy">
+        <div class="hospital-kicker">Hospital command center</div>
         <h1>🏥 <%= hospital.name %></h1>
-        <p>📍 <%= hospital.address %>, <%= hospital.city %></p>
+        <p>Monitor stock, broadcast emergencies, and close fulfilled requests from one live dashboard.</p>
+        <div class="hospital-hero-meta">
+          <span>📍 <%= hospital.address %>, <%= hospital.city %></span>
+          <span>📞 <%= hospital.phone %></span>
+          <span>✅ Verified hospital</span>
+        </div>
       </div>
-      <span class="hospital-verified-badge">✅ Verified Hospital</span>
+      <div class="hospital-hero-rail">
+        <div class="hospital-rail-title">Live overview</div>
+        <div class="hospital-rail-list">
+          <div class="hospital-rail-item"><span>Open requests</span><strong><%= requests.length %></strong></div>
+          <div class="hospital-rail-item"><span>Critical cases</span><strong><%= criticalRequests %></strong></div>
+          <div class="hospital-rail-item"><span>Urgent cases</span><strong><%= urgentRequests %></strong></div>
+          <div class="hospital-rail-item"><span>Fulfilled today</span><strong><%= fulfilledRequests %></strong></div>
+        </div>
+      </div>
     </div>
 
-    <div class="admin-grid">
+    <div class="hospital-summary-grid">
+      <div class="hospital-summary-card is-red">
+        <div class="hospital-summary-label">Open requests</div>
+        <div class="hospital-summary-value"><%= requests.length %></div>
+        <div class="hospital-summary-note">Requests waiting for follow-up</div>
+      </div>
+      <div class="hospital-summary-card is-orange">
+        <div class="hospital-summary-label">Critical alerts</div>
+        <div class="hospital-summary-value"><%= criticalRequests %></div>
+        <div class="hospital-summary-note">Needs immediate donor action</div>
+      </div>
+      <div class="hospital-summary-card is-green">
+        <div class="hospital-summary-label">Inventory units</div>
+        <div class="hospital-summary-value"><%= totalUnits %></div>
+        <div class="hospital-summary-note"><%= lowStockGroups.length %> blood groups are low</div>
+      </div>
+      <div class="hospital-summary-card is-blue">
+        <div class="hospital-summary-label">Pending donor checks</div>
+        <div class="hospital-summary-value"><%= donations.length %></div>
+        <div class="hospital-summary-note">Awaiting screening verification</div>
+      </div>
+    </div>
 
-      <!-- EMERGENCY REQUEST FORM -->
-      <div class="admin-card admin-full-width">
-        <div class="admin-card-header">
-          <h3>🚨 Create Emergency Request</h3>
-        </div>
-        <div style="display:flex; gap:30px; flex-wrap:wrap;">
-          <form id="emergencyForm" style="flex:1; min-width:280px;">
-            <div class="form-group">
-              <label>Patient Name</label>
-              <input type="text" name="patientName" required placeholder="Patient full name">
-            </div>
-            <div class="form-group">
-              <label>Blood Group Required</label>
-              <select name="bloodGroup" required onchange="showBloodStock(this.value)">
-                <option value="">Select</option>
-                <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(g => { %>
-                  <option value="<%= g %>"><%= g %></option>
-                <% }) %>
-              </select>
-            </div>
-            <!-- Live stock check -->
-            <div id="stockInfo" style="display:none; margin-bottom:14px; padding:12px; border-radius:8px; background:#f8f9fa; border-left:4px solid #e74c3c;">
-              <strong>Current Stock:</strong> <span id="stockVal"></span>
-            </div>
-            <div class="form-group">
-              <label>Emergency Level</label>
-              <select name="emergencyLevel" required>
-                <option value="Normal">Normal</option>
-                <option value="Urgent">Urgent</option>
-                <option value="Critical">Critical</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Patient Age</label>
-              <input type="number" name="patientAge" placeholder="Age (optional)">
-            </div>
-            <div class="form-group">
-              <label>Contact Phone</label>
-              <input type="tel" name="contactPhone" required placeholder="Contact number">
-            </div>
-            <button type="submit" class="h-submit-btn">🚨 Broadcast Emergency Request</button>
-          </form>
-
-          <!-- BLOOD INVENTORY (compact) -->
-          <div style="flex:1; min-width:260px;">
-            <h4 style="margin-bottom:14px; color:#333;">🩸 Update Blood Stock</h4>
-            <% const groups = ['A+','A-','B+','B-','AB+','AB-','O+','O-']; %>
-            <% groups.forEach(g => { %>
-              <% const item = hospital.inventory.find(i => i.bloodGroup === g); %>
-              <% const units = item ? item.units : 0; %>
-              <div class="inv-row" id="inv-row-<%= g.replace('+','plus').replace('-','minus') %>">
-                <span class="blood-tag"><%= g %></span>
-                <div class="inv-bar-wrap">
-                  <div class="inv-bar" style="width:<%= Math.min(units * 5, 100) %>%"></div>
-                </div>
-                <span class="inv-unit-display" id="display-<%= g.replace('+','plus').replace('-','minus') %>"><%= units %></span>
-                <div class="inv-controls">
-                  <input type="number" id="inv-<%= g %>" value="<%= units %>" min="0" class="inv-input">
-                  <button class="inv-update-btn" onclick="updateInventory('<%= g %>')">Save</button>
-                </div>
-              </div>
-            <% }) %>
+    <div class="hospital-dashboard-grid">
+      <div class="hospital-panel">
+        <div class="hospital-panel-header">
+          <div>
+            <h3>🚨 Create Emergency Request</h3>
+            <div class="hospital-panel-subtitle">Send a broadcast request and notify nearby donors instantly.</div>
           </div>
+          <span class="hospital-panel-badge">Live form</span>
         </div>
-        <div id="emergencyResult" style="display:none; margin-top:15px; padding:12px; border-radius:8px;"></div>
+
+        <form id="emergencyForm" class="hospital-form-grid">
+          <div class="form-group">
+            <label>Patient Name</label>
+            <input type="text" name="patientName" required placeholder="Patient full name">
+          </div>
+          <div class="form-group">
+            <label>Blood Group Required</label>
+            <select name="bloodGroup" required onchange="showBloodStock(this.value)">
+              <option value="">Select</option>
+              <% inventoryGroups.forEach(g => { %>
+                <option value="<%= g %>"><%= g %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div id="stockInfo" class="hospital-stock-note" style="display:none;">
+            <strong>Current stock:</strong> <span id="stockVal"></span>
+          </div>
+          <div class="form-group">
+            <label>Emergency Level</label>
+            <select name="emergencyLevel" required>
+              <option value="Normal">Normal</option>
+              <option value="Urgent">Urgent</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Patient Age</label>
+            <input type="number" name="patientAge" placeholder="Age (optional)">
+          </div>
+          <div class="form-group">
+            <label>Contact Phone</label>
+            <input type="tel" name="contactPhone" required placeholder="Contact number">
+          </div>
+          <button type="submit" class="h-submit-btn">🚨 Broadcast Emergency Request</button>
+        </form>
+
+        <div id="emergencyResult" class="hospital-result-box" style="display:none;"></div>
       </div>
 
-      <!-- RECENT REQUESTS -->
-      <div class="admin-card admin-full-width">
-        <div class="admin-card-header">
-          <h3>📋 Recent Blood Requests</h3>
+      <div class="hospital-panel">
+        <div class="hospital-panel-header">
+          <div>
+            <h3>🩸 Blood Inventory</h3>
+            <div class="hospital-panel-subtitle">Update stock levels and spot low supply before the next emergency.</div>
+          </div>
+          <span class="hospital-panel-badge">8 groups</span>
+        </div>
+
+        <div class="inventory-group-grid">
+          <% inventoryGroups.forEach(g => { %>
+            <% const units = inventoryMap[g] || 0; %>
+            <% const safeKey = g.replace('+','plus').replace('-','minus'); %>
+            <div class="inventory-group-card <%= units <= 4 ? 'low' : '' %>" id="inv-row-<%= safeKey %>">
+              <div class="inventory-group-top">
+                <span class="blood-tag"><%= g %></span>
+                <span class="inventory-group-units"><%= units %> units</span>
+              </div>
+              <div class="inv-bar-wrap">
+                <div class="inv-bar" style="width:<%= Math.min(units * 5, 100) %>%"></div>
+              </div>
+              <div class="inventory-group-actions">
+                <input type="number" id="inv-<%= g %>" value="<%= units %>" min="0" class="inv-input">
+                <button class="inv-update-btn" onclick="updateInventory('<%= g %>')">Save</button>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="admin-card admin-full-width hospital-panel request-panel">
+        <div class="hospital-panel-header">
+          <div>
+            <h3>📋 Recent Blood Requests</h3>
+            <div class="hospital-panel-subtitle">Track request status and mark fulfilled cases once care is complete.</div>
+          </div>
         </div>
         <% if (requests.length === 0) { %>
-          <div class="admin-empty">No requests yet.</div>
+          <div class="request-empty-state">No requests yet.</div>
         <% } else { %>
-          <table class="mini-table">
-            <thead>
-              <tr>
-                <th>Patient</th>
-                <th>Blood</th>
-                <th>Level</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% requests.forEach(r => { %>
-                <tr id="req-<%= r._id %>">
-                  <td><%= r.patientName %></td>
-                  <td><span class="blood-tag"><%= r.bloodGroup %></span></td>
-                  <td>
-                    <span class="level-badge level-<%= r.emergencyLevel?.toLowerCase() %>">
-                      <%= r.emergencyLevel %>
-                    </span>
-                  </td>
-                  <td>
-                    <span class="status-badge status-<%= (r.status || 'Pending').toLowerCase() %>">
-                      <%= r.status || 'Pending' %>
-                    </span>
-                  </td>
-                  <td><%= new Date(r.createdAt).toLocaleDateString() %></td>
-                  <td>
-                    <% if (r.status !== 'Fulfilled') { %>
-                      <button class="admin-btn-verify" onclick="fulfillRequest('<%= r._id %>')">
-                        ✅ Mark Fulfilled
-                      </button>
-                    <% } else { %>
-                      <span style="color:#27ae60; font-size:13px;">✅ Done</span>
-                    <% } %>
-                  </td>
+          <div class="request-table-wrap">
+            <table class="mini-table hospital-request-table">
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Blood</th>
+                  <th>Level</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Action</th>
                 </tr>
-              <% }) %>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <% requests.forEach(r => { %>
+                  <tr id="req-<%= r._id %>">
+                    <td><%= r.patientName %></td>
+                    <td><span class="blood-tag"><%= r.bloodGroup %></span></td>
+                    <td>
+                      <span class="level-badge level-<%= (r.emergencyLevel || '').toLowerCase() %>">
+                        <%= r.emergencyLevel %>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-badge status-<%= (r.status || 'Pending').toLowerCase() %>">
+                        <%= r.status || 'Pending' %>
+                      </span>
+                    </td>
+                    <td><%= new Date(r.createdAt).toLocaleDateString() %></td>
+                    <td>
+                      <% if (r.status !== 'Fulfilled') { %>
+                        <button class="admin-btn-verify" onclick="fulfillRequest('<%= r._id %>')">
+                          ✅ Mark Fulfilled
+                        </button>
+                      <% } else { %>
+                        <span class="request-status-muted">✅ Done</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
         <% } %>
       </div>
 

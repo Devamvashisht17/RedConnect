@@ -1,19 +1,23 @@
 require('dotenv').config();
-
-
-
 const express      = require('express');
 const path         = require('path');
 const session      = require('express-session');
 const MongoStore = require('connect-mongo').default;
 const cookieParser = require('cookie-parser');
 const jwt          = require('jsonwebtoken');
+const flash        = require('connect-flash');
 
 const connectDB = require('./config/db');
 const User      = require('./models/User');
 
 // Connect DB
 connectDB();
+
+// Register models used by populate() across routes (avoids MissingSchemaError on cold paths)
+require('./models/Donor');
+require('./models/User');
+require('./models/Notification');
+require('./models/Request');
 
 // Init passport AFTER models are loaded
 const passport = require('./auth/google');
@@ -40,6 +44,7 @@ app.use(session({
   }),
   cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true }
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -55,6 +60,13 @@ app.use(async (req, res, next) => {
       res.clearCookie('token');
     }
   }
+  next();
+});
+
+// Attach flash messages to res.locals (for views alert banner)
+app.use((req, res, next) => {
+  res.locals.success = req.flash('success')[0] || null;
+  res.locals.error = req.flash('error')[0] || null;
   next();
 });
 

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matched Donors - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/request-system.css">
+</head>
+<body class="blood-matches-page">
+  <%- include('partials/header') %>
+
+  <div class="quote-section">
+    <h2>"<%= request.patientName %> needs <%= request.bloodGroupRequired %>"</h2>
+    <p>Compatible donors are emailed to come for doctor screening. After screening, admin verifies the donor — then the donor is told to give blood and you are told to receive blood.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="faq-section">
+      <h3>What happens next?</h3>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Donors are being contacted</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Each eligible matched donor receives an email with hospital screening time and location.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>After admin verification</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>When admin confirms the donor is healthy after screening, you receive an email to arrange receiving blood (if you provided your email).</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Hospital details</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p><strong><%= request.hospitalName %></strong>, <%= request.city %>. Contact: <%= request.contactNumber %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>🩸 Compatible Donors</h1>
+        <p>
+          <%= compatibleDonorCount %> compatible donor(s)
+          <% if (typeof eligibleCount !== 'undefined') { %> · <%= eligibleCount %> emailed for screening<% } %>
+          <% if (typeof cooldownCount !== 'undefined' && cooldownCount > 0) { %> · <%= cooldownCount %> on 90-day cooldown<% } %>
+          · Status: <strong><%= request.status %></strong>
+        </p>
+      </div>
+
+      <% if (!smtpConfigured) { %>
+        <div style="background:#fff3e0;border:2px solid #e67e22;padding:14px;border-radius:8px;margin-bottom:16px;font-size:14px;">
+          <strong>Donor emails are not being delivered.</strong> Add <code>SMTP_USER</code> and <code>SMTP_PASS</code> (Gmail App Password) to <code>.env</code> and restart the server. Until then, messages are only saved in <code>scratch/sent_emails.log</code> on the server — donors will not receive them in their inbox.
+        </div>
+      <% } else if (typeof newlyNotifiedCount !== 'undefined' && newlyNotifiedCount > 0) { %>
+        <div style="background:#e8f5e9;border:2px solid #27ae60;padding:14px;border-radius:8px;margin-bottom:16px;">
+          Screening emails were just sent to <%= newlyNotifiedCount %> donor(s).
+        </div>
+      <% } %>
+
+      <% if (!request.requesterEmail) { %>
+        <div style="background:#fff3e0;border:2px solid #f39c12;padding:14px;border-radius:8px;margin-bottom:16px;font-size:14px;">
+          No requester email was provided on the form — you will not receive “donor found” updates by email.
+        </div>
+      <% } %>
+
+      <% if (typeof justConfirmed !== 'undefined' && justConfirmed) { %>
+        <div style="background:#e3f2fd;border:2px solid #2980b9;padding:14px;border-radius:8px;margin-bottom:16px;">
+          Emails have been sent with hospital visit details.
+        </div>
+      <% } %>
+
+      <% if (request.acceptedDonor) { %>
+        <% const matchEntry = typeof acceptedEntry !== 'undefined' ? acceptedEntry : null; %>
+        <% const hs = matchEntry?.healthStatus; %>
+        <div style="background:<%= hs === 'verified' || hs === 'healthy' ? '#e8f5e9' : '#fff3e0' %>;border:2px solid <%= hs === 'verified' || hs === 'healthy' ? '#27ae60' : '#e67e22' %>;padding:18px;border-radius:8px;margin-bottom:24px;">
+          <% if (hs === 'verified' || hs === 'healthy') { %>
+            <strong>✅ Donor cleared by admin — ready to donate</strong><br>
+            Emails sent with donation time.
+          <% } else if (request.awaitingAdminVerification || hs === 'scheduled') { %>
+            <strong>⏳ Donor scheduled for doctor screening</strong><br>
+            Waiting for admin verification after hospital examination.
+          <% } else { %>
+            <strong>Donor assigned:</strong> <%= request.acceptedDonor.name %>
+          <% } %>
+          <br><strong><%= request.acceptedDonor.name %></strong> (<%= request.acceptedDonor.bloodGroup %>)
+          <% if (visitTime || request.scheduledVisitAt) { %>
+            · <strong><%= new Date(visitTime || request.scheduledVisitAt).toLocaleString() %></strong>
+          <% } %>
+          <br>Phone: <%= request.acceptedDonor.phone %>
+        </div>
+      <% } %>
+
+      <% if (typeof cooldownCount !== 'undefined' && cooldownCount > 0 && typeof eligibleCount !== 'undefined' && eligibleCount === 0) { %>
+        <div style="background:#fff8e1;border:2px solid #f39c12;padding:14px;border-radius:8px;margin-bottom:16px;font-size:14px;">
+          Compatible donors exist in our database but all are on the <strong>90-day donation cooldown</strong> after a recent donation. They are listed below — we cannot email them until the cooldown ends.
+        </div>
+      <% } %>
+
+      <div class="panel-card" style="margin-bottom:24px;padding:20px;">
+        <div class="stack-list" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div class="summary-chip"><div class="value"><%= compatibleDonorCount %></div><div class="label">Compatible</div></div>
+          <div class="summary-chip"><div class="value"><%= typeof eligibleCount !== 'undefined' ? eligibleCount : '—' %></div><div class="label">Screening emailed</div></div>
+          <div class="summary-chip"><div class="value"><%= request.emergencyLevel %></div><div class="label">Urgency</div></div>
+          <div class="summary-chip"><div class="value"><%= request.city %></div><div class="label">City</div></div>
+        </div>
+      </div>
+
+      <% if ((request.matchedDonors || []).length === 0) { %>
+        <div class="empty-state" style="padding:24px;text-align:center;color:#888;">
+          No compatible donors in the database for <strong><%= request.bloodGroupRequired %></strong> in or near <strong><%= request.city %></strong>.
+          Ask donors to register at <a href="/register">Donate Blood</a>, then refresh this page.
+        </div>
+      <% } else { %>
+        <div class="request-grid">
+          <% request.matchedDonors.forEach(entry => {
+               const entryDonorId = entry.donor ? (entry.donor._id || entry.donor).toString() : '';
+          %>
+            <article class="request-card" style="margin-bottom:16px;padding:16px;">
+              <div class="request-card-header">
+                <div>
+                  <h3><%= entry.donor?.name || 'Donor' %></h3>
+                  <div class="request-meta">
+                    <span class="blood-pill"><%= entry.donor?.bloodGroup || '—' %></span>
+                    <span class="city-pill"><%= entry.donor?.city || '—' %></span>
+                    <span class="response-pill <%= entry.healthStatus || 'pending' %>"><%= entry.healthStatus || 'pending' %></span>
+                  </div>
+                </div>
+                <span class="compat-badge <%= entry.cityMatch ? 'same-city' : 'other-city' %>">
+                  <%= entry.cityMatch ? 'Same city' : 'Compatible' %>
+                </span>
+              </div>
+              <div class="request-card-body">
+                <p class="subtle-note">
+                  <% if (entry.healthStatus === 'cooldown') { %>
+                    <strong>On 90-day cooldown</strong> — cannot be emailed yet.<% if (entry.note) { %> <%= entry.note %><% } %>
+                  <% } else { %>
+                    Health: <strong><%= entry.healthStatus || 'pending' %></strong>
+                    <% if (entry.healthStatus === 'healthy' && entry.scheduledVisitAt) { %>
+                      · Visit by <%= new Date(entry.scheduledVisitAt).toLocaleString() %>
+                    <% } %>
+                  <% } %>
+                </p>
+                <% if (typeof acceptedDonorId !== 'undefined' && acceptedDonorId && entryDonorId === acceptedDonorId) { %>
+                  <span class="status-pill completed">Selected donor</span>
+                <% } %>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <div class="action-row" style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+        <a class="submit-btn" href="/request" style="display:inline-block;text-decoration:none;width:auto;padding:12px 24px;">Submit another request</a>
+        <a class="back-link" href="/" style="display:inline-block;margin:0;">← Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    function toggleFaq(element) {
+      element.parentElement.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

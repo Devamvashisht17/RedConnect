@@ -6,152 +6,202 @@
   <title>Donor Dashboard - RedConnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
   <link rel="stylesheet" href="/css/dashboard.css">
   <link rel="stylesheet" href="/css/footer.css">
 </head>
 <body>
   <%- include('../partials/header') %>
 
-  <div class="dashboard-wrapper">
+  <div class="quote-section">
+    <h2>"Your Blood, Their Hope"</h2>
+    <p>Track your donations, earn badges, and see how many lives you've helped save.</p>
+  </div>
 
-    <!-- STATS ROW -->
-    <div class="stats-row">
-      <div class="stat-card red">
-        <div class="stat-icon">🩸</div>
-        <div class="stat-value"><%= stats.verifiedDonations %></div>
-        <div class="stat-label">Donations</div>
+  <div class="content-wrapper">
+    <div class="faq-section">
+      <h3>Donor Dashboard Help</h3>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>How do I log a donation?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Fill in the Log a Donation form with hospital and city details. An admin will verify it before points are awarded.</p>
+        </div>
       </div>
-      <div class="stat-card gold">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-value"><%= stats.totalPoints %></div>
-        <div class="stat-label">Points</div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What is the 90-day cooldown?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>After a verified donation you must wait 90 days before logging another, for your health and safety.</p>
+        </div>
       </div>
-      <div class="stat-card green">
-        <div class="stat-icon">❤️</div>
-        <div class="stat-value"><%= stats.livesSaved %></div>
-        <div class="stat-label">Lives Saved</div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>How are points and levels earned?</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Each verified donation adds points. Reach higher donor levels as you donate more. Emergency donations may earn bonus points.</p>
+        </div>
       </div>
-      <div class="stat-card blue">
-        <div class="stat-icon">🏆</div>
-        <div class="stat-value">#<%= rank %></div>
-        <div class="stat-label">Your Rank</div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Live notifications</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>When a nearby blood request matches your group, you'll see a real-time alert on this page.</p>
+        </div>
       </div>
     </div>
 
-    <div class="dashboard-grid">
-
-      <!-- LEFT COLUMN -->
-      <div class="dash-col">
-
-        <!-- LEVEL PROGRESS -->
-        <div class="dash-card">
-          <h3>Donor Level: <span class="level-badge level-<%= stats.donorLevel.toLowerCase() %>"><%= stats.donorLevel %></span></h3>
-          <% if (nextLevelInfo.nextLevel !== 'Max') { %>
-            <p>Next: <strong><%= nextLevelInfo.nextLevel %></strong> — <%= nextLevelInfo.needed %> more donation(s)</p>
-            <div class="progress-bar-wrap">
-              <div class="progress-bar" style="width:<%= nextLevelInfo.progress %>%"></div>
-            </div>
-            <small><%= nextLevelInfo.progress %>% complete</small>
-          <% } else { %>
-            <p>🎉 You've reached the highest level — Platinum Lifesaver!</p>
-          <% } %>
-        </div>
-
-        <!-- BADGES -->
-        <div class="dash-card">
-          <h3>Your Badges</h3>
-          <% if (stats.badges.length === 0) { %>
-            <p class="muted">No badges yet. Make your first donation!</p>
-          <% } else { %>
-            <div class="badges-row">
-              <% stats.badges.forEach(b => { %>
-                <div class="badge-item" title="<%= b.description %>">
-                  <span class="badge-icon"><%= b.icon %></span>
-                  <span class="badge-name"><%= b.name %></span>
-                </div>
-              <% }) %>
-            </div>
-          <% } %>
-        </div>
-
-        <!-- LOG DONATION -->
-        <div class="dash-card">
-          <h3>Log a Donation</h3>
-          <% if (cooldown) { %>
-            <div class="alert-warning">⏳ You are in a 90-day cooldown period. You can donate again after the cooldown ends.</div>
-          <% } else { %>
-            <form action="/donor/log-donation" method="POST">
-              <div class="form-group">
-                <label>Blood Group</label>
-                <select name="bloodGroup" required>
-                  <option value="">Select</option>
-                  <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(g => { %>
-                    <option value="<%= g %>"><%= g %></option>
-                  <% }) %>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Hospital Name</label>
-                <input type="text" name="hospital" required placeholder="Hospital where you donated">
-              </div>
-              <div class="form-group">
-                <label>City</label>
-                <input type="text" name="city" required placeholder="City">
-              </div>
-              <div class="form-group checkbox-group">
-                <input type="checkbox" name="isEmergency" id="isEmergency">
-                <label for="isEmergency">Was this an emergency donation?</label>
-              </div>
-              <button type="submit" class="btn-red">Submit for Verification</button>
-            </form>
-          <% } %>
-        </div>
-
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>🩸 Donor Dashboard</h1>
+        <p>Welcome back, <%= user.name %> — here's your donation journey</p>
       </div>
 
-      <!-- RIGHT COLUMN -->
-      <div class="dash-col">
+      <div class="stats-row">
+        <div class="stat-card red">
+          <div class="stat-icon">🩸</div>
+          <div class="stat-value"><%= stats.verifiedDonations %></div>
+          <div class="stat-label">Donations</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value"><%= stats.totalPoints %></div>
+          <div class="stat-label">Points</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">❤️</div>
+          <div class="stat-value"><%= stats.livesSaved %></div>
+          <div class="stat-label">Lives Saved</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-value">#<%= rank %></div>
+          <div class="stat-label">Your Rank</div>
+        </div>
+      </div>
 
-        <!-- RECENT DONATIONS -->
-        <div class="dash-card">
-          <h3>Recent Donations</h3>
-          <% if (donations.length === 0) { %>
-            <p class="muted">No verified donations yet.</p>
-          <% } else { %>
-            <table class="mini-table">
-              <thead><tr><th>Blood</th><th>Hospital</th><th>Status</th><th>Date</th></tr></thead>
-              <tbody>
-                <% donations.forEach(d => { %>
-                  <tr>
-                    <td><span class="blood-tag"><%= d.bloodGroup %></span></td>
-                    <td><%= d.hospital %></td>
-                    <td><span class="status-tag <%= d.status %>"><%= d.status %></span></td>
-                    <td><%= new Date(d.donatedAt).toLocaleDateString() %></td>
-                  </tr>
+      <div class="dashboard-grid">
+        <div class="dash-col">
+          <div class="dash-card">
+            <h3>Donor Level: <span class="level-badge level-<%= stats.donorLevel.toLowerCase() %>"><%= stats.donorLevel %></span></h3>
+            <% if (nextLevelInfo.nextLevel !== 'Max') { %>
+              <p>Next: <strong><%= nextLevelInfo.nextLevel %></strong> — <%= nextLevelInfo.needed %> more donation(s)</p>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar" style="width:<%= nextLevelInfo.progress %>%"></div>
+              </div>
+              <small><%= nextLevelInfo.progress %>% complete</small>
+            <% } else { %>
+              <p>🎉 You've reached the highest level — Platinum Lifesaver!</p>
+            <% } %>
+          </div>
+
+          <div class="dash-card">
+            <h3>Your Badges</h3>
+            <% if (stats.badges.length === 0) { %>
+              <p class="muted">No badges yet. Make your first donation!</p>
+            <% } else { %>
+              <div class="badges-row">
+                <% stats.badges.forEach(b => { %>
+                  <div class="badge-item" title="<%= b.description %>">
+                    <span class="badge-icon"><%= b.icon %></span>
+                    <span class="badge-name"><%= b.name %></span>
+                  </div>
                 <% }) %>
-              </tbody>
-            </table>
-          <% } %>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="dash-card">
+            <h3>Log a Donation</h3>
+            <% if (cooldown) { %>
+              <div class="alert-warning">⏳ You are in a 90-day cooldown period. You can donate again after the cooldown ends.</div>
+            <% } else { %>
+              <form action="/donor/log-donation" method="POST" class="register-form">
+                <div class="form-group">
+                  <label>Blood Group</label>
+                  <select name="bloodGroup" required>
+                    <option value="">Select</option>
+                    <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(g => { %>
+                      <option value="<%= g %>"><%= g %></option>
+                    <% }) %>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Hospital Name</label>
+                  <input type="text" name="hospital" required placeholder="Hospital where you donated">
+                </div>
+                <div class="form-group">
+                  <label>City</label>
+                  <input type="text" name="city" required placeholder="City">
+                </div>
+                <div class="form-group checkbox-group">
+                  <input type="checkbox" name="isEmergency" id="isEmergency">
+                  <label for="isEmergency">Was this an emergency donation?</label>
+                </div>
+                <button type="submit" class="submit-btn">Submit for Verification</button>
+              </form>
+            <% } %>
+          </div>
         </div>
 
-        <!-- MINI LEADERBOARD -->
-        <div class="dash-card">
-          <h3>🏆 Top Donors <a href="/donor/leaderboard" class="view-all">View All</a></h3>
-          <% leaderboard.slice(0,5).forEach((entry, i) => { %>
-            <div class="leader-row <%= entry.user?._id?.toString() === user._id?.toString() ? 'highlight' : '' %>">
-              <span class="leader-rank">#<%= i+1 %></span>
-              <span class="leader-name"><%= entry.user?.name || 'Unknown' %></span>
-              <span class="leader-pts"><%= entry.totalPoints %> pts</span>
-            </div>
-          <% }) %>
-        </div>
+        <div class="dash-col">
+          <div class="dash-card">
+            <h3>Recent Donations</h3>
+            <% if (donations.length === 0) { %>
+              <p class="muted">No verified donations yet.</p>
+            <% } else { %>
+              <table class="mini-table">
+                <thead><tr><th>Blood</th><th>Hospital</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                  <% donations.forEach(d => { %>
+                    <tr>
+                      <td><span class="blood-tag"><%= d.bloodGroup %></span></td>
+                      <td><%= d.hospital %></td>
+                      <td><span class="status-tag <%= d.status %>"><%= d.status %></span></td>
+                      <td><%= new Date(d.donatedAt).toLocaleDateString() %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </div>
 
+          <div class="dash-card">
+            <h3>🏆 Top Donors <a href="/donor/leaderboard" class="view-all">View All</a></h3>
+            <% leaderboard.slice(0,5).forEach((entry, i) => { %>
+              <div class="leader-row <%= entry.user?._id?.toString() === user._id?.toString() ? 'highlight' : '' %>">
+                <span class="leader-rank">#<%= i+1 %></span>
+                <span class="leader-name"><%= entry.user?.name || 'Unknown' %></span>
+                <span class="leader-pts"><%= entry.totalPoints %> pts</span>
+              </div>
+            <% }) %>
+          </div>
+        </div>
       </div>
+
+      <a href="/" class="back-link">← Back to Home</a>
     </div>
   </div>
 
   <%- include('../partials/footer') %>
 
+  <script>
+    function toggleFaq(element) {
+      element.parentElement.classList.toggle('active');
+    }
+  </script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();

@@ -6,6 +6,7 @@
   <title>Admin Dashboard - RedConnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
   <link rel="stylesheet" href="/css/dashboard.css">
   <link rel="stylesheet" href="/css/footer.css">
   <link rel="stylesheet" href="/css/admin.css">
@@ -13,137 +14,164 @@
 <body>
   <%- include('../partials/header') %>
 
-  <div class="admin-wrapper">
+  <div class="quote-section">
+    <h2>"Coordinate Care, Save Lives"</h2>
+    <p>Verify donors after hospital screening, approve hospitals, and manage blood requests.</p>
+  </div>
 
-    <!-- PAGE HEADER -->
-    <div class="admin-page-header">
-      <div>
+  <div class="content-wrapper">
+    <div class="faq-section">
+      <h3>Admin Guide</h3>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Pending donation verifications</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>Review donor-submitted donations and click Verify to award points or Reject if details are invalid.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Hospital approvals</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>New hospitals must be verified before they can submit blood requests on the platform.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Donor screening verification</h4>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>When a blood request is submitted, compatible donors receive an email to come for doctor screening. After screening, click “Healthy — send emails” to notify the donor to give blood and the requester to receive blood.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="register-container dashboard-page">
+      <div class="register-header">
         <h1>⚙️ Admin Dashboard</h1>
         <p>Manage the RedConnect emergency blood response system</p>
       </div>
-      <a href="/admin/queue" class="admin-queue-btn">📋 Live Queue Monitor</a>
-    </div>
 
-    <!-- STATS -->
-    <div class="admin-stats-row">
-      <div class="admin-stat-card" style="border-top:4px solid #e74c3c">
-        <div class="admin-stat-icon" style="background:#fff0f0">👥</div>
-        <div class="admin-stat-value"><%= totalUsers %></div>
-        <div class="admin-stat-label">Total Users</div>
-      </div>
-      <div class="admin-stat-card" style="border-top:4px solid #27ae60">
-        <div class="admin-stat-icon" style="background:#f0fff4">🩸</div>
-        <div class="admin-stat-value"><%= totalDonors %></div>
-        <div class="admin-stat-label">Active Donors</div>
-      </div>
-      <div class="admin-stat-card" style="border-top:4px solid #e67e22">
-        <div class="admin-stat-icon" style="background:#fff8f0">📋</div>
-        <div class="admin-stat-value"><%= activeRequests %></div>
-        <div class="admin-stat-label">Active Requests</div>
-      </div>
-      <div class="admin-stat-card" style="border-top:4px solid #2980b9">
-        <div class="admin-stat-icon" style="background:#f0f8ff">🏥</div>
-        <div class="admin-stat-value"><%= pendingHospitals.length %></div>
-        <div class="admin-stat-label">Pending Hospitals</div>
-      </div>
-    </div>
-
-    <div class="admin-grid">
-
-      <!-- PENDING DONATIONS -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3>🩸 Pending Donation Verifications</h3>
-          <span class="admin-badge red"><%= pendingDonations.length %></span>
+      <div class="admin-stats-row">
+        <div class="admin-stat-card" style="border-top:4px solid #e74c3c">
+          <div class="admin-stat-icon" style="background:#fff0f0">👥</div>
+          <div class="admin-stat-value"><%= totalUsers %></div>
+          <div class="admin-stat-label">Total Users</div>
         </div>
-        <% if (pendingDonations.length === 0) { %>
-          <div class="admin-empty">✅ No pending donations</div>
-        <% } else { %>
-          <% pendingDonations.forEach(d => { %>
-            <div class="admin-pending-item">
-              <div class="admin-pending-info">
-                <strong><%= d.donor?.name %></strong>
-                <span class="blood-tag"><%= d.bloodGroup %></span>
-                <% if (d.isEmergency) { %><span class="admin-emergency-tag">🚨 Emergency</span><% } %>
-                <div class="admin-pending-sub"><%= d.hospital %>, <%= d.city %></div>
+        <div class="admin-stat-card" style="border-top:4px solid #27ae60">
+          <div class="admin-stat-icon" style="background:#f0fff4">🩸</div>
+          <div class="admin-stat-value"><%= totalDonors %></div>
+          <div class="admin-stat-label">Active Donors</div>
+        </div>
+        <div class="admin-stat-card" style="border-top:4px solid #e67e22">
+          <div class="admin-stat-icon" style="background:#fff8f0">📋</div>
+          <div class="admin-stat-value"><%= openRequests %></div>
+          <div class="admin-stat-label">Open Requests</div>
+        </div>
+        <div class="admin-stat-card" style="border-top:4px solid #2980b9">
+          <div class="admin-stat-icon" style="background:#f0f8ff">🏥</div>
+          <div class="admin-stat-value"><%= pendingHospitals.length %></div>
+          <div class="admin-stat-label">Pending Hospitals</div>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="admin-card admin-full-width">
+          <div class="admin-card-header">
+            <h3>🩺 Donors awaiting admin verification (after doctor screening)</h3>
+            <span class="admin-badge orange"><%= pendingScreening.length %></span>
+          </div>
+          <% if (pendingScreening.length === 0) { %>
+            <div class="admin-empty">✅ No donors waiting for health verification</div>
+          <% } else { %>
+            <% pendingScreening.forEach(r => { %>
+              <div class="admin-pending-item">
+                <div class="admin-pending-info">
+                  <strong><%= r.acceptedDonor?.name %></strong>
+                  <span class="blood-tag"><%= r.acceptedDonor?.bloodGroup %></span>
+                  <div class="admin-pending-sub">Patient: <%= r.patientName %> · needs <%= r.bloodGroupRequired %></div>
+                  <div class="admin-pending-sub"><%= r.hospitalName %>, <%= r.city %></div>
+                  <% if (r.scheduledVisitAt) { %>
+                    <div class="admin-pending-sub">Screening visit: <%= new Date(r.scheduledVisitAt).toLocaleString() %></div>
+                  <% } %>
+                </div>
+                <div class="admin-action-btns">
+                  <button class="admin-btn-verify" onclick="verifyRequestDonor('<%= r._id %>')">✓ Healthy — email donor & requester</button>
+                  <button class="admin-btn-reject" onclick="rejectRequestDonor('<%= r._id %>')">✗ Not fit</button>
+                </div>
               </div>
-              <div class="admin-action-btns">
-                <button class="admin-btn-verify" onclick="verifyDonation('<%= d._id %>')">✓ Verify</button>
-                <button class="admin-btn-reject" onclick="rejectDonation('<%= d._id %>')">✗ Reject</button>
+            <% }) %>
+          <% } %>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h3>🩸 Pending Donation Verifications</h3>
+            <span class="admin-badge red"><%= pendingDonations.length %></span>
+          </div>
+          <% if (pendingDonations.length === 0) { %>
+            <div class="admin-empty">✅ No pending donations</div>
+          <% } else { %>
+            <% pendingDonations.forEach(d => { %>
+              <div class="admin-pending-item">
+                <div class="admin-pending-info">
+                  <strong><%= d.donor?.name %></strong>
+                  <span class="blood-tag"><%= d.bloodGroup %></span>
+                  <% if (d.isEmergency) { %><span class="admin-emergency-tag">🚨 Emergency</span><% } %>
+                  <div class="admin-pending-sub"><%= d.hospital %>, <%= d.city %></div>
+                </div>
+                <div class="admin-action-btns">
+                  <button class="admin-btn-verify" onclick="verifyDonation('<%= d._id %>')">✓ Verify</button>
+                  <button class="admin-btn-reject" onclick="rejectDonation('<%= d._id %>')">✗ Reject</button>
+                </div>
               </div>
-            </div>
-          <% }) %>
-        <% } %>
-      </div>
-
-      <!-- PENDING HOSPITALS -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <h3>🏥 Hospitals Awaiting Verification</h3>
-          <span class="admin-badge orange"><%= pendingHospitals.length %></span>
+            <% }) %>
+          <% } %>
         </div>
-        <% if (pendingHospitals.length === 0) { %>
-          <div class="admin-empty">✅ No pending hospitals</div>
-        <% } else { %>
-          <% pendingHospitals.forEach(h => { %>
-            <div class="admin-pending-item">
-              <div class="admin-pending-info">
-                <strong><%= h.name %></strong>
-                <div class="admin-pending-sub"><%= h.address %>, <%= h.city %></div>
-                <div class="admin-pending-sub"><%= h.email %> | <%= h.phone %></div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h3>🏥 Hospitals Awaiting Verification</h3>
+            <span class="admin-badge orange"><%= pendingHospitals.length %></span>
+          </div>
+          <% if (pendingHospitals.length === 0) { %>
+            <div class="admin-empty">✅ No pending hospitals</div>
+          <% } else { %>
+            <% pendingHospitals.forEach(h => { %>
+              <div class="admin-pending-item">
+                <div class="admin-pending-info">
+                  <strong><%= h.name %></strong>
+                  <div class="admin-pending-sub"><%= h.address %>, <%= h.city %></div>
+                  <div class="admin-pending-sub"><%= h.email %> | <%= h.phone %></div>
+                </div>
+                <button class="admin-btn-verify" onclick="verifyHospital('<%= h._id %>')">✓ Verify</button>
               </div>
-              <button class="admin-btn-verify" onclick="verifyHospital('<%= h._id %>')">✓ Verify</button>
-            </div>
-          <% }) %>
-        <% } %>
+            <% }) %>
+          <% } %>
+        </div>
+
       </div>
 
-      <!-- LIVE QUEUE SUMMARY -->
-      <div class="admin-card admin-full-width">
-        <div class="admin-card-header">
-          <h3>📊 Live Queue Summary</h3>
-          <a href="/admin/queue" class="admin-view-all">Full View →</a>
-        </div>
-        <div class="admin-queue-summary">
-          <div class="admin-queue-box critical">
-            <div class="aq-icon">🚨</div>
-            <div class="aq-count"><%= queueSnapshot['critical']?.length || 0 %></div>
-            <div class="aq-label">Critical</div>
-          </div>
-          <div class="admin-queue-box emergency">
-            <div class="aq-icon">⚠️</div>
-            <div class="aq-count"><%= queueSnapshot['emergency']?.length || 0 %></div>
-            <div class="aq-label">Emergency</div>
-          </div>
-          <div class="admin-queue-box priority">
-            <div class="aq-icon">⭐</div>
-            <div class="aq-count"><%= queueSnapshot['priority']?.length || 0 %></div>
-            <div class="aq-label">Priority</div>
-          </div>
-          <div class="admin-queue-box normal">
-            <div class="aq-icon">📋</div>
-            <div class="aq-count"><%= queueSnapshot['normal']?.length || 0 %></div>
-            <div class="aq-label">Normal</div>
-          </div>
-        </div>
-      </div>
-
+      <a href="/" class="back-link">← Back to Home</a>
     </div>
   </div>
 
   <%- include('../partials/footer') %>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io();
-    socket.emit('join_admin');
-    socket.on('queue_snapshot', data => {
-      ['critical','emergency','priority','normal'].forEach(level => {
-        const el = document.querySelector(`.admin-queue-box.${level} .aq-count`);
-        if (el) el.textContent = data[level]?.length || 0;
-      });
-    });
-
+    function toggleFaq(element) {
+      element.parentElement.classList.toggle('active');
+    }
+  </script>
+  <script>
     async function verifyDonation(id) {
       const r = await fetch(`/admin/verify-donation/${id}`, { method: 'POST' });
       const d = await r.json();
@@ -158,6 +186,20 @@
       const r = await fetch(`/admin/verify-hospital/${id}`, { method: 'POST' });
       const d = await r.json();
       if (d.success) { alert('✅ Hospital verified!'); location.reload(); }
+    }
+    async function verifyRequestDonor(requestId) {
+      if (!confirm('Confirm donor is healthy after screening? The donor will be emailed to GIVE blood and the requester to RECEIVE blood.')) return;
+      const r = await fetch(`/admin/verify-request-donor/${requestId}`, { method: 'POST' });
+      const d = await r.json();
+      if (d.success) { alert(d.message || '✅ Verified and emails sent!'); location.reload(); }
+      else alert('Error: ' + (d.error || 'Failed'));
+    }
+    async function rejectRequestDonor(requestId) {
+      if (!confirm('Mark donor as not fit after screening?')) return;
+      const r = await fetch(`/admin/reject-request-donor/${requestId}`, { method: 'POST' });
+      const d = await r.json();
+      if (d.success) location.reload();
+      else alert('Error: ' + (d.error || 'Failed'));
     }
   </script>
 </body>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Requests - RedConnect Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/request-system.css">
+</head>
+<body class="admin-requests-page">
+  <%- include('../partials/header') %>
+
+  <main class="admin-requests-shell">
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success" style="margin-bottom: 20px;">
+        <%= success %>
+      </div>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-warning" style="margin-bottom: 20px; background: #ffebee; border-color: #e74c3c; color: #c0392b;">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <section class="admin-requests-hero">
+      <div class="hero-card">
+        <span class="hero-eyebrow">Admin Request Management</span>
+        <h1>Blood requests, matches, and resolution</h1>
+        <p>
+          Review all requests, manually assign donors, mark requests completed, and remove fake entries.
+        </p>
+        <div class="action-row">
+          <a class="btn-primary" href="/admin/dashboard">Back to dashboard</a>
+          <a class="btn-secondary" href="/admin/dashboard">Admin dashboard</a>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h2>Request Summary</h2>
+        <div class="stack-list">
+          <div class="summary-chip"><div class="value"><%= requests.length %></div><div class="label">Total requests</div></div>
+          <div class="summary-chip"><div class="value"><%= requests.filter(r => r.status === 'pending').length %></div><div class="label">Pending requests</div></div>
+          <div class="summary-chip"><div class="value"><%= donors.length %></div><div class="label">Available donors</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <div class="section-title">
+        <div>
+          <h2>All Blood Requests</h2>
+          <p class="subtle-note">Use manual assignment when a request needs an override or a direct donor match.</p>
+        </div>
+      </div>
+
+      <% if (requests.length === 0) { %>
+        <div class="empty-state">No blood requests have been created yet.</div>
+      <% } else { %>
+        <div class="stack-list">
+          <% requests.forEach(request => { %>
+            <article class="management-card">
+              <div class="management-header">
+                <div>
+                  <h3><%= request.patientName %></h3>
+                  <div class="management-meta">
+                    <span class="blood-pill"><%= request.bloodGroupRequired %></span>
+                    <span class="urgency-pill <%= request.emergencyLevel.toLowerCase() %>"><%= request.emergencyLevel %></span>
+                    <span class="status-pill <%= request.status %>"><%= request.status %></span>
+                    <span class="count-pill <%= request.compatibleDonorCount > 0 ? 'good' : 'warn' %>"><%= request.compatibleDonorCount || 0 %> matches</span>
+                  </div>
+                </div>
+                <div class="action-row">
+                  <form method="POST" action="/admin/requests/<%= request._id %>/complete" class="inline-form">
+                    <button type="submit" class="btn-secondary">Mark Completed</button>
+                  </form>
+                  <form method="POST" action="/admin/requests/<%= request._id %>/delete" class="inline-form" onsubmit="return confirm('Delete this request?');">
+                    <button type="submit" class="btn-danger">Delete Fake Request</button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="management-body">
+                <p><strong>Hospital:</strong> <%= request.hospitalName %> | <strong>City:</strong> <%= request.city %> | <strong>Units:</strong> <%= request.unitsRequired %></p>
+                <p><strong>Contact:</strong> <%= request.contactNumber %></p>
+                <% if (request.additionalMessage) { %>
+                  <p class="subtle-note"><%= request.additionalMessage %></p>
+                <% } %>
+
+                <div class="request-meta" style="margin-top: 16px;">
+                  <% if ((request.matchedDonors || []).length === 0) { %>
+                    <span class="empty-state" style="padding: 12px 14px;">No matched donors stored on this request</span>
+                  <% } else { %>
+                    <% request.matchedDonors.forEach(entry => { %>
+                      <span class="status-pill <%= entry.responseStatus || 'pending' %>">
+                        <%= entry.donor?.name || 'Donor' %> • <%= entry.responseStatus || 'pending' %>
+                      </span>
+                    <% }) %>
+                  <% } %>
+                </div>
+
+                <form method="POST" action="/admin/requests/<%= request._id %>/assign" class="inline-form" style="margin-top:16px;">
+                  <select name="donorId" required>
+                    <option value="">Manual assign donor</option>
+                    <% donors.forEach(donor => { %>
+                      <option value="<%= donor._id %>"><%= donor.name %> - <%= donor.bloodGroup %> - <%= donor.city %></option>
+                    <% }) %>
+                  </select>
+                  <button type="submit" class="btn-primary">Assign Donor</button>
+                </form>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

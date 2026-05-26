@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donor Notifications - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/request-system.css">
+</head>
+<body class="donor-notifications-page">
+  <%- include('../partials/header') %>
+
+  <main class="notifications-shell">
+    <section class="notifications-hero">
+      <div class="hero-card">
+        <span class="hero-eyebrow">Donor Notification Center</span>
+        <h1>Incoming blood requests</h1>
+        <p>
+          Review notifications and respond to matched requests without leaving your donor portal.
+        </p>
+        <div class="action-row">
+          <a class="btn-primary" href="/donor/dashboard">Back to dashboard</a>
+          <a class="btn-secondary" href="/request">Create a request</a>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h2>Inbox Summary</h2>
+        <div class="stack-list">
+          <div class="summary-chip"><div class="value"><%= notifications.length %></div><div class="label">Notifications</div></div>
+          <div class="summary-chip"><div class="value"><%= requestOffers.length %></div><div class="label">Open requests</div></div>
+          <div class="summary-chip"><div class="value"><%= donorProfile ? donorProfile.city : 'N/A' %></div><div class="label">Donor city</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-card" style="margin-bottom:24px;">
+      <div class="section-title">
+        <div>
+          <h2>Requests Waiting for Your Response</h2>
+          <p class="subtle-note">Accepting a request will lock it for other donors. Declining keeps it visible to remaining matches.</p>
+        </div>
+      </div>
+
+      <% if (requestOffers.length === 0) { %>
+        <div class="empty-state">No active requests are currently assigned to you.</div>
+      <% } else { %>
+        <div class="donor-offer-grid">
+          <% requestOffers.forEach(request => { %>
+            <article class="request-card">
+              <div class="request-card-header">
+                <div>
+                  <h3><%= request.patientName %></h3>
+                  <div class="request-meta">
+                    <span class="blood-pill"><%= request.bloodGroupRequired %></span>
+                    <span class="urgency-pill <%= request.emergencyLevel.toLowerCase() %>"><%= request.emergencyLevel %></span>
+                    <span class="city-pill"><%= request.city %></span>
+                  </div>
+                </div>
+                <span class="status-pill <%= request.status %>"><%= request.status %></span>
+              </div>
+              <div class="request-card-body">
+                <p><strong>Hospital:</strong> <%= request.hospitalName %></p>
+                <p><strong>Units needed:</strong> <%= request.unitsRequired %></p>
+                <p><strong>Contact:</strong> <%= request.contactNumber %></p>
+                <% if (request.additionalMessage) { %>
+                  <p class="subtle-note"><%= request.additionalMessage %></p>
+                <% } %>
+                <div class="request-actions">
+                  <form method="POST" action="/donor/requests/<%= request._id %>/accept" class="inline-form">
+                    <button type="submit" class="btn-primary">Accept Request</button>
+                  </form>
+                  <form method="POST" action="/donor/requests/<%= request._id %>/decline" class="inline-form">
+                    <button type="submit" class="btn-secondary">Decline Request</button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="panel-card">
+      <div class="section-title">
+        <div>
+          <h2>Notification Feed</h2>
+          <p class="subtle-note">The latest matched-request and assignment updates for your donor profile.</p>
+        </div>
+      </div>
+
+      <% if (notifications.length === 0) { %>
+        <div class="empty-state">No notifications yet. Matching alerts will show up here automatically.</div>
+      <% } else { %>
+        <div class="stack-list">
+          <% notifications.forEach(notification => { %>
+            <article class="notification-card">
+              <div class="notification-header">
+                <div>
+                  <h3><%= notification.title %></h3>
+                  <p><%= notification.message %></p>
+                </div>
+                <span class="status-pill <%= notification.isRead ? 'completed' : 'pending' %>"><%= notification.isRead ? 'read' : 'new' %></span>
+              </div>
+              <div class="notification-meta">
+                <span class="count-pill neutral"><%= notification.type %></span>
+                <span class="count-pill neutral"><%= new Date(notification.createdAt).toLocaleString() %></span>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,154 @@
+/* ── DONOR LEADERBOARD PREMIUM OVERRIDES ───────────────── */
+
+/* Medal stage for top 3 donors */
+.leaderboard-medal-stage {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-end !important;
+  gap: 24px !important;
+  margin: 40px 0 50px !important;
+  flex-wrap: wrap !important;
+}
+
+.medal-card {
+  background: var(--bg-panel) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--shadow-main) !important;
+  padding: 30px 20px !important;
+  width: 240px !important;
+  text-align: center !important;
+  border: 1px solid var(--border-glass) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  transition: var(--transition-smooth) !important;
+  position: relative !important;
+}
+
+.medal-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45) !important;
+}
+
+.medal-card.gold {
+  border: 2px solid #eab308 !important;
+  box-shadow: 0 0 25px rgba(234, 179, 8, 0.25) !important;
+  transform: scale(1.08) !important;
+}
+
+.medal-card.silver {
+  border: 2px solid #94a3b8 !important;
+  box-shadow: 0 0 20px rgba(148, 163, 184, 0.2) !important;
+}
+
+.medal-card.bronze {
+  border: 2px solid #ca8a04 !important;
+  box-shadow: 0 0 20px rgba(202, 138, 4, 0.2) !important;
+}
+
+.medal-card.gold:hover {
+  transform: scale(1.08) translateY(-5px) !important;
+  box-shadow: 0 0 35px rgba(234, 179, 8, 0.4) !important;
+}
+
+.medal-rank {
+  font-size: 32px !important;
+  margin-bottom: 12px !important;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)) !important;
+}
+
+.medal-avatar {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  overflow: hidden !important;
+  margin-bottom: 14px !important;
+  border: 3px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3) !important;
+}
+
+.medal-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.medal-name {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 10px !important;
+}
+
+.medal-stats {
+  font-size: 13px !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.5 !important;
+  margin-top: 4px !important;
+}
+
+.medal-stats strong {
+  color: var(--color-primary) !important;
+  font-weight: 800 !important;
+}
+
+/* Table for rest */
+.leaderboard-table-wrap {
+  margin-top: 40px !important;
+}
+
+.leaderboard-table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 8px !important;
+}
+
+.leaderboard-table th {
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  border-bottom: 2px solid var(--border-glass) !important;
+  padding: 12px 18px !important;
+  font-size: 11px !important;
+}
+
+.leaderboard-table td {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: none !important;
+  border-top: 1px solid var(--border-glass) !important;
+  border-bottom: 1px solid var(--border-glass) !important;
+  padding: 16px 18px !important;
+  color: var(--text-secondary) !important;
+}
+
+.leaderboard-table tr:hover td {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--text-primary) !important;
+}
+
+.my-row td {
+  background: rgba(255, 71, 87, 0.06) !important;
+  border-color: rgba(255, 71, 87, 0.2) !important;
+  font-weight: 600 !important;
+}
+
+@media (max-width: 800px) {
+  .leaderboard-medal-stage {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 30px !important;
+  }
+  .medal-card {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+  .medal-card.gold {
+    transform: none !important;
+  }
+  .medal-card.gold:hover {
+    transform: translateY(-5px) !important;
+  }
+}

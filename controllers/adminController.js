@@ -1,25 +1,55 @@
 // controllers/adminController.js
 const Donation   = require('../models/Donation');
+const Request    = require('../models/Request');
+require('../models/Donor');
 const DonorStats = require('../models/DonorStats');
-const Queue      = require('../models/Queue');
 const Hospital   = require('../models/Hospital');
 const mongoose   = require('mongoose');
-const { awardDonation }                          = require('../services/gamificationService');
-const { getQueueSnapshot, recalculatePositions } = require('../services/queueService');
+const { awardDonation } = require('../services/gamificationService');
+const { sendAdminVerifiedMails } = require('../services/emailService');
+const { createRequesterNotification } = require('../services/requestMatchingService');
+const { refId } = require('../utils/refId');
+
+function assignNextScreeningDonor(request) {
+  const next = (request.matchedDonors || []).find(
+    m => m.healthStatus === 'scheduled' && m.responseStatus !== 'declined'
+  );
+  if (next) {
+    request.acceptedDonor = next.donor;
+    request.scheduledVisitAt = next.scheduledVisitAt || request.scheduledVisitAt;
+    request.awaitingAdminVerification = true;
+    request.status = 'accepted';
+  } else {
+    request.acceptedDonor = undefined;
+    request.awaitingAdminVerification = false;
+    request.scheduledVisitAt = undefined;
+    request.status = 'matched';
+  }
+}
 
 exports.dashboard = async (req, res) => {
   try {
-    const BloodRequest = mongoose.model('BloodRequest');
-    const User         = mongoose.model('User');
-    const [pendingDonations, queueSnapshot, totalDonors, activeRequests, pendingHospitals, totalUsers] = await Promise.all([
+    const User = mongoose.model('User');
+    const [pendingDonations, totalDonors, openRequests, pendingHospitals, totalUsers, pendingScreening] = await Promise.all([
       Donation.find({ status: 'pending' }).populate('donor', 'name email').sort({ createdAt: -1 }).limit(10),
-      getQueueSnapshot(),
       DonorStats.countDocuments({ verifiedDonations: { $gt: 0 } }),
-      Queue.countDocuments({ status: 'waiting' }),
+      Request.countDocuments({ status: { $in: ['pending', 'matched', 'accepted'] } }),
       Hospital.find({ isVerified: false }).limit(5),
-      User.countDocuments()
+      User.countDocuments(),
+      Request.find({ awaitingAdminVerification: true })
+        .populate('acceptedDonor', 'name email phone bloodGroup city')
+        .sort({ updatedAt: -1 })
+        .limit(15)
     ]);
-    res.render('admin/dashboard', { user: req.user, pendingDonations, queueSnapshot, totalDonors, activeRequests, pendingHospitals, totalUsers });
+    res.render('admin/dashboard', {
+      user: req.user,
+      pendingDonations,
+      totalDonors,
+      openRequests,
+      pendingHospitals,
+      totalUsers,
+      pendingScreening
+    });
   } catch (err) {
     console.error('Admin dashboard error:', err.message);
     res.status(500).send('Something went wrong.');
@@ -30,14 +60,17 @@ exports.verifyDonation = async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
     if (!donation) return res.status(404).json({ error: 'Not found' });
-    donation.status = 'verified'; donation.verifiedBy = req.user._id;
+    donation.status = 'verified';
+    donation.verifiedBy = req.user._id;
     await donation.save();
     const { stats, pointsEarned } = await awardDonation(donation.donor, donation);
-    // Socket.IO alert to donor
     const emitters = req.app.get('socketEmitters');
-    if (emitters) emitters.notifyDonor(donation.donor.toString(), {
-      type: 'achievement', message: `✅ Donation verified! +${pointsEarned} points. Level: ${stats.donorLevel}`
-    });
+    if (emitters) {
+      emitters.notifyDonor(donation.donor.toString(), {
+        type: 'achievement',
+        message: `✅ Donation verified! +${pointsEarned} pts. Level: ${stats.donorLevel}`
+      });
+    }
     res.json({ success: true, pointsEarned, newLevel: stats.donorLevel });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -53,59 +86,95 @@ exports.rejectDonation = async (req, res) => {
   }
 };
 
+exports.verifyRequestDonor = async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.requestId).populate('acceptedDonor');
+    if (!request || !request.acceptedDonor) {
+      return res.status(404).json({ error: 'Request or donor not found' });
+    }
+
+    const donorId = request.acceptedDonor._id.toString();
+    const matchIndex = (request.matchedDonors || []).findIndex(m => refId(m.donor) === donorId);
+    if (matchIndex === -1) {
+      return res.status(400).json({ error: 'Donor match not found on request' });
+    }
+
+    const donationTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    request.matchedDonors[matchIndex].healthStatus = 'verified';
+    request.matchedDonors[matchIndex].scheduledVisitAt = donationTime;
+    request.awaitingAdminVerification = false;
+    request.status = 'completed';
+    request.handledBy = req.user._id;
+    request.completedAt = new Date();
+    request.scheduledVisitAt = donationTime;
+    request.markModified('matchedDonors');
+    await request.save();
+
+    const donor = request.acceptedDonor;
+    try {
+      await sendAdminVerifiedMails(donor, request, donationTime);
+    } catch (mailErr) {
+      console.error('Admin verified email error:', mailErr.message);
+    }
+
+    await createRequesterNotification({
+      request,
+      title: 'Donor cleared — arrange blood collection',
+      message: `${donor.name} is verified healthy. Please arrange to receive blood at ${request.hospitalName}.`,
+      type: 'request-completed'
+    });
+
+    res.json({
+      success: true,
+      message: 'Donor verified. Donor and requester emailed with blood donation details.'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.rejectRequestDonor = async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.requestId).populate('acceptedDonor');
+    if (!request || !request.acceptedDonor) {
+      return res.status(404).json({ error: 'Request or donor not found' });
+    }
+
+    const donorName = request.acceptedDonor.name;
+    const donorId = request.acceptedDonor._id.toString();
+    const matchIndex = (request.matchedDonors || []).findIndex(m => refId(m.donor) === donorId);
+    if (matchIndex >= 0) {
+      request.matchedDonors[matchIndex].healthStatus = 'unfit';
+      request.matchedDonors[matchIndex].responseStatus = 'declined';
+      request.markModified('matchedDonors');
+    }
+
+    assignNextScreeningDonor(request);
+    await request.save();
+
+    await createRequesterNotification({
+      request,
+      title: 'Donor not cleared',
+      message: `${donorName} did not pass screening.${request.awaitingAdminVerification ? ' Another donor is awaiting verification.' : ' Searching for other donors.'}`,
+      type: 'request-declined'
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.verifyHospital = async (req, res) => {
   try {
-    await Hospital.findByIdAndUpdate(req.params.id, { isVerified: true, verifiedBy: req.user._id, verifiedAt: new Date() });
+    await Hospital.findByIdAndUpdate(req.params.id, {
+      isVerified: true,
+      verifiedBy: req.user._id,
+      verifiedAt: new Date()
+    });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
-  }
-};
-
-exports.markCritical = async (req, res) => {
-  try {
-    const entry = await Queue.findOne({ request: req.params.requestId });
-    if (!entry) return res.status(404).json({ error: 'Not found' });
-    const old = entry.queueLevel;
-    entry.queueLevel = 'critical'; entry.priorityScore += 1000;
-    await entry.save();
-    await recalculatePositions(old);
-    await recalculatePositions('critical');
-    const emitters = req.app.get('socketEmitters');
-    if (emitters) emitters.broadcastQueueUpdate();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.fulfillRequest = async (req, res) => {
-  try {
-    const BloodRequest = mongoose.model('BloodRequest');
-    const entry = await Queue.findOne({ request: req.params.requestId });
-    if (!entry) return res.status(404).json({ error: 'Not found in queue' });
-    const level = entry.queueLevel;
-    entry.status = 'fulfilled'; entry.fulfilledAt = new Date();
-    await entry.save();
-    await BloodRequest.findByIdAndUpdate(req.params.requestId, { status: 'Fulfilled' });
-    await recalculatePositions(level);
-    const emitters = req.app.get('socketEmitters');
-    if (emitters) emitters.broadcastQueueUpdate();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.queueMonitor = async (req, res) => {
-  try {
-    const snapshot  = await getQueueSnapshot();
-    const fulfilled = await Queue.find({ status: 'fulfilled' })
-      .sort({ fulfilledAt: -1 }).limit(20)
-      .populate({ path: 'request', select: 'patientName bloodGroup emergencyLevel city hospitalName' });
-    res.render('admin/queue', { user: req.user, snapshot, fulfilled });
-  } catch (err) {
-    res.render('admin/queue', { user: req.user, snapshot: { critical: [], emergency: [], priority: [], normal: [] }, fulfilled: [] });
   }
 };
 

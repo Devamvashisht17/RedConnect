@@ -280,6 +280,43 @@ body {
   transform: translateY(-2px);
 }
 
+/* Dashboard / admin pages inside register layout */
+.register-container.dashboard-page {
+  max-width: none;
+}
+
+.register-container.dashboard-page .stats-row,
+.register-container.dashboard-page .admin-stats-row {
+  margin-bottom: 28px;
+}
+
+.register-container.dashboard-page .dashboard-grid,
+.register-container.dashboard-page .admin-grid {
+  margin-bottom: 24px;
+}
+
+.page-actions {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.page-action-btn {
+  display: inline-block;
+  text-decoration: none;
+  width: auto;
+  min-width: 220px;
+  text-align: center;
+}
+
+.register-container.queue-page .queue-section-block {
+  margin-bottom: 20px;
+}
+
+.register-container.queue-page .queue-tabs {
+  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
 @media (max-width: 768px) {
   .quote-section h2 {
     font-size: 24px;

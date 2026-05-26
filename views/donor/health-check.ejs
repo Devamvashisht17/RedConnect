@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Hospital Visit - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="quote-section">
+    <h2>"Confirm Your Hospital Visit"</h2>
+    <p>A doctor will examine you at the hospital. Admin will verify you after screening before final donation.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="faq-section">
+      <h3>What happens next?</h3>
+      <div class="faq-item active">
+        <div class="faq-question"><h4>Step 1 — You confirm visit</h4></div>
+        <div class="faq-answer" style="max-height:120px;padding-bottom:12px;">
+          <p>You receive an email with the hospital and time to come for screening.</p>
+        </div>
+      </div>
+      <div class="faq-item active">
+        <div class="faq-question"><h4>Step 2 — Doctor examines you</h4></div>
+        <div class="faq-answer" style="max-height:120px;padding-bottom:12px;">
+          <p>At the hospital, medical staff check if you are fit to donate.</p>
+        </div>
+      </div>
+      <div class="faq-item active">
+        <div class="faq-question"><h4>Step 3 — Admin verifies</h4></div>
+        <div class="faq-answer" style="max-height:120px;padding-bottom:12px;">
+          <p>After screening, admin confirms on the dashboard and emails you and the patient contact to proceed with blood donation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="register-container">
+      <div class="register-header">
+        <h1>🩺 Confirm hospital visit</h1>
+      </div>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div style="background:#ffebee;border:2px solid #e74c3c;color:#c0392b;padding:18px;border-radius:8px;margin-bottom:20px;">
+          <%= error %>
+        </div>
+        <a href="/" class="back-link">← Back to Home</a>
+      <% } else if (typeof screeningScheduled !== 'undefined' && screeningScheduled) { %>
+        <div style="background:#e3f2fd;border:2px solid #2980b9;padding:18px;border-radius:8px;margin-bottom:20px;line-height:1.6;">
+          <strong>✅ Visit scheduled</strong><br>
+          Check your email for screening details.<br>
+          <strong>When:</strong> <%= new Date(visitTime).toLocaleString() %><br>
+          <strong>Where:</strong> <%= request.hospitalName %>, <%= request.city %><br><br>
+          After the doctor examines you, admin will verify you and send a final email if you are cleared to donate.
+        </div>
+        <a href="/donor/dashboard" class="back-link">← Donor Dashboard</a>
+      <% } else if (typeof adminVerified !== 'undefined' && adminVerified) { %>
+        <div style="background:#e8f5e9;border:2px solid #27ae60;padding:18px;border-radius:8px;margin-bottom:20px;">
+          ✅ Admin has verified you as healthy. Check your email for final donation instructions.
+          <% if (visitTime) { %><br><strong>Time:</strong> <%= new Date(visitTime).toLocaleString() %><% } %>
+        </div>
+        <a href="/donor/dashboard" class="back-link">← Donor Dashboard</a>
+      <% } else if (typeof awaitingDoctor !== 'undefined' && awaitingDoctor) { %>
+        <div style="background:#fff3e0;border:2px solid #e67e22;padding:18px;border-radius:8px;margin-bottom:20px;">
+          ⏳ You are scheduled for doctor screening. Please visit the hospital at the time in your email. Admin will verify you after examination.
+          <% if (visitTime) { %><br><strong>When:</strong> <%= new Date(visitTime).toLocaleString() %><% } %>
+        </div>
+        <a href="/donor/dashboard" class="back-link">← Donor Dashboard</a>
+      <% } else if (typeof alreadyAssigned !== 'undefined' && alreadyAssigned) { %>
+        <div style="background:#fff3e0;border:2px solid #e67e22;padding:18px;border-radius:8px;margin-bottom:20px;">
+          Another donor is already assigned for this request. Thank you for your willingness to help.
+        </div>
+        <a href="/donor/dashboard" class="back-link">← Donor Dashboard</a>
+      <% } else if (typeof declined !== 'undefined' && declined) { %>
+        <div style="background:#f5f5f5;border:2px solid #999;padding:18px;border-radius:8px;margin-bottom:20px;">
+          Thank you. We have noted that you cannot donate for this request.
+        </div>
+        <a href="/donor/dashboard" class="back-link">← Donor Dashboard</a>
+      <% } else { %>
+        <p style="color:#666;margin-bottom:20px;line-height:1.6;">
+          Patient <strong><%= request.patientName %></strong> needs <strong><%= request.bloodGroupRequired %></strong> at
+          <strong><%= request.hospitalName %></strong>, <%= request.city %>.
+        </p>
+
+        <form method="POST" action="/request/<%= request._id %>/health/<%= donor._id %>" class="register-form">
+          <input type="hidden" name="token" value="<%= token %>">
+
+          <p style="font-weight:bold;margin-bottom:16px;">Can you come to the hospital for doctor screening?</p>
+
+          <div class="form-group checkbox-group" style="margin-bottom:12px;">
+            <input type="radio" name="healthy" id="healthy-yes" value="yes" required>
+            <label for="healthy-yes">Yes — I will come for screening at the scheduled time</label>
+          </div>
+          <div class="form-group checkbox-group" style="margin-bottom:24px;">
+            <input type="radio" name="healthy" id="healthy-no" value="no" required>
+            <label for="healthy-no">No — I cannot donate for this request</label>
+          </div>
+
+          <button type="submit" class="submit-btn">Confirm my presence</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>
