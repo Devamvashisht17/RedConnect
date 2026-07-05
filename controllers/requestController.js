@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const Request = require('../models/Request');
+const User = require('../models/User');
 require('../models/Donor');
 const Notification = require('../models/Notification');
 const { refId } = require('../utils/refId');
@@ -11,6 +13,7 @@ const {
 const { isSmtpConfigured } = require('../services/emailService');
 const { syncDonorsAndNotify, emailRequesterSubmitted } = require('../services/requestNotifyService');
 const { healthCheckToken, verifyHealthCheckToken, normalizeToken } = require('../utils/requestToken');
+const { handleDonorUnavailable } = require('../services/donorRescheduleService');
 
 function matchDonorId(entry) {
   return refId(entry?.donor);
@@ -18,6 +21,20 @@ function matchDonorId(entry) {
 
 function acceptedDonorId(request) {
   return refId(request?.acceptedDonor);
+}
+
+async function resolveAuthenticatedEmail(req) {
+  const token = req.cookies?.token;
+
+  if (!token || !process.env.JWT_SECRET) return null;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('email');
+    return user?.email || null;
+  } catch (err) {
+    return null;
+  }
 }
 
 exports.getRequest = (req, res) => res.render('request');
@@ -39,6 +56,9 @@ exports.postRequest = async (req, res) => {
       return res.redirect('/request');
     }
 
+    const authenticatedEmail = await resolveAuthenticatedEmail(req);
+    const requesterEmail = (authenticatedEmail || contactEmail || '').trim().toLowerCase() || undefined;
+
     let request = await Request.create({
       patientName,
       bloodGroupRequired: bloodGroup,
@@ -50,8 +70,9 @@ exports.postRequest = async (req, res) => {
       contactNumber: contactPhone,
       contactPhone,
       emergencyLevel: emergencyLevel || 'Normal',
-      requesterEmail: (contactEmail || '').trim().toLowerCase() || undefined,
-      status: 'pending'
+      requesterEmail,
+      status: 'pending',
+      additionalMessage: emergencyLevel === 'Critical' ? 'Emergency blood request submitted through RedConnect.' : ''
     });
 
     request.matchedDonors = [];
@@ -89,11 +110,11 @@ exports.postRequest = async (req, res) => {
         request,
         title: 'Request submitted — searching for donors',
         message: 'No compatible donors in the database yet. Register donors or revisit the matches page later.',
-        type: 'admin-alert'
+        type: emergencyLevel === 'Critical' ? 'emergency-alert' : 'admin-alert'
       });
     }
 
-    res.redirect(`/request/${request._id}/matches`);
+    res.redirect('/requester/dashboard');
   } catch (err) {
     console.error('Blood request error:', err.message);
     res.redirect('/request');
@@ -183,11 +204,29 @@ exports.getHealthCheck = async (req, res) => {
 
     const request = await Request.findById(requestId);
     const Donor = require('../models/Donor');
-    const donor = await Donor.findById(donorId);
+    const donor = donorId ? await Donor.findById(donorId) : null;
 
-    if (!request || !donor) {
+    console.log('Health check debug:', {
+      loggedInUser: req.user?._id?.toString(),
+      userRole: req.user?.roles,
+      requestId,
+      donorId,
+      request: request ? { id: request._id.toString(), status: request.status } : null,
+      donor: donor ? { id: donor._id.toString(), bloodGroup: donor.bloodGroup, user: donor.user?.toString() } : null
+    });
+
+    if (!request) {
       return res.status(404).render('donor/health-check', {
-        error: 'Request or donor not found.',
+        error: 'Blood request not found.',
+        request: null,
+        donor: null,
+        token: null
+      });
+    }
+
+    if (!donor) {
+      return res.status(404).render('donor/health-check', {
+        error: 'Donor profile not found.',
         request: null,
         donor: null,
         token: null
@@ -270,12 +309,30 @@ exports.postHealthCheck = async (req, res) => {
 
     const request = await Request.findById(requestId);
     const Donor = require('../models/Donor');
-    const donor = await Donor.findById(donorId);
+    const donor = donorId ? await Donor.findById(donorId) : null;
     const { sendDonorScreeningVisitMail } = require('../services/emailService');
 
-    if (!request || !donor) {
+    console.log('Health check post debug:', {
+      loggedInUser: req.user?._id?.toString(),
+      userRole: req.user?.roles,
+      requestId,
+      donorId,
+      request: request ? { id: request._id.toString(), status: request.status } : null,
+      donor: donor ? { id: donor._id.toString(), bloodGroup: donor.bloodGroup, user: donor.user?.toString() } : null
+    });
+
+    if (!request) {
       return res.status(404).render('donor/health-check', {
-        error: 'Request or donor not found.',
+        error: 'Blood request not found.',
+        request: null,
+        donor: null,
+        token: null
+      });
+    }
+
+    if (!donor) {
+      return res.status(404).render('donor/health-check', {
+        error: 'Donor profile not found.',
         request: null,
         donor: null,
         token: null
@@ -308,9 +365,13 @@ exports.postHealthCheck = async (req, res) => {
     }
 
     const willAttend = healthy === 'yes';
+    const willReschedule = healthy === 'reschedule';
     const now = new Date();
 
-    if (!willAttend) {
+    if (!willAttend && !willReschedule) {
+      // Donor declined completely
+      const rescheduleResult = await handleDonorUnavailable(requestId, donorId, 'Donor declined to participate');
+      
       matchedDonors[matchIndex].healthStatus = 'unfit';
       matchedDonors[matchIndex].healthCheckedAt = now;
       matchedDonors[matchIndex].respondedAt = now;
@@ -325,20 +386,25 @@ exports.postHealthCheck = async (req, res) => {
       request.markModified('matchedDonors');
       await request.save();
 
-      try {
-        await createRequesterNotification({
-          request,
-          title: 'Donor unavailable',
-          message: `${donor.name} cannot donate for this request. We are contacting other donors.`,
-          type: 'request-declined'
-        });
-      } catch (notifErr) {
-        console.error('Notification error:', notifErr.message);
-      }
-
       return res.render('donor/health-check', {
         error: null,
         declined: true,
+        request,
+        donor,
+        token: null,
+        match: matchedDonors[matchIndex]
+      });
+    }
+
+    if (willReschedule) {
+      // Donor requested different time
+      const reason = 'Not available at scheduled time';
+      const rescheduleResult = await handleDonorUnavailable(requestId, donorId, reason);
+      
+      return res.render('donor/health-check', {
+        error: null,
+        rescheduled: true,
+        rescheduleMessage: rescheduleResult.message,
         request,
         donor,
         token: null,

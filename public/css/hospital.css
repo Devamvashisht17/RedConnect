@@ -193,13 +193,13 @@
 
 /* ── Homepage Hospital Section ───────────────────────── */
 .hospital-section {
-  padding: 80px 20px;
+  padding: 40px;
   background: #f8f9fa;
 }
 
 .hospital-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 }
 
 .hospital-header h2 {

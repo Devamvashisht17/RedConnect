@@ -168,6 +168,49 @@ RedConnect Team`;
 }
 
 /**
+ * Notifies requester when a compatible donor has been found.
+ */
+async function sendRequestMatchedMail(request, visitTime, donorCount) {
+  const to = request.requesterEmail;
+  if (!to) return null;
+
+  const when = visitTime ? formatWhen(visitTime) : null;
+  const donorLabel = donorCount === 1 ? '1 compatible donor' : `${donorCount} compatible donors`;
+  const subject = `🤝 ${donorLabel} found for ${request.patientName}`;
+
+  const text = `Dear ${request.contactName || 'Requester'},
+
+Good news! We found ${donorLabel} for ${request.patientName}.
+
+${when ? `Screening visit time: ${when}
+` : ''}Hospital: ${request.hospitalName}, ${request.city}
+Blood group needed: ${request.bloodGroupRequired}
+
+We have emailed the donor(s) to come for screening. You can track the request from your requester dashboard.
+
+RedConnect Team`;
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+      <div style="background:linear-gradient(135deg,#2980b9,#1a5276);color:white;padding:18px;border-radius:8px 8px 0 0;text-align:center;">
+        <h2 style="margin:0;">Compatible donor found</h2>
+      </div>
+      <div style="padding:22px;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;line-height:1.6;color:#333;">
+        <p>Dear <strong>${request.contactName || 'Requester'}</strong>,</p>
+        <p>We found <strong>${donorLabel}</strong> for <strong>${request.patientName}</strong>.</p>
+        <p style="background:#f0f8ff;padding:14px;border-radius:8px;">
+          <strong>Hospital:</strong> ${request.hospitalName}, ${request.city}<br>
+          <strong>Blood group:</strong> ${request.bloodGroupRequired}${when ? `<br><strong>Screening time:</strong> ${when}` : ''}
+        </p>
+        <p>We have emailed the donor(s) to come for screening. Please watch your requester dashboard for updates.</p>
+      </div>
+    </div>
+  `;
+
+  return sendMail({ to, subject, text, html });
+}
+
+/**
  * Send screening instructions to assigned donor
  */
 async function sendScreeningMail(donor, request) {
@@ -615,6 +658,7 @@ module.exports = {
   sendDonorConfirmedMails,
   sendAdminVerifiedMails,
   sendRequestSubmittedMail,
+  sendRequestMatchedMail,
   getTransporter,
   isSmtpConfigured
 };

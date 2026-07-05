@@ -1,9 +1,31 @@
 const jwt  = require('jsonwebtoken');
 const User = require('../models/User');
+const Donor = require('../models/Donor');
+const { ensureDonorProfileForUser } = require('../services/donorProfileService');
+
+const BLOOD_GROUP_OPTIONS = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
 
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+const isAdminEmail = (email) => ADMIN_EMAILS.includes(String(email || '').trim());
 
 const cookieOpts = { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 };
+
+async function getPostLoginRedirect(user) {
+  const roles = user.roles || ['donor'];
+  const isDonor = roles.includes('donor');
+  const isRequesterOnly = roles.includes('requester') && !isDonor;
+
+  if (isRequesterOnly) return '/requester/dashboard';
+
+  if (isDonor) {
+    const donor = await Donor.findOne({ user: user._id }).select('bloodGroup');
+    const valid = BLOOD_GROUP_OPTIONS.includes(String(donor?.bloodGroup || '').trim());
+    return valid ? '/donor/dashboard' : '/donor/complete-profile';
+  }
+
+  return '/dashboard';
+}
 
 exports.getSignup = (req, res) =>
   res.render('signup', { error: req.flash('error')[0] || null });
@@ -20,7 +42,8 @@ exports.postSignup = async (req, res) => {
       return res.redirect('/signup');
     }
     const profilePic = req.file ? '/uploads/' + req.file.filename : '';
-    await User.create({ name, email, password, profilePic });
+    const user = await User.create({ name, email, password, profilePic, roles: ['donor'] });
+    await ensureDonorProfileForUser(user, { name, email });
     res.render('success', { name });
   } catch (err) {
     req.flash('error', err.message || 'Something went wrong.');
@@ -38,8 +61,13 @@ exports.postLogin = async (req, res) => {
     if (!user)                              { req.flash('error', 'Not registered. Please signup.'); return res.redirect('/login'); }
     if (!user.password)                     { req.flash('error', 'Please login with Google.');      return res.redirect('/login'); }
     if (!await user.matchPassword(password)){ req.flash('error', 'Incorrect password.');            return res.redirect('/login'); }
+    const isDonorUser = !user.roles || user.roles.length === 0 || user.roles.includes('donor');
+    if (isDonorUser) {
+      await ensureDonorProfileForUser(user, { name: user.name, email: user.email });
+    }
     res.cookie('token', generateToken(user._id), cookieOpts);
-    res.redirect('/');
+    if (isAdminEmail(user.email)) return res.redirect('/admin/dashboard');
+    res.redirect(await getPostLoginRedirect(user));
   } catch (err) {
     req.flash('error', 'Something went wrong.');
     res.redirect('/login');
@@ -48,11 +76,17 @@ exports.postLogin = async (req, res) => {
 
 exports.logout = (req, res) => {
   res.clearCookie('token');
-  req.session.destroy();
-  res.redirect('/');
+  req.session.destroy(() => {
+    res.redirect('/');
+  });
 };
 
-exports.googleCallback = (req, res) => {
+exports.googleCallback = async (req, res) => {
+  const isDonorUser = !req.user?.roles || req.user.roles.length === 0 || req.user.roles.includes('donor');
+  if (isDonorUser) {
+    await ensureDonorProfileForUser(req.user, { name: req.user.name, email: req.user.email });
+  }
   res.cookie('token', generateToken(req.user._id), cookieOpts);
-  res.redirect('/');
+  if (isAdminEmail(req.user?.email)) return res.redirect('/admin/dashboard');
+  res.redirect(await getPostLoginRedirect(req.user));
 };

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requester Dashboard - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="quote-section">
+    <h2>"When You Need Blood, We're Here"</h2>
+    <p>Manage your blood requests, track their status, and connect with donors.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>🩸 Requester Dashboard</h1>
+        <p>Welcome back, <%= user.name %> — here's your request history</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card red">
+          <div class="stat-icon">📋</div>
+          <div class="stat-value"><%= stats.totalRequests %></div>
+          <div class="stat-label">Total Requests</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-value"><%= stats.pendingRequests %></div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value"><%= stats.fulfilledRequests %></div>
+          <div class="stat-label">Fulfilled</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">🤝</div>
+          <div class="stat-value"><%= stats.matchedRequests %></div>
+          <div class="stat-label">Matched</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card red">
+          <div class="stat-icon">🩸</div>
+          <div class="stat-value"><%= stats.totalDonations %></div>
+          <div class="stat-label">Total Donations</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value"><%= stats.completedDonations %></div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-value"><%= stats.pendingDonations %></div>
+          <div class="stat-label">Pending Verification</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">❤️</div>
+          <div class="stat-value"><%= stats.completedDonations %></div>
+          <div class="stat-label">Lives Impacted</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dash-col">
+          <div class="dash-card">
+            <h3>Create Blood Request</h3>
+            <form action="/requester/create-request" method="POST" class="register-form">
+              <div class="form-group">
+                <label>Patient Name</label>
+                <input type="text" name="patientName" required placeholder="Patient full name">
+              </div>
+              <div class="form-group">
+                <label>Blood Group Required</label>
+                <select name="bloodGroup" required>
+                  <option value="">Select</option>
+                  <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(g => { %>
+                    <option value="<%= g %>"><%= g %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Units Required</label>
+                <input type="number" name="unitsRequired" required min="1" value="1" placeholder="Number of units">
+              </div>
+              <div class="form-group">
+                <label>Hospital Name</label>
+                <input type="text" name="hospitalName" required placeholder="Hospital name">
+              </div>
+              <div class="form-group">
+                <label>City</label>
+                <input type="text" name="city" required placeholder="City">
+              </div>
+              <div class="form-group">
+                <label>Contact Number</label>
+                <input type="tel" name="contactNumber" required placeholder="Contact phone number">
+              </div>
+              <div class="form-group">
+                <label>Contact Email</label>
+                <input type="email" name="contactEmail" value="<%= user.email %>" placeholder="Email for request updates">
+              </div>
+              <div class="form-group">
+                <label>Emergency Level</label>
+                <select name="emergencyLevel" required>
+                  <option value="Normal">Normal</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Patient Age (Optional)</label>
+                <input type="number" name="patientAge" placeholder="Patient age">
+              </div>
+              <div class="form-group">
+                <label>Additional Message (Optional)</label>
+                <textarea name="additionalMessage" rows="3" placeholder="Any additional information"></textarea>
+              </div>
+              <button type="submit" class="submit-btn">Submit Request</button>
+            </form>
+          </div>
+
+          <div class="dash-card">
+            <h3>Your Donation History</h3>
+            <% if (donations.length > 0) { %>
+              <table class="mini-table">
+                <thead><tr><th>Blood</th><th>Hospital</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                  <% donations.forEach(d => { %>
+                    <tr>
+                      <td><span class="blood-tag"><%= d.bloodGroup %></span></td>
+                      <td><%= d.hospital %></td>
+                      <td>
+                        <% if (d.status === 'verified') { %>
+                          <span class="status-tag verified">✅ Completed</span>
+                        <% } else if (d.status === 'pending') { %>
+                          <span class="status-tag pending">⏳ Pending Verification</span>
+                        <% } else { %>
+                          <span class="status-tag <%= d.status %>"><%= d.status %></span>
+                        <% } %>
+                      </td>
+                      <td><%= new Date(d.donatedAt).toLocaleDateString() %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+              <a href="/donor/dashboard" class="view-all">View Donor Dashboard →</a>
+            <% } else { %>
+              <p class="muted">No donations yet. Start donating to save lives!</p>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="dash-col">
+          <div class="dash-card">
+            <h3>Recent Blood Requests</h3>
+            <% if (requests.length === 0) { %>
+              <p class="muted">No blood requests yet.</p>
+            <% } else { %>
+              <table class="mini-table">
+                <thead><tr><th>Patient</th><th>Blood</th><th>Level</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                  <% requests.forEach(r => { %>
+                    <tr>
+                      <td><%= r.patientName %></td>
+                      <td><span class="blood-tag"><%= r.bloodGroupRequired %></span></td>
+                      <td>
+                        <span class="level-badge level-<%= (r.emergencyLevel || '').toLowerCase() %>">
+                          <%= r.emergencyLevel %>
+                        </span>
+                      </td>
+                      <td><span class="status-tag <%= (r.status || '').toLowerCase() %>"><%= r.status %></span></td>
+                      <td><%= new Date(r.createdAt).toLocaleDateString() %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            <% } %>
+          </div>
+
+          <div class="dash-card">
+            <h3>Switch to Donor Dashboard</h3>
+            <p>View your donation stats, badges, and log new donations.</p>
+            <a href="/donor/dashboard" class="submit-btn" style="display:inline-block;text-decoration:none;text-align:center;">Go to Donor Dashboard</a>
+          </div>
+        </div>
+      </div>
+
+      <a href="/" class="back-link">← Back to Home</a>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

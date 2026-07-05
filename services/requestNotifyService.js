@@ -4,7 +4,7 @@ const {
   getAppBaseUrl,
   getSuggestedVisitTime
 } = require('./requestMatchingService');
-const { sendDonorScreeningVisitMail, sendRequestSubmittedMail } = require('./emailService');
+const { sendDonorScreeningVisitMail, sendRequestSubmittedMail, sendRequestMatchedMail } = require('./emailService');
 const { refId } = require('../utils/refId');
 
 function requiredBloodGroup(request) {
@@ -16,6 +16,7 @@ function requiredBloodGroup(request) {
  * and queue first donor for admin verification after screening.
  */
 async function syncDonorsAndNotify(request, socketEmitters) {
+  const wasPending = request.status === 'pending';
   const compatible = await findCompatibleDonors({
     bloodGroupRequired: requiredBloodGroup(request),
     city: request.city
@@ -74,6 +75,14 @@ async function syncDonorsAndNotify(request, socketEmitters) {
   }
 
   await request.save();
+
+  if (wasPending && request.matchedDonors.length > 0) {
+    try {
+      await sendRequestMatchedMail(request, request.scheduledVisitAt || visitTime, newlyNotified.length || request.matchedDonors.length);
+    } catch (mailErr) {
+      console.error('Requester matched email error:', mailErr.message);
+    }
+  }
 
   if (newlyNotified.length > 0) {
     const freshCompatible = compatible.filter(

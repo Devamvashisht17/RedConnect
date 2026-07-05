@@ -38,9 +38,29 @@ async function getCooldownUntil(donor, user) {
 }
 
 function getSuggestedVisitTime(emergencyLevel) {
-  const hours = { Critical: 4, Urgent: 24, Normal: 72 };
-  const add = (hours[emergencyLevel] || 24) * 60 * 60 * 1000;
-  return new Date(Date.now() + add);
+  const schedule = {
+    Critical: { dayOffset: 0, hour: 16 },
+    Urgent: { dayOffset: 1, hour: 10 },
+    Normal: { dayOffset: 2, hour: 10 }
+  };
+
+  const slot = schedule[emergencyLevel] || schedule.Urgent;
+  const visitTime = new Date();
+  visitTime.setDate(visitTime.getDate() + slot.dayOffset);
+  visitTime.setHours(slot.hour, 0, 0, 0);
+
+  if (visitTime <= new Date()) {
+    visitTime.setDate(visitTime.getDate() + 1);
+  }
+
+  return visitTime;
+}
+
+function getSuggestedDonationTime(referenceDate = new Date()) {
+  const donationTime = new Date(referenceDate);
+  donationTime.setDate(donationTime.getDate() + 1);
+  donationTime.setHours(11, 0, 0, 0);
+  return donationTime;
 }
 
 function getAppBaseUrl() {
@@ -152,5 +172,6 @@ module.exports = {
   getCooldownUntil,
   getSuggestedVisitTime,
   getAppBaseUrl,
+  getSuggestedDonationTime,
   normalize
 };

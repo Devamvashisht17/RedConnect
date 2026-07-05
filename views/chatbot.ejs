@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bank AI Chatbot - Help & Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chatbot-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            max-height: 700px;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .chatbot-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message.bot.error .message-content {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .suggestions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .suggestion-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            transition: all 0.2s;
+            border-bottom-left-radius: 4px;
+        }
+
+        .suggestion-btn:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+
+        .chatbot-input-area {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .input-group {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+
+        #chatInput {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #chatInput:focus {
+            border-color: #667eea;
+        }
+
+        #sendBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .empty-state h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .feedback {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .feedback button {
+            background: #eee;
+            border: 1px solid #ddd;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .feedback button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .chatbot-container {
+                height: 90vh;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <div>
+                <h1>RedConnect🩸</h1>
+                <p style="font-size: 12px; opacity: 0.9;">
+                    <% if (aiEnabled) { %>
+                        AI-Powered (Gemini) — Always here to help
+                    <% } else { %>
+                        Smart Assistant — Always here to help
+                    <% } %>
+                </p>
+            </div>
+        </div>
+
+        <div class="chatbot-body" id="chatBody">
+            <div class="empty-state">
+                <h2>Welcome! 👋</h2>
+                <p>I'm here to answer your questions about blood donation, requests, and screening appointments.</p>
+            </div>
+        </div>
+
+        <div class="chatbot-input-area">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    placeholder="Ask me anything..." 
+                    autocomplete="off"
+                >
+                <button id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatBody = document.getElementById('chatBody');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const userType = '<%= userType %>';
+
+        // Initial suggestions
+        let suggestionsLoaded = false;
+
+        function loadSuggestions() {
+            if (suggestionsLoaded) return;
+            suggestionsLoaded = true;
+
+            fetch(`/chatbot/suggestions?userType=${userType}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        const suggestionsDiv = document.createElement('div');
+                        suggestionsDiv.className = 'suggestions';
+                        
+                        data.suggestions.forEach(suggestion => {
+                            const btn = document.createElement('button');
+                            btn.className = 'suggestion-btn';
+                            btn.textContent = suggestion;
+                            btn.onclick = () => sendMessage(suggestion);
+                            suggestionsDiv.appendChild(btn);
+                        });
+                        
+                        const emptyState = chatBody.querySelector('.empty-state');
+                        if (emptyState) {
+                            emptyState.appendChild(suggestionsDiv);
+                        }
+                    }
+                })
+                .catch(err => console.error('Error loading suggestions:', err));
+        }
+
+        function sendMessage(message = null) {
+            const userMessage = message || chatInput.value.trim();
+            if (!userMessage) return;
+
+            // Add user message to chat
+            addMessage(userMessage, 'user');
+            chatInput.value = '';
+
+            // Remove empty state
+            const emptyState = chatBody.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            chatBody.appendChild(typingDiv);
+            scrollToBottom();
+
+            // Send to backend
+            fetch('/chatbot/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: userMessage,
+                    userType: userType
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                typingDiv.remove();
+                if (data.success) {
+                    addMessage(data.message, 'bot', data.confidence);
+                } else {
+                    addMessage(data.error || 'Something went wrong', 'bot', 'error');
+                }
+            })
+            .catch(err => {
+                typingDiv.remove();
+                addMessage('Error: Could not connect to chatbot. Please try again.', 'bot', 'error');
+                console.error('Chat error:', err);
+            });
+        }
+
+        function addMessage(text, sender, type = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}${type === 'error' ? ' error' : ''}`;
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = text;
+            
+            messageDiv.appendChild(content);
+            chatBody.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 50);
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', () => sendMessage());
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        chatInput.addEventListener('focus', () => {
+            loadSuggestions();
+        });
+
+        // Load suggestions on page load if not focused
+        window.addEventListener('load', () => {
+            setTimeout(loadSuggestions, 500);
+        });
+    </script>
+</body>
+</html>

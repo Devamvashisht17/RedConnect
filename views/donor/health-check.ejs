@@ -80,6 +80,15 @@
           Thank you. We have noted that you cannot donate for this request.
         </div>
         <a href="/donor/dashboard" class="back-link">← Donor Dashboard</a>
+      <% } else if (typeof rescheduled !== 'undefined' && rescheduled) { %>
+        <div style="background:#e3f2fd;border:2px solid #2196F3;padding:18px;border-radius:8px;margin-bottom:20px;">
+          <strong>✅ Request Noted</strong><br><br>
+          <% if (rescheduleMessage) { %>
+            <%= rescheduleMessage %><br><br>
+          <% } %>
+          We will contact you if an alternative time works for this request, or we will find another donor.
+        </div>
+        <a href="/donor/dashboard" class="back-link">← Donor Dashboard</a>
       <% } else { %>
         <p style="color:#666;margin-bottom:20px;line-height:1.6;">
           Patient <strong><%= request.patientName %></strong> needs <strong><%= request.bloodGroupRequired %></strong> at
@@ -92,16 +101,74 @@
           <p style="font-weight:bold;margin-bottom:16px;">Can you come to the hospital for doctor screening?</p>
 
           <div class="form-group checkbox-group" style="margin-bottom:12px;">
-            <input type="radio" name="healthy" id="healthy-yes" value="yes" required>
-            <label for="healthy-yes">Yes — I will come for screening at the scheduled time</label>
+            <input type="radio" name="healthy" id="healthy-yes" value="yes" required onchange="updateFormState()">
+            <label for="healthy-yes">✅ Yes — I will come for screening at the scheduled time</label>
+          </div>
+          <div class="form-group checkbox-group" style="margin-bottom:12px;">
+            <input type="radio" name="healthy" id="healthy-reschedule" value="reschedule" required onchange="updateFormState()">
+            <label for="healthy-reschedule">🕐 I'm not available at this time — Show me alternative times</label>
           </div>
           <div class="form-group checkbox-group" style="margin-bottom:24px;">
-            <input type="radio" name="healthy" id="healthy-no" value="no" required>
-            <label for="healthy-no">No — I cannot donate for this request</label>
+            <input type="radio" name="healthy" id="healthy-no" value="no" required onchange="updateFormState()">
+            <label for="healthy-no">❌ No — I cannot donate for this request</label>
           </div>
 
-          <button type="submit" class="submit-btn">Confirm my presence</button>
+          <!-- Alternative times section (hidden by default) -->
+          <div id="altTimesSection" style="display:none;background:#f5f5f5;padding:16px;border-radius:8px;margin-bottom:20px;">
+            <p style="font-weight:bold;margin-bottom:12px;">Choose an alternative time:</p>
+            <div id="altTimesContainer" style="display:grid;grid-template-columns:1fr;gap:8px;"></div>
+          </div>
+
+          <button type="submit" class="submit-btn">Confirm</button>
         </form>
+
+        <script>
+          function updateFormState() {
+            const rescheduleRadio = document.getElementById('healthy-reschedule');
+            const altTimesSection = document.getElementById('altTimesSection');
+            
+            if (rescheduleRadio.checked) {
+              altTimesSection.style.display = 'block';
+              loadAlternativeTimes();
+            } else {
+              altTimesSection.style.display = 'none';
+            }
+          }
+
+          function loadAlternativeTimes() {
+            const container = document.getElementById('altTimesContainer');
+            const times = [
+              { label: 'Tomorrow at 9:00 AM', value: 'tomorrow-9am' },
+              { label: 'Tomorrow at 2:00 PM', value: 'tomorrow-2pm' },
+              { label: 'Day after at 10:00 AM', value: 'dayafter-10am' },
+              { label: 'Day after at 3:00 PM', value: 'dayafter-3pm' },
+              { label: 'In 4 days at 10:00 AM', value: '4days-10am' }
+            ];
+
+            container.innerHTML = '';
+            times.forEach(time => {
+              const label = document.createElement('label');
+              label.style.display = 'flex';
+              label.style.alignItems = 'center';
+              label.style.padding = '8px';
+              label.style.cursor = 'pointer';
+              label.style.borderRadius = '4px';
+              label.style.transition = 'background 0.2s';
+              label.onmouseover = () => label.style.background = '#eee';
+              label.onmouseout = () => label.style.background = 'transparent';
+              
+              const input = document.createElement('input');
+              input.type = 'radio';
+              input.name = 'alternativeTime';
+              input.value = time.value;
+              input.style.marginRight = '8px';
+              
+              label.appendChild(input);
+              label.appendChild(document.createTextNode(time.label));
+              container.appendChild(label);
+            });
+          }
+        </script>
       <% } %>
     </div>
   </div>

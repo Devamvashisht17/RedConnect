@@ -1,0 +1,167 @@
+<!-- Chatbot Widget Floating Button -->
+<div id="chatbot-widget">
+  <button id="chatbot-toggle" class="chatbot-btn" title="Chat with AI Assistant">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <span class="badge">?</span>
+  </button>
+
+  <!-- Chatbot Iframe Modal -->
+  <div id="chatbot-modal" class="chatbot-modal" style="display: none;">
+    <div class="chatbot-window">
+      <div class="chatbot-header">
+        <h3>🤖 RedConnect🩸</h3>
+        <button id="chatbot-close" class="close-btn">&times;</button>
+      </div>
+      <iframe id="chatbot-frame" src="/chatbot?type=<%= user ? (user.role === 'donor' ? 'donor' : 'requester') : 'general' %>" style="border: none; width: 100%; height: 100%; border-radius: 0 0 12px 12px;"></iframe>
+    </div>
+  </div>
+</div>
+
+<style>
+  #chatbot-widget {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 999;
+  }
+
+  .chatbot-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .chatbot-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  .chatbot-btn .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e74c3c;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid white;
+  }
+
+  .chatbot-modal {
+    position: fixed;
+    bottom: 90px;
+    left: 20px;
+    width: 400px;
+    height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.3s ease;
+    z-index: 999;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .chatbot-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .chatbot-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .chatbot-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+
+  .close-btn:hover {
+    transform: rotate(90deg);
+  }
+
+  #chatbot-frame {
+    flex: 1;
+  }
+
+  @media (max-width: 600px) {
+    .chatbot-modal {
+      width: 90vw;
+      height: 70vh;
+      bottom: auto;
+      left: 5vw;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+</style>
+
+<script>
+  document.getElementById('chatbot-toggle').addEventListener('click', function() {
+    const modal = document.getElementById('chatbot-modal');
+    modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.getElementById('chatbot-close').addEventListener('click', function() {
+    document.getElementById('chatbot-modal').style.display = 'none';
+  });
+
+  // Close modal when clicking outside
+  document.getElementById('chatbot-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.style.display = 'none';
+    }
+  });
+</script>

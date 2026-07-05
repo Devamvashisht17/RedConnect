@@ -33,6 +33,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use((req, res, next) => {
+  const isStaticAsset = req.path.startsWith('/css/') || req.path.startsWith('/js/') || req.path.startsWith('/images/') || req.path.startsWith('/uploads/') || req.path.startsWith('/favicon') || req.path.startsWith('/fonts/');
+
+  if (!isStaticAsset) {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+
+  next();
+});
 app.use(session({
   secret:            process.env.SESSION_SECRET || 'fallback-secret',
   resave:            false,
@@ -87,9 +98,12 @@ app.use('/', require('./routes/requestRoutes'));
 app.use('/', require('./routes/volunteerRoutes'));
 
 // Modular routes
-app.use('/admin',    require('./routes/admin'));
-app.use('/donor',    require('./routes/donor'));
-app.use('/hospital', require('./routes/hospital'));
+app.use('/admin',     require('./routes/admin'));
+app.use('/donor',     require('./routes/donor'));
+app.use('/api/donor', require('./routes/donorApi'));
+app.use('/requester', require('./routes/requester'));
+app.use('/hospital',  require('./routes/hospital'));
+app.use('/chatbot',   require('./routes/chatbot'));
 
 // 404
 app.use((req, res) => res.status(404).render('404'));

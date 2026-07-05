@@ -7,8 +7,9 @@ const Hospital   = require('../models/Hospital');
 const mongoose   = require('mongoose');
 const { awardDonation } = require('../services/gamificationService');
 const { sendAdminVerifiedMails } = require('../services/emailService');
-const { createRequesterNotification } = require('../services/requestMatchingService');
+const { createRequesterNotification, getSuggestedDonationTime } = require('../services/requestMatchingService');
 const { refId } = require('../utils/refId');
+const Feedback = require('../models/Feedback');
 
 function assignNextScreeningDonor(request) {
   const next = (request.matchedDonors || []).find(
@@ -30,7 +31,7 @@ function assignNextScreeningDonor(request) {
 exports.dashboard = async (req, res) => {
   try {
     const User = mongoose.model('User');
-    const [pendingDonations, totalDonors, openRequests, pendingHospitals, totalUsers, pendingScreening] = await Promise.all([
+    const [pendingDonations, totalDonors, openRequests, pendingHospitals, totalUsers, pendingScreening, feedbackCount] = await Promise.all([
       Donation.find({ status: 'pending' }).populate('donor', 'name email').sort({ createdAt: -1 }).limit(10),
       DonorStats.countDocuments({ verifiedDonations: { $gt: 0 } }),
       Request.countDocuments({ status: { $in: ['pending', 'matched', 'accepted'] } }),
@@ -39,7 +40,8 @@ exports.dashboard = async (req, res) => {
       Request.find({ awaitingAdminVerification: true })
         .populate('acceptedDonor', 'name email phone bloodGroup city')
         .sort({ updatedAt: -1 })
-        .limit(15)
+        .limit(15),
+      Feedback.countDocuments({})
     ]);
     res.render('admin/dashboard', {
       user: req.user,
@@ -48,7 +50,8 @@ exports.dashboard = async (req, res) => {
       openRequests,
       pendingHospitals,
       totalUsers,
-      pendingScreening
+      pendingScreening,
+      feedbackCount
     });
   } catch (err) {
     console.error('Admin dashboard error:', err.message);
@@ -89,8 +92,14 @@ exports.rejectDonation = async (req, res) => {
 exports.verifyRequestDonor = async (req, res) => {
   try {
     const request = await Request.findById(req.params.requestId).populate('acceptedDonor');
-    if (!request || !request.acceptedDonor) {
-      return res.status(404).json({ error: 'Request or donor not found' });
+    if (!request) {
+      console.error('Admin verify request donor: blood request not found.', { requestId: req.params.requestId });
+      return res.status(404).json({ error: 'Blood request not found.' });
+    }
+
+    if (!request.acceptedDonor) {
+      console.error('Admin verify request donor: donor profile not found.', { requestId: req.params.requestId });
+      return res.status(404).json({ error: 'Donor profile not found.' });
     }
 
     const donorId = request.acceptedDonor._id.toString();
@@ -99,7 +108,7 @@ exports.verifyRequestDonor = async (req, res) => {
       return res.status(400).json({ error: 'Donor match not found on request' });
     }
 
-    const donationTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    const donationTime = getSuggestedDonationTime(request.scheduledVisitAt || new Date());
     request.matchedDonors[matchIndex].healthStatus = 'verified';
     request.matchedDonors[matchIndex].scheduledVisitAt = donationTime;
     request.awaitingAdminVerification = false;
@@ -136,8 +145,14 @@ exports.verifyRequestDonor = async (req, res) => {
 exports.rejectRequestDonor = async (req, res) => {
   try {
     const request = await Request.findById(req.params.requestId).populate('acceptedDonor');
-    if (!request || !request.acceptedDonor) {
-      return res.status(404).json({ error: 'Request or donor not found' });
+    if (!request) {
+      console.error('Admin reject request donor: blood request not found.', { requestId: req.params.requestId });
+      return res.status(404).json({ error: 'Blood request not found.' });
+    }
+
+    if (!request.acceptedDonor) {
+      console.error('Admin reject request donor: donor profile not found.', { requestId: req.params.requestId });
+      return res.status(404).json({ error: 'Donor profile not found.' });
     }
 
     const donorName = request.acceptedDonor.name;

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Your Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f8fb;
+      margin: 0;
+      color: #222;
+    }
+    .wrap {
+      max-width: 520px;
+      margin: 60px auto;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 32px;
+    }
+    h1 { margin-top: 0; font-size: 24px; }
+    p { color: #555; line-height: 1.6; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; }
+    select, button {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid #d0d7de;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+    button {
+      background: #d7263d;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .msg { margin-top: 12px; padding: 10px 12px; border-radius: 8px; display: none; }
+    .msg.error { background: #ffe4e6; color: #a61b2a; display: block; }
+    .msg.success { background: #e8f7ee; color: #1a7f4d; display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Complete Your Profile</h1>
+    <p>Please select your blood group to continue to the donor dashboard.</p>
+
+    <form id="profileForm">
+      <label for="bloodGroup">Blood Group</label>
+      <select id="bloodGroup" name="bloodGroup" required>
+        <option value="">Select your blood group</option>
+        <% bloodGroupOptions.forEach(function(option) { %>
+          <option value="<%= option %>" <%= donorProfile?.bloodGroup === option ? 'selected' : '' %>><%= option %></option>
+        <% }) %>
+      </select>
+      <button type="submit">Continue</button>
+    </form>
+
+    <div id="message" class="msg"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('profileForm');
+    const messageBox = document.getElementById('message');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const bloodGroup = document.getElementById('bloodGroup').value;
+      messageBox.className = 'msg';
+      messageBox.textContent = '';
+
+      try {
+        const response = await fetch('/api/donor/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bloodGroup })
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Unable to save your profile.');
+        }
+
+        messageBox.className = 'msg success';
+        messageBox.textContent = 'Profile updated successfully. Redirecting...';
+        window.location.href = '/donor/dashboard';
+      } catch (error) {
+        messageBox.className = 'msg error';
+        messageBox.textContent = error.message || 'Something went wrong.';
+      }
+    });
+  </script>
+</body>
+</html>

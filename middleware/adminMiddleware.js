@@ -5,6 +5,10 @@ const mongoose = require('mongoose');
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
 
 const isAdmin = async (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+
   const token = req.cookies?.token;
   if (!token) return res.redirect('/login');
   try {

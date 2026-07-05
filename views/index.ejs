@@ -6,24 +6,328 @@
  <title>RedConnect</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
 
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/donation-process.css">
-  <link rel="stylesheet" href="/css/volunteers.css">
-  <link rel="stylesheet" href="/css/footer.css">
-  <link rel="stylesheet" href="/css/donors-group.css">
-  <link rel="stylesheet" href="/css/hospital.css">
+  <link rel="stylesheet" href="/css/style.css?v=3">
+  <link rel="stylesheet" href="/css/donation-process.css?v=3">
+  <link rel="stylesheet" href="/css/volunteers.css?v=3">
+  <link rel="stylesheet" href="/css/footer.css?v=3">
+  <link rel="stylesheet" href="/css/donors-group.css?v=3">
+  <link rel="stylesheet" href="/css/hospital.css?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
   <%- include('partials/header') %>
 
-  <section class="hero">
-    <div class="hero-content">
-      <h1>DONATE BLOOD AND GET REAL BLESSINGS.</h1>
-      <p>Blood is the most precious gift that anyone can give to another person.<br>
-      Donating blood not only saves the life also save donor's lives.</p>
-      <button class="appointment-btn" onclick="window.location.href='/register'">DONATE BLOOD</button>
-      <button class="appointment-btn" onclick="window.location.href='/request'">REQUEST BLOOD</button>
+  <style>
+    .feedback-section {
+      padding: 56px 20px 72px;
+      background: linear-gradient(135deg, #fef2f2 0%, #fdecec 100%);
+      font-family: 'Poppins', sans-serif;
+    }.support-section{
+    padding:100px 8%;
+    background:#fff5f5;
+    font-family:'Poppins',sans-serif;
+}
 
+.support-card{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:70px;
+    align-items:center;
+
+    background:#fff5f5;
+}
+
+.support-copy h2{
+    margin:0 0 18px;
+    font-size:48px;
+    font-weight:700;
+    line-height:1.1;
+    color:#1f2937;
+}
+
+.support-copy .accent{
+    color:#dc2626;
+}
+
+.support-copy p{
+    margin-bottom:24px;
+    font-size:16px;
+    line-height:1.8;
+    color:#4b5563;
+}
+
+.support-list{
+    list-style:none;
+    padding:0;
+    margin:0 0 28px;
+}
+
+.support-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:14px;
+    font-size:18px;
+    color:#4b5563;
+}
+
+.support-list i{
+    color:#22c55e;
+    margin-top:5px;
+}
+
+.support-btn{
+    display:inline-block;
+    padding:14px 34px;
+    border:2px solid #dc2626;
+    border-radius:8px;
+    color:#dc2626;
+    text-decoration:none;
+    font-weight:600;
+    transition:.3s;
+    background:#fff;
+}
+
+.support-btn:hover{
+    background:#dc2626;
+    color:#fff;
+}
+
+.support-media{
+    height: 440px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible; /* or hidden if you want clipping */
+}
+
+.support-media video{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1.35);
+}
+.support-section,
+.support-card,
+.support-media,
+.support-media video{
+    background:#fae7e7;
+}
+    @keyframes supportFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.01); }
+    }
+    @media (max-width: 900px) {
+      .support-card { gap: 40px; }
+      .support-copy h2 { font-size: 36px; }
+    }
+    @media (max-width: 768px) {
+      .support-section { padding: 72px 20px; }
+      .support-card { grid-template-columns: 1fr; gap: 28px; }
+      .support-copy { text-align: center; }
+      .support-copy h2 { font-size: 28px; }
+      .support-list li { justify-content: center; text-align: left; }
+      .support-btn { margin: 0 auto; }
+      .support-media { height: 320px; }
+    }
+    .feedback-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.82);
+      box-shadow: 0 18px 50px rgba(180, 35, 24, 0.12);
+      border: 1px solid #f7d7d3;
+      backdrop-filter: blur(8px);
+    }
+    .feedback-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .feedback-heading h2 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: #b42318;
+    }
+    .feedback-heading p {
+      margin: 0;
+      font-size: 16px;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+    .testimonial-swiper {
+      padding: 8px 2px 42px;
+    }
+    .testimonial-card {
+      min-height: 280px;
+      padding: 30px 32px;
+      border-radius: 24px;
+      background: #ffffff;
+      box-shadow: 0 15px 35px rgba(17, 24, 39, 0.08);
+      border: 1px solid #f6d8d3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+    .swiper-slide-active .testimonial-card {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 20px 45px rgba(180, 35, 24, 0.16);
+    }
+    .testimonial-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #fff1ef;
+      color: #b42318;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .testimonial-card h3 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .testimonial-card p {
+      margin: 0 0 16px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #4b5563;
+    }
+    .testimonial-stars {
+      display: flex;
+      gap: 4px;
+      color: #ef4444;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .testimonial-footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: auto;
+    }
+    .testimonial-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ef4444, #b42318);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 10px 20px rgba(180, 35, 24, 0.2);
+    }
+    .testimonial-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .testimonial-subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .testimonial-swiper .swiper-pagination {
+      bottom: 6px;
+    }
+    .testimonial-swiper .swiper-pagination-bullet {
+      width: 10px;
+      height: 10px;
+      background: #f6c5bf;
+      opacity: 1;
+      transition: all 0.3s ease;
+    }
+    .testimonial-swiper .swiper-pagination-bullet-active {
+      width: 28px;
+      border-radius: 999px;
+      background: #ef4444;
+    }
+    @media (max-width: 768px) {
+      .feedback-shell { padding: 22px; }
+      .testimonial-card { min-height: 260px; padding: 24px; }
+    }
+  </style>
+
+  <!-- REDESIGNED HERO SECTION -->
+  <section class="hero">
+    <div class="hero-container">
+      <!-- Left: Text Content -->
+      <div class="hero-text">
+        <h1>Every Drop Can<br><span class="highlight-red">Save a Life</span></h1>
+        <h2 class="hero-subheading">Connect blood donors with patients in need quickly, securely, and efficiently.</h2>
+        <p class="hero-description">
+          Join thousands of donors helping save lives every day. Whether you need blood urgently or want to become a donor, RedConnect makes the process simple, secure, and fast.
+        </p>
+        <div class="hero-buttons">
+          <button class="hero-btn primary-btn" onclick="window.location.href='/request'"><i class="fa-solid fa-droplet" aria-hidden="true"></i>&nbsp;Find Blood</button>
+          <button class="hero-btn secondary-btn" onclick="window.location.href='/register'"><i class="fa-solid fa-users" aria-hidden="true"></i>&nbsp;Become a Donor</button>
+        </div>
+      </div>
+
+      <!-- Right: Hero Image -->
+      <div class="hero-image-wrapper">
+        <img 
+          src="/images/hero_donors.jpeg" 
+          alt="Blood donors and medical staff helping donors"
+          class="hero-image"
+        >
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE IMPACT STATISTICS -->
+  <section class="impact-section" id="impact-statistics">
+    <div class="impact-container">
+      <div class="impact-header">
+        <h2>Our Impact</h2>
+        <p>Together, our community is saving lives every day through blood donation.</p>
+      </div>
+
+      <div class="impact-grid">
+        <article class="impact-card" data-target="<%= impactStats?.registeredDonors || 0 %>">
+          <div class="impact-icon"><i class="fa-solid fa-heart" aria-hidden="true"></i></div>
+          <div class="impact-number"><span class="counter">0</span>+</div>
+          <h3>Registered Donors</h3>
+          <p>People ready to donate blood anytime.</p>
+        </article>
+
+        <article class="impact-card" data-target="<%= impactStats?.successfulDonations || 0 %>">
+          <div class="impact-icon"><i class="fa-solid fa-tint" aria-hidden="true"></i></div>
+          <div class="impact-number"><span class="counter">0</span>+</div>
+          <h3>Successful Donations</h3>
+          <p>Lives supported through blood donation.</p>
+        </article>
+
+        <article class="impact-card" data-target="<%= impactStats?.partnerHospitals || 0 %>">
+          <div class="impact-icon"><i class="fa-solid fa-hospital" aria-hidden="true"></i></div>
+          <div class="impact-number"><span class="counter">0</span>+</div>
+          <h3>Partner Hospitals</h3>
+          <p>Hospitals and blood banks connected.</p>
+        </article>
+
+        <article class="impact-card" data-target="<%= impactStats?.citiesCovered || 0 %>">
+          <div class="impact-icon"><i class="fa-solid fa-globe" aria-hidden="true"></i></div>
+          <div class="impact-number"><span class="counter">0</span>+</div>
+          <h3>Cities Covered</h3>
+          <p>Growing network across multiple cities.</p>
+        </article>
+      </div>
     </div>
   </section>
 
@@ -39,7 +343,7 @@
       <% const cardColors = {'O+':'#e53935','A+':'#8e24aa','B+':'#1e88e5','AB+':'#00897b','O-':'#f4511e','A-':'#6d4c41','B-':'#3949ab','AB-':'#00acc1'}; %>
       <% bloodGroups.forEach(group => { %>
         <a href="/donors/<%= encodeURIComponent(group) %>" class="donor-card">
-          <div class="donor-badge" style="background:<%= cardColors[group] %>">
+          <div class="donor-badge" style="background-color: <%= cardColors[group] %>;">
             <%= group %>
           </div>
           <h3><%= group %> Blood Group</h3>
@@ -81,16 +385,197 @@
     </div>
   </section>
 
-  <%- include('volunteers') %>
+  <section class="support-section" aria-labelledby="support-heading">
+    <div class="support-card">
+      <div class="support-copy">
+        <h2 id="support-heading">Support Us Make <span class="accent">Blood Sufficient</span></h2>
+        <p>Our mission is to ensure that no patient suffers due to a shortage of blood. With your support, we can expand our donor network, organize more blood donation camps, and strengthen emergency blood assistance across the country. Every contribution helps us save lives.</p>
+        <ul class="support-list">
+          <li><i class="fa-solid fa-check"></i> Arrange blood donors for patients in emergencies</li>
+          <li><i class="fa-solid fa-check"></i> Conduct blood donation awareness campaigns</li>
+          <li><i class="fa-solid fa-check"></i> Support regular blood requirements for thalassemia patients</li>
+          <li><i class="fa-solid fa-check"></i> Expand our volunteer and donor network nationwide</li>
+          <li><i class="fa-solid fa-check"></i> Help hospitals and blood banks during critical shortages</li>
+        </ul>
+        <a href="/register" class="support-btn">Support Us</a>
+      </div>
+      <div class="support-media" aria-label="Animated blood donation illustration">
+        <video autoplay muted loop playsinline webkit-playsinline preload="auto" poster="/images/hero_donors.jpeg">
+          <source src="/animations/support-animation.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </section>
 
-  <section class="volunteer-section">
-    <div class="volunteer-content">
-      <h2>JOIN WITH US AND SAVE LIFE</h2>
-      <a href="/volunteer" class="volunteer-btn">BECOME VOLUNTEER</a>
+  <section class="feedback-section">
+    <div class="feedback-shell">
+      <div class="feedback-heading">
+        <h2>Testimonials & Feedback</h2>
+        <p>Real stories from donors, volunteers, and families who trusted RedConnect during urgent moments.</p>
+      </div>
+
+      <div class="swiper testimonial-swiper">
+        <div class="swiper-wrapper">
+          <% testimonials.forEach((item) => { %>
+            <div class="swiper-slide">
+              <article class="testimonial-card">
+                <div>
+                  <div class="testimonial-badge">Trusted Experience</div>
+                 
+                  <h3>“<%= item.message %>”</h3>
+                  <div class="testimonial-stars" aria-label="<%= item.rating %> star rating">
+                    <% for (let i = 0; i < 5; i++) { %>
+                      <i class="<%= i < item.rating ? 'fa-solid fa-star' : 'fa-regular fa-star' %>"></i>
+                    <% } %>
+                  </div>
+                </div>
+                <div class="testimonial-footer">
+                  <div class="testimonial-avatar"><i class="fa-solid fa-kit-medical"></i></div>
+                  <div>
+                    <div class="testimonial-name"><%= item.name %></div>
+                    <div class="testimonial-subtitle"><%= item.subtitle || 'Helpline Requester' %></div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          <% }) %>
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feedback-section" style="padding-top: 0;">
+    <div class="feedback-shell">
+      <div class="feedback-heading" style="margin-bottom: 16px;">
+        <h2 style="font-size: 24px;">Share your experience</h2>
+        <p>Tell us what worked well or what we can improve for the next donation drive.</p>
+      </div>
+
+      <form id="feedbackForm" style="display: grid; gap: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+          <input type="text" name="name" placeholder="Your name" required style="padding: 12px 14px; border: 1px solid #f4c2bb; border-radius: 14px; background: #fffaf7; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); outline: none; font-size: 15px;">
+          <input type="email" name="email" placeholder="Your email" required style="padding: 12px 14px; border: 1px solid #f4c2bb; border-radius: 14px; background: #fffaf7; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); outline: none; font-size: 15px;">
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+          <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid #f4c2bb; border-radius: 14px; background: #fffaf7; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);">
+            <label for="ratingInput" style="font-weight: 700; color: #b42318;">Your rating</label>
+            <div id="starRating" role="radiogroup" aria-label="Rate your experience" style="display: flex; gap: 6px;">
+              <button type="button" class="feedback-star" data-value="1" aria-label="1 star" style="background: none; border: 0; padding: 0; font-size: 32px; color: #f4c2bb; cursor: pointer; line-height: 1; transition: transform 0.2s ease, color 0.2s ease;">☆</button>
+              <button type="button" class="feedback-star" data-value="2" aria-label="2 stars" style="background: none; border: 0; padding: 0; font-size: 32px; color: #f4c2bb; cursor: pointer; line-height: 1; transition: transform 0.2s ease, color 0.2s ease;">☆</button>
+              <button type="button" class="feedback-star" data-value="3" aria-label="3 stars" style="background: none; border: 0; padding: 0; font-size: 32px; color: #f4c2bb; cursor: pointer; line-height: 1; transition: transform 0.2s ease, color 0.2s ease;">☆</button>
+              <button type="button" class="feedback-star" data-value="4" aria-label="4 stars" style="background: none; border: 0; padding: 0; font-size: 32px; color: #f4c2bb; cursor: pointer; line-height: 1; transition: transform 0.2s ease, color 0.2s ease;">☆</button>
+              <button type="button" class="feedback-star" data-value="5" aria-label="5 stars" style="background: none; border: 0; padding: 0; font-size: 32px; color: #f4c2bb; cursor: pointer; line-height: 1; transition: transform 0.2s ease, color 0.2s ease;">☆</button>
+            </div>
+            <input type="hidden" name="rating" id="ratingInput" value="0" required>
+          </div>
+          <select name="category" style="padding: 12px 14px; border: 1px solid #f4c2bb; border-radius: 14px; background: #fffaf7; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); outline: none; font-size: 15px; color: #374151;">
+            <option value="general">General</option>
+            <option value="donor">Donor experience</option>
+            <option value="request">Blood request flow</option>
+            <option value="hospital">Hospital support</option>
+          </select>
+        </div>
+        <textarea name="message" rows="4" placeholder="Share your feedback..." required style="padding: 12px 14px; border: 1px solid #f4c2bb; border-radius: 14px; resize: vertical; background: #fffaf7; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); outline: none; font-size: 15px; min-height: 110px;"></textarea>
+        <button id="feedbackSubmit" type="submit" style="width: fit-content; padding: 12px 18px; border: 0; background: linear-gradient(135deg, #e53935, #b42318); color: white; border-radius: 999px; cursor: pointer; font-weight: 700; transition: all 0.2s ease; box-shadow: 0 8px 20px rgba(181, 35, 24, 0.2);">Submit Feedback</button>
+        <p id="feedbackMessage" style="margin: 0; color: #0f766e; font-weight: 600;"></p>
+      </form>
     </div>
   </section>
 
   <%- include('partials/footer') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="/js/home-stats.js?v=1" defer></script>
+  <script>
+    const feedbackForm = document.getElementById('feedbackForm');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const ratingInput = document.getElementById('ratingInput');
+    const feedbackSubmit = document.getElementById('feedbackSubmit');
+    const starButtons = Array.from(document.querySelectorAll('.feedback-star'));
+
+    if (window.Swiper) {
+      new Swiper('.testimonial-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 24,
+        loop: true,
+        speed: 700,
+        grabCursor: true,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true
+        },
+        pagination: {
+          el: '.testimonial-swiper .swiper-pagination',
+          clickable: true
+        },
+        breakpoints: {
+          640: { slidesPerView: 1.2 },
+          900: { slidesPerView: 1.5 },
+          1200: { slidesPerView: 2 }
+        }
+      });
+    }
+
+    const updateRatingUI = (value) => {
+      starButtons.forEach((button, index) => {
+        const isActive = index < value;
+        button.textContent = isActive ? '★' : '☆';
+        button.style.color = isActive ? '#f59e0b' : '#f4c2bb';
+        button.style.transform = isActive ? 'scale(1.08)' : 'scale(1)';
+      });
+
+      feedbackSubmit.style.background = value > 0
+        ? 'linear-gradient(135deg, #fbbf24, #f59e0b)'
+        : 'linear-gradient(135deg, #e53935, #b42318)';
+      feedbackSubmit.style.color = value > 0 ? '#111827' : 'white';
+    };
+
+    starButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const value = Number(button.dataset.value);
+        ratingInput.value = value;
+        updateRatingUI(value);
+      });
+    });
+
+    if (feedbackForm) {
+      feedbackForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!ratingInput.value || Number(ratingInput.value) < 1) {
+          feedbackMessage.textContent = 'Please select a star rating.';
+          feedbackMessage.style.color = '#b42318';
+          return;
+        }
+
+        const formData = new FormData(feedbackForm);
+        feedbackMessage.textContent = 'Submitting...';
+        feedbackMessage.style.color = '#0f766e';
+        try {
+          const response = await fetch('/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData.entries()))
+          });
+          const data = await response.json();
+          feedbackMessage.textContent = data.message || data.error || 'Thank you.';
+          feedbackMessage.style.color = response.ok ? '#0f766e' : '#b42318';
+          if (response.ok) {
+            feedbackForm.reset();
+            ratingInput.value = '0';
+            updateRatingUI(0);
+          }
+        } catch (err) {
+          feedbackMessage.textContent = 'Unable to submit feedback right now.';
+          feedbackMessage.style.color = '#b42318';
+        }
+      });
+    }
+
+    updateRatingUI(0);
+  </script>
 
 </body>
 </html>

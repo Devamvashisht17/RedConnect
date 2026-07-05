@@ -7,7 +7,7 @@ const notificationSchema = new mongoose.Schema({
   request:       { type: mongoose.Schema.Types.ObjectId, ref: 'Request', required: true },
   title:         { type: String, required: true, trim: true },
   message:       { type: String, required: true, trim: true },
-  type:          { type: String, enum: ['request-match', 'request-accepted', 'request-declined', 'request-completed', 'manual-assignment', 'admin-alert'], default: 'request-match' },
+  type:          { type: String, enum: ['request-match', 'request-accepted', 'request-declined', 'request-completed', 'manual-assignment', 'admin-alert', 'availability-update', 'emergency-alert'], default: 'request-match' },
   actionUrl:     { type: String, default: '' },
   isRead:        { type: Boolean, default: false },
   metadata:      { type: mongoose.Schema.Types.Mixed, default: {} }

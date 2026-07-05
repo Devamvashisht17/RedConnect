@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Dashboard - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="quote-section">
+    <h2>"Choose Your Role"</h2>
+    <p>You have both donor and requester roles. Select which dashboard you'd like to access.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>🩸 Select Dashboard</h1>
+        <p>Welcome, <%= user.name %> — choose your role for this session</p>
+      </div>
+
+      <div class="role-selection-grid">
+        <div class="role-card donor-card">
+          <div class="role-icon">🩸</div>
+          <h2>Donor Dashboard</h2>
+          <p>Track your donations, earn badges, and see how many lives you've helped save.</p>
+          <ul class="role-features">
+            <li>✓ Log new donations</li>
+            <li>✓ View donation history</li>
+            <li>✓ Earn points and badges</li>
+            <li>✓ Check leaderboard rankings</li>
+          </ul>
+          <a href="/donor/dashboard" class="role-btn primary">Go to Donor Dashboard →</a>
+        </div>
+
+        <div class="role-card requester-card">
+          <div class="role-icon">📋</div>
+          <h2>Requester Dashboard</h2>
+          <p>Create blood requests, track their status, and manage your request history.</p>
+          <ul class="role-features">
+            <li>✓ Create blood requests</li>
+            <li>✓ Track request status</li>
+            <li>✓ View request history</li>
+            <li>✓ Manage emergency requests</li>
+          </ul>
+          <a href="/requester/dashboard" class="role-btn primary">Go to Requester Dashboard →</a>
+        </div>
+      </div>
+
+      <a href="/" class="back-link">← Back to Home</a>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

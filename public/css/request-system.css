@@ -16,6 +16,7 @@
 .blood-request-page,
 .blood-matches-page,
 .donor-notifications-page,
+.donor-history-page,
 .admin-requests-page {
   background:
     radial-gradient(circle at top left, rgba(192, 57, 43, 0.12), transparent 30%),
@@ -27,6 +28,7 @@
 .request-shell,
 .matches-shell,
 .notifications-shell,
+.donor-history-shell,
 .admin-requests-shell {
   max-width: 1240px;
   margin: 0 auto;
@@ -36,6 +38,7 @@
 .request-hero,
 .matches-hero,
 .notifications-hero,
+.donor-history-hero,
 .admin-requests-hero {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
@@ -102,6 +105,12 @@
 .donor-offer-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -390,6 +399,20 @@
   align-items: center;
 }
 
+.history-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+
+.history-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  flex: 1;
+}
+
 @media (max-width: 980px) {
   .request-hero,
   .matches-hero,
@@ -401,15 +424,18 @@
   .request-grid,
   .management-grid,
   .donor-offer-grid,
+  .donor-history-hero,
   .request-form-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .request-shell,
-  .matches-shell,
-  .notifications-shell,
+  .donor-offer-grid,
+  .history-summary-grid,
+  .history-filter-fields {
+    grid-template-columns: 1fr;
+  }
   .admin-requests-shell {
     padding: 20px 14px 48px;
   }

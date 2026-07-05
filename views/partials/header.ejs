@@ -1,51 +1,72 @@
 <nav class="navbar">
   <div class="logo">
-    <a href="/"><img src="/images/logo.svg" alt="RedConnect" style="height:52px;"></a></a>
+    <a href="/" aria-label="RedConnect home">
+      <img src="/images/logo.svg" alt="RedConnect" style="height:52px;">
+    </a>
   </div>
-  <ul class="nav-menu">
-    <li><a href="/">HOME</a></li>
-    <li><a href="/blood">COMPATIBILITY</a></li>
-    <li><a href="/how-it-works">HOW IT WORKS</a></li>
-    <li><a href="/register">DONATE</a></li>
-    <li><a href="/request">REQUEST</a></li>
-  </ul>
-  <div class="nav-buttons">
-    <% if (typeof user !== 'undefined' && user) { %>
-      <div class="user-profile">
-        <div class="avatar" onclick="toggleDropdown()">
-          <% if (user.profilePic) { %>
-            <img src="<%= user.profilePic %>" alt="profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
-          <% } else { %>
-            <%= (user.name && user.name.charAt(0)) ? user.name.charAt(0).toUpperCase() : '?' %>
-          <% } %>
+
+  <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </button>
+
+  <div class="nav-panel" id="navPanel">
+    <ul class="nav-menu">
+      <li><a href="/">HOME</a></li>
+      <li><a href="/blood">COMPATIBILITY</a></li>
+      <li><a href="/how-it-works">HOW IT WORKS</a></li>
+      <li><a href="/register">DONATE</a></li>
+      <li><a href="/request">REQUEST</a></li>
+    </ul>
+
+    <div class="nav-buttons">
+      <% if (typeof user !== 'undefined' && user) { %>
+        <div class="user-profile">
+          <div class="avatar" onclick="toggleDropdown()">
+            <% if (user.profilePic) { %>
+              <img src="<%= user.profilePic %>" alt="profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+            <% } else { %>
+              <%= (user.name && user.name.charAt(0)) ? user.name.charAt(0).toUpperCase() : '?' %>
+            <% } %>
+          </div>
+          <div class="user-info" onclick="toggleDropdown()">
+            <span class="user-name"><%= user.name || 'User' %></span>
+          </div>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <% 
+              const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+              const isAdmin = adminEmails.includes(user.email);
+            %>
+            <% if (isAdmin) { %>
+              <a href="/admin/dashboard">⚙️ Admin Dashboard</a>
+            <% } else { %>
+              <a href="/dashboard">🩸 My Dashboard</a>
+            <% } %>
+            <a href="/logout">Logout</a>
+          </div>
         </div>
-        <div class="user-info" onclick="toggleDropdown()">
-          <span class="user-name"><%= user.name || 'User' %></span>
-        </div>
-        <div class="dropdown-menu" id="dropdownMenu">
-          <% 
-            const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
-            const isAdmin = adminEmails.includes(user.email);
-          %>
-          <% if (isAdmin) { %>
-            <a href="/admin/dashboard">⚙️ Admin Dashboard</a>
-          <% } else { %>
-            <a href="/donor/dashboard">🩸 My Dashboard</a>
-          <% } %>
-          <a href="/logout">Logout</a>
-        </div>
-      </div>
-    <% } else { %>
-      <a href="/login"><button class="appointment-btn">LOGIN</button></a>
-      <a href="/signup"><button class="appointment-btn">SIGN UP</button></a>
-    <% } %>
+      <% } else { %>
+        <a href="/login" class="nav-action-btn">LOGIN</a>
+        <a href="/signup" class="nav-action-btn secondary">SIGN UP</a>
+      <% } %>
+    </div>
   </div>
 </nav>
 
 <script>
   function toggleDropdown() {
-    document.getElementById('dropdownMenu').classList.toggle('show');
+    const dropdown = document.getElementById('dropdownMenu');
+    if (dropdown) dropdown.classList.toggle('show');
   }
+
+  function toggleMobileMenu() {
+    const panel = document.getElementById('navPanel');
+    const toggle = document.querySelector('.nav-toggle');
+    if (!panel || !toggle) return;
+    const isOpen = panel.classList.toggle('open');
+    toggle.classList.toggle('open', isOpen);
+    toggle.setAttribute('aria-expanded', String(isOpen));
+  }
+
   window.onclick = function(e) {
     if (!e.target.matches('.avatar') && !e.target.matches('.user-info') && !e.target.matches('.user-name') && !e.target.matches('.user-role')) {
       const d = document.getElementById('dropdownMenu');

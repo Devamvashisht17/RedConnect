@@ -1,64 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donation Process</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Manrope', sans-serif;
+}
+
+body{
+    background:#f7f7f7;
+}
+
+/* Heading */
+.divider{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;   /* Space between the two lines */
+    margin:15px 0;
+}
+
+.line{
+    width:70px;
+    height:2px;
+    background:#c62828;
+}
+.donation-header{
+    text-align:center;
+    padding:50px 20px 30px;
+}
+
+.donation-header h2{
+    font-size:42px;
+    color:#c62828;
+    letter-spacing:2px;
+}
+
+.divider{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:15px 0;
+}
+
+.line{
+    width:70px;
+    height:2px;
+    background:#c62828;
+}
+
+
+.donation-header p{
+    color:#666;
+    font-size:18px;
+}
+
+/* Section */
+
+.donation-process{
+    padding:8px 0 40px;
+}
+
+.container{
+    width:90%;
+    max-width:1250px;
+    margin:auto;
+}
+
+.steps{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:30px;
+}
+
+/* Card */
+
+.step{
+    background:#fff;
+    border-radius:12px;
+    border-top:4px solid #e74c3c;
+    overflow:hidden;
+    box-shadow:0 6px 18px rgba(0,0,0,.12);
+    transition:.3s;
+    display:flex;
+    flex-direction:column;
+}
+
+.step:hover{
+    transform:translateY(-8px);
+    box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+
+.step-image{
+    position:relative;
+}
+
+.step-image img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+}
+
+.step-number{
+    position:absolute;
+    bottom:12px;
+    right:12px;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:#c62828;
+    color:#fff;
+    font-size:22px;
+    font-weight:bold;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.step h3{
+    color:#c62828;
+    text-align:center;
+    margin:20px 0 15px;
+    font-size:32px;
+}
+
+.step ul{
+    padding:0 25px 15px;
+    margin:0;
+}
+
+.step ul li{
+    color:#444;
+    font-size:15px;
+    line-height:1.4;   /* Reduced from 1.8 */
+    margin-bottom:6px; /* Reduced from 12px */
+    text-align:left;
+}
+
+.step ul li:last-child{
+    margin-bottom:0;
+}
+
+.step ul li::marker{
+    color:#c62828;
+    font-size:18px;
+}
+
+/* Mobile */
+
+@media(max-width:768px){
+
+.step h3{
+    font-size:28px;
+}
+
+.donation-header h2{
+    font-size:34px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
 <div class="donation-header">
-  <h2>DONATION PROCESS</h2>
-  <div class="divider">
-    <span class="line"></span>
-    <span class="blood-icon"></span>
-    <span class="line"></span>
-  </div>
-  <p>The donation process from the time you arrive center until the time you leave!</p>
+
+<h2>DONATION PROCESS</h2>
+
+<div class="divider">
+<span class="line"></span>
+<span> 🩸</span>
+<span class="line"></span>
+</div>
+
+<p>The donation process from the time you arrive at the center until the time you leave.</p>
+
 </div>
 
 <section class="donation-process">
-  <div class="container">
-    <div class="steps">
-      <div class="step">
-        <div class="step-image">
-          <img src="/images/process_1.jpg" alt="Registration">
-          <span class="step-number">1</span>
-        </div>
-        <h3>Registration</h3>
-        <p>
-          You need to complete a very simple registration form. 
-          It collects your contact details and basic health information. 
-          This ensures our staff can safely process your donation and keep track of your records.
-        </p>
-      </div>
-      <div class="step">
-        <div class="step-image">
-          <img src="/images/process_2.jpg" alt="Screening">
-          <span class="step-number">2</span>
-        </div>
-        <h3>Screening</h3>
-        <p>
-          A small drop of blood from your finger will be tested. 
-          This checks your hemoglobin and iron levels to confirm that it is safe for you to donate. 
-          The process is quick and ensures your safety during the donation.
-        </p>
-      </div>
-      <div class="step">
-        <div class="step-image">
-          <img src="/images/process_3.jpg" alt="Donation">
-          <span class="step-number">3</span>
-        </div>
-        <h3>Donation</h3>
-        <p>
-          Once screening is complete, you will be guided to a comfortable donor bed. 
-          The actual blood donation takes about 6-10 minutes. 
-          Our trained staff will ensure the process is safe, hygienic, and comfortable for you.
-        </p>
-      </div>
-      <div class="step">
-        <div class="step-image">
-          <img src="/images/process_4.jpg" alt="Refreshment">
-          <span class="step-number">4</span>
-        </div>
-        <h3>Refreshment</h3>
-        <p>
-          After donation, you can relax in the sitting area and enjoy some refreshments. 
-          This helps you recover and ensures you feel strong before leaving the center. 
-          It's our way of thanking you for your generous donation.
-        </p>
-      </div>
-    </div>
-  </div>
+
+<div class="container">
+
+<div class="steps">
+
+<!-- Card 1 -->
+
+<div class="step">
+
+<div class="step-image">
+<img src="/images/process_1.jpg" alt="Registration">
+<span class="step-number">1</span>
+</div>
+
+<h3>Registration</h3>
+
+<ul>
+<li>Complete the donor registration form.</li>
+<li>Provide your contact information.</li>
+<li>Share basic medical history.</li>
+<li>Receive your donor record.</li>
+</ul>
+
+</div>
+
+<!-- Card 2 -->
+
+<div class="step">
+
+<div class="step-image">
+<img src="/images/process_2.jpg" alt="Screening">
+<span class="step-number">2</span>
+</div>
+
+<h3>Screening</h3>
+
+<ul>
+<li>Finger-prick blood sample.</li>
+<li>Check hemoglobin level.</li>
+<li>Measure blood pressure.</li>
+<li>Confirm donation eligibility.</li>
+</ul>
+
+</div>
+
+<!-- Card 3 -->
+
+<div class="step">
+
+<div class="step-image">
+<img src="/images/process_3.jpg" alt="Donation">
+<span class="step-number">3</span>
+</div>
+
+<h3>Donation</h3>
+
+<ul>
+<li>Relax on the donor chair.</li>
+<li>Donation takes only 6–10 minutes.</li>
+<li>Performed by trained professionals.</li>
+<li>Safe, clean and comfortable process.</li>
+</ul>
+
+</div>
+
+<!-- Card 4 -->
+
+<div class="step">
+
+<div class="step-image">
+<img src="/images/process_4.jpg" alt="Refreshment">
+<span class="step-number">4</span>
+</div>
+
+<h3>Refreshment</h3>
+
+<ul>
+<li>Rest for 10–15 minutes.</li>
+<li>Enjoy juice and light snacks.</li>
+<li>Regain your energy.</li>
+<li>Leave when you feel comfortable.</li>
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
 </section>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Details - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/request-system.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <main class="request-shell">
+    <section class="request-hero">
+      <article class="hero-card">
+        <span class="hero-eyebrow">Donor Request Details</span>
+        <h1><%= request.patientName %></h1>
+        <p>
+          Review the request details, verify compatibility, and respond if you can help.
+        </p>
+        <div class="action-row">
+          <a class="btn-primary" href="/donor/dashboard#donor-requests-feed">Back to Requests</a>
+        </div>
+      </article>
+
+      <aside class="panel-card">
+        <h2>Compatibility Overview</h2>
+        <div class="stack-list">
+          <div class="summary-chip"><div class="value"><%= request.bloodGroupRequired %></div><div class="label">Requested Blood Group</div></div>
+          <div class="summary-chip"><div class="value"><%= request.donorBloodGroup %></div><div class="label">Your Blood Group</div></div>
+          <div class="summary-chip"><div class="value"><%= request.compatibilityLabel %></div><div class="label">Compatibility</div></div>
+          <div class="summary-chip"><div class="value"><%= request.emergencyLevel %></div><div class="label">Urgency</div></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel-card">
+      <div class="request-card donor-feed-request <%= request.isCompatible ? 'compatible' : 'incompatible' %> <%= request.emergencyLevel.toLowerCase() %>">
+        <div class="request-card-header">
+          <div>
+            <h3><%= request.patientName %></h3>
+            <div class="request-meta">
+              <span class="blood-pill">Requested: <%= request.bloodGroupRequired %></span>
+              <span class="blood-pill">Yours: <%= request.donorBloodGroup %></span>
+              <span class="urgency-pill <%= request.emergencyLevel.toLowerCase() %>"><%= request.emergencyLevel %></span>
+              <span class="compat-badge <%= request.compatibilityTone %>"><%= request.compatibilityLabel %></span>
+            </div>
+          </div>
+          <span class="priority-tag <%= request.emergencyLevel.toLowerCase() %>"><%= request.priorityLabel %></span>
+        </div>
+        <div class="request-card-body">
+          <div class="request-detail-grid">
+            <div>
+              <span class="detail-label">Location</span>
+              <strong><%= request.city %><%= request.area ? ' · ' + request.area : '' %></strong>
+            </div>
+            <div>
+              <span class="detail-label">Requested Time</span>
+              <strong><%= new Date(request.createdAt).toLocaleString() %></strong>
+            </div>
+            <div>
+              <span class="detail-label">Hospital</span>
+              <strong><%= request.hospitalName %></strong>
+            </div>
+            <div>
+              <span class="detail-label">Units needed</span>
+              <strong><%= request.unitsRequired %></strong>
+            </div>
+          </div>
+
+          <% if (request.additionalMessage) { %>
+            <p class="subtle-note"><%= request.additionalMessage %></p>
+          <% } %>
+
+          <div class="request-actions donor-feed-actions">
+            <% if (request.isCompatible && !request.hasResponded) { %>
+              <button type="button" class="btn-primary request-respond-btn" data-request-id="<%= request.requestId %>" data-respond-url="/donor/request/<%= request.requestId %>/respond">Respond</button>
+            <% } else if (request.hasResponded) { %>
+              <span class="response-pill accepted">Response sent</span>
+            <% } else { %>
+              <span class="response-pill pending">Not compatible</span>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <p id="detail-status" class="subtle-note" aria-live="polite" style="margin-top:14px;"></p>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    (function () {
+      const button = document.querySelector('.request-respond-btn');
+      const status = document.getElementById('detail-status');
+      if (!button) return;
+
+      function setStatus(message, isError) {
+        if (!status) return;
+        status.textContent = message;
+        status.style.color = isError ? '#b91c1c' : '#6b7280';
+      }
+
+      button.addEventListener('click', async () => {
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Sending...';
+        setStatus('Sending your response to the requester...');
+
+        try {
+          const response = await fetch(button.dataset.respondUrl, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json'
+            }
+          });
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok || payload.success === false) {
+            if (response.status === 403 && payload.redirectUrl) {
+              window.location.href = payload.redirectUrl;
+              return;
+            }
+            throw new Error(payload.error || 'Unable to send your response.');
+          }
+
+          setStatus(payload.message || 'Your availability has been sent.');
+          button.outerHTML = '<span class="response-pill accepted">Response sent</span>';
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = originalText;
+          setStatus(error.message || 'Unable to send your response.', true);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
