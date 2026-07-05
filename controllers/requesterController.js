@@ -227,8 +227,14 @@ exports.toggleRole = async (req, res) => {
 
     console.log('Updated user roles:', updatedUser.roles);
 
-    req.flash('success', `Requester role enabled successfully`);
-    res.redirect('/dashboard');
+    // Land the user on the dashboard for the role they just switched to.
+    if (role === 'requester') {
+      req.flash('success', 'Requester role enabled successfully');
+      return res.redirect('/requester/dashboard');
+    }
+
+    req.flash('success', 'Donor role enabled successfully');
+    return res.redirect('/donor/dashboard');
   } catch (err) {
     console.error('=== TOGGLE ROLE ERROR ===');
     console.error('Error message:', err.message);
