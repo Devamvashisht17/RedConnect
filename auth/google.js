@@ -5,6 +5,10 @@ const mongoose       = require('mongoose');
 
 const User = mongoose.model('User');
 
+// Only register the Google strategy when credentials are configured.
+// Passport throws (and crashes the whole server) if clientID is missing,
+// so guard it — the app should still boot with email/password auth only.
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 passport.use(new GoogleStrategy({
   clientID:     process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -37,6 +41,9 @@ passport.use(new GoogleStrategy({
     return done(err, null);
   }
 }));
+} else {
+  console.warn('⚠️  Google OAuth disabled: GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not set. Email/password login still works.');
+}
 
 passport.serializeUser((user, done) => done(null, user._id));
 
