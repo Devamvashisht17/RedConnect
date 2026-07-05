@@ -1,8 +1,11 @@
-const dns = require('dns');
 const mongoose = require('mongoose');
 
-// Some networks/ISPs refuse SRV lookups (querySrv EREFUSED) for mongodb+srv://
-dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+// NOTE: Do NOT override dns.setServers() here. Forcing DNS through public
+// resolvers (8.8.8.8 / 1.1.1.1) breaks the mongodb+srv:// SRV lookup in
+// environments that block outbound DNS to those servers, causing the
+// connection to hang and queries to "buffer timed out". Use the system
+// resolver instead. If a network truly refuses SRV lookups, provide a
+// non-SRV MONGO_URI_DIRECT connection string instead.
 
 const connectDB = async () => {
   const uri =
