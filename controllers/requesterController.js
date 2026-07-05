@@ -15,13 +15,15 @@ exports.dashboard = async (req, res) => {
     console.log('===============================');
 
     const userId = req.user._id;
-    const userEmail = req.user.email;
+    const userEmail = (req.user.email || '').trim();
     const userRoles = req.user.roles || ['donor'];
 
     console.log('Fetching requests for email:', userEmail);
 
-    // Get all requests made by this user (by email)
-    const requests = await Request.find({ requesterEmail: userEmail })
+    // Get all requests made by this user (by email, case-insensitive so history
+    // still matches even if the stored email was normalized to lowercase)
+    const emailRegex = new RegExp(`^${userEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+    const requests = await Request.find({ requesterEmail: emailRegex })
       .sort({ createdAt: -1 })
       .limit(10);
 
@@ -227,8 +229,12 @@ exports.toggleRole = async (req, res) => {
 
     console.log('Updated user roles:', updatedUser.roles);
 
-    req.flash('success', `Requester role enabled successfully`);
-    res.redirect('/dashboard');
+    req.flash('success', `${role.charAt(0).toUpperCase() + role.slice(1)} role enabled successfully`);
+    // Send the user straight to the dashboard for the role they just enabled
+    if (role === 'requester') {
+      return res.redirect('/requester/dashboard');
+    }
+    return res.redirect('/donor/dashboard');
   } catch (err) {
     console.error('=== TOGGLE ROLE ERROR ===');
     console.error('Error message:', err.message);

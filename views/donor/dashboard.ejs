@@ -69,7 +69,14 @@
         <h1>🩸 Donor Dashboard</h1>
         <p>Welcome back, <%= user.name %> — here's your donation journey</p>
         <div class="role-switcher">
-          <a href="/requester/dashboard" class="role-btn">Switch to Requester Dashboard →</a>
+          <% if ((user.roles || []).includes('requester')) { %>
+            <a href="/requester/dashboard" class="role-btn">Switch to Requester Dashboard →</a>
+          <% } else { %>
+            <form action="/requester/toggle-role" method="POST" style="display:inline;">
+              <input type="hidden" name="role" value="requester">
+              <button type="submit" class="role-btn">Switch to Requester Dashboard →</button>
+            </form>
+          <% } %>
         </div>
       </div>
 
