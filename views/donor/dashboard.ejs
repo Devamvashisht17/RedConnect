@@ -69,7 +69,9 @@
         <h1>🩸 Donor Dashboard</h1>
         <p>Welcome back, <%= user.name %> — here's your donation journey</p>
         <div class="role-switcher">
-          <a href="/requester/dashboard" class="role-btn">Switch to Requester Dashboard →</a>
+          <form action="/requester/enable" method="POST" style="display:inline;">
+            <button type="submit" class="role-btn">Switch to Requester Dashboard →</button>
+          </form>
         </div>
       </div>
 

@@ -184,6 +184,31 @@ exports.createRequest = async (req, res) => {
   }
 };
 
+exports.enableRequester = async (req, res) => {
+  try {
+    if (!req.user || !req.user._id) {
+      req.flash('error', 'Please login to continue');
+      return res.redirect('/login');
+    }
+
+    // Grant the requester role if the user doesn't already have it.
+    // Guarded by `protect` only, so donor-only users can switch over.
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { roles: 'requester' } },
+      { new: true, runValidators: false }
+    );
+
+    return res.redirect('/requester/dashboard');
+  } catch (err) {
+    console.error('=== ENABLE REQUESTER ERROR ===');
+    console.error('Error message:', err.message);
+    console.error('==============================');
+    req.flash('error', 'Could not switch to requester dashboard. Please try again.');
+    return res.redirect('/donor/dashboard');
+  }
+};
+
 exports.toggleRole = async (req, res) => {
   try {
     const { role } = req.body;
