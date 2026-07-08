@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback & Testimonials — RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- Swiper -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+  <!-- Site styles -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/footer.css">
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="/css/feedback.css">
+</head>
+<body class="fb-page">
+
+  <%- include('partials/header') %>
+
+  <main>
+    <div class="fb-shell">
+
+      <!-- ── Page hero ──────────────────────────────────── -->
+      <header class="fb-hero">
+        <span class="fb-hero-eyebrow">
+          <i class="fa-solid fa-heart" aria-hidden="true"></i>
+          Community Voices
+        </span>
+        <h1>Testimonials &amp; <span>Feedback</span></h1>
+        <p>
+          Real stories from donors, volunteers, and families who trusted
+          RedConnect during urgent moments.
+        </p>
+      </header>
+
+      <!-- ── Outer card ─────────────────────────────────── -->
+      <div class="fb-outer-card">
+
+        <!-- ── Testimonials ──────────────────────────────── -->
+        <section class="fb-testimonials-section" aria-labelledby="testimonials-heading">
+
+          <div class="fb-section-label">
+            <h2 id="testimonials-heading">What people say</h2>
+            <% if (typeof testimonials !== 'undefined' && testimonials.length) { %>
+              <span class="fb-count-pill"><%= testimonials.length %> reviews</span>
+            <% } %>
+          </div>
+
+          <% if (typeof testimonials !== 'undefined' && testimonials.length) { %>
+
+            <div class="swiper fb-swiper" role="region" aria-label="Testimonial slider">
+              <div class="swiper-wrapper">
+
+                <% testimonials.forEach(function(item) { %>
+                  <div class="swiper-slide">
+                    <article class="fb-card">
+
+                      <div>
+                        <span class="fb-card-badge">
+                          <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+                          Trusted Experience
+                        </span>
+
+                        <p class="fb-card-quote">"<%= item.message %>"</p>
+
+                        <div class="fb-card-stars" aria-label="<%= item.rating %> out of 5 stars">
+                          <% for (let i = 0; i < 5; i++) { %>
+                            <i class="<%= i < item.rating ? 'fa-solid fa-star' : 'fa-regular fa-star' %>"
+                               aria-hidden="true"></i>
+                          <% } %>
+                        </div>
+                      </div>
+
+                      <footer class="fb-card-footer">
+                        <div class="fb-card-avatar" aria-hidden="true">
+                          <i class="fa-solid fa-kit-medical"></i>
+                        </div>
+                        <div>
+                          <div class="fb-card-name"><%= item.name %></div>
+                          <div class="fb-card-role">
+                            <%= item.subtitle || 'RedConnect User' %>
+                          </div>
+                        </div>
+                      </footer>
+
+                    </article>
+                  </div>
+                <% }) %>
+
+              </div>
+
+              <!-- Pagination dots -->
+              <div class="swiper-pagination" role="tablist" aria-label="Slide navigation"></div>
+            </div>
+
+          <% } else { %>
+            <div class="fb-empty" role="status">
+              <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
+              <p>No public testimonials yet. Be the first to share your experience!</p>
+            </div>
+          <% } %>
+
+        </section>
+
+        <div class="fb-divider" role="separator"></div>
+
+        <!-- ── Share your experience form ────────────────── -->
+        <section class="fb-form-section" aria-labelledby="form-heading">
+
+          <div class="fb-section-label">
+            <h2 id="form-heading">Share your experience</h2>
+          </div>
+
+          <p style="margin: 0 0 1.25rem; font-size: 0.9rem; color: #6b7280; line-height: 1.6;">
+            Tell us what worked well or what we can improve for the next donation drive.
+          </p>
+
+          <div class="fb-form-shell">
+            <form id="feedbackForm" class="fb-form" novalidate>
+
+              <!-- Row 1: Name + Email -->
+              <div class="fb-row">
+                <input
+                  class="fb-input"
+                  type="text"
+                  name="name"
+                  placeholder="Your name"
+                  autocomplete="name"
+                  required
+                  aria-label="Your name"
+                >
+                <input
+                  class="fb-input"
+                  type="email"
+                  name="email"
+                  placeholder="Your email"
+                  autocomplete="email"
+                  required
+                  aria-label="Your email"
+                >
+              </div>
+
+              <!-- Row 2: Rating + Category -->
+              <div class="fb-row">
+
+                <!-- Star rating -->
+                <div class="fb-rating-block">
+                  <span class="fb-rating-label" id="rating-label">Your rating</span>
+                  <div class="fb-stars"
+                       role="radiogroup"
+                       aria-labelledby="rating-label">
+                    <button type="button" class="fb-star" data-value="1" aria-label="1 star">☆</button>
+                    <button type="button" class="fb-star" data-value="2" aria-label="2 stars">☆</button>
+                    <button type="button" class="fb-star" data-value="3" aria-label="3 stars">☆</button>
+                    <button type="button" class="fb-star" data-value="4" aria-label="4 stars">☆</button>
+                    <button type="button" class="fb-star" data-value="5" aria-label="5 stars">☆</button>
+                  </div>
+                  <input type="hidden" name="rating" id="ratingInput" value="0">
+                </div>
+
+                <!-- Category -->
+                <select
+                  class="fb-select"
+                  name="category"
+                  aria-label="Feedback category"
+                >
+                  <option value="general">General</option>
+                  <option value="donor">Donor experience</option>
+                  <option value="request">Blood request flow</option>
+                  <option value="hospital">Hospital support</option>
+                </select>
+
+              </div>
+
+              <!-- Message -->
+              <textarea
+                class="fb-textarea"
+                name="message"
+                rows="4"
+                placeholder="Share your feedback…"
+                required
+                aria-label="Your feedback message"
+              ></textarea>
+
+              <!-- Submit -->
+              <div class="fb-submit-wrap">
+                <button
+                  id="feedbackSubmit"
+                  type="submit"
+                  class="fb-submit-btn"
+                >
+                  <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                  &nbsp;Submit Feedback
+                </button>
+                <p id="feedbackMessage" class="fb-msg" role="status" aria-live="polite"></p>
+              </div>
+
+            </form>
+          </div>
+
+        </section>
+
+      </div><!-- /.fb-outer-card -->
+
+    </div><!-- /.fb-shell -->
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <script>
+    /* ── Swiper init ──────────────────────────────────── */
+    if (window.Swiper) {
+      new Swiper('.fb-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: true,
+        speed: 700,
+        grabCursor: true,
+        autoplay: {
+          delay: 3500,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true
+        },
+        pagination: {
+          el: '.fb-swiper .swiper-pagination',
+          clickable: true
+        },
+        breakpoints: {
+          481:  { slidesPerView: 1.15, spaceBetween: 16 },
+          768:  { slidesPerView: 1.5,  spaceBetween: 20 },
+          1025: { slidesPerView: 2,    spaceBetween: 24 }
+        }
+      });
+    }
+
+    /* ── Star rating ──────────────────────────────────── */
+    const ratingInput  = document.getElementById('ratingInput');
+    const submitBtn    = document.getElementById('feedbackSubmit');
+    const fbMessage    = document.getElementById('feedbackMessage');
+    const starBtns     = Array.from(document.querySelectorAll('.fb-star'));
+
+    function setRating(value) {
+      ratingInput.value = value;
+      starBtns.forEach(function(btn, i) {
+        var active = i < value;
+        btn.textContent    = active ? '★' : '☆';
+        btn.style.color    = active ? '#f59e0b' : '#f4c2bb';
+        btn.style.transform = active ? 'scale(1.12)' : 'scale(1)';
+        btn.classList.toggle('active', active);
+      });
+      submitBtn.style.background = value > 0
+        ? 'linear-gradient(135deg, #fbbf24, #f59e0b)'
+        : 'linear-gradient(135deg, #e53935, #b42318)';
+      submitBtn.style.color = value > 0 ? '#111827' : '#fff';
+    }
+
+    starBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        setRating(Number(btn.dataset.value));
+      });
+    });
+
+    setRating(0);
+
+    /* ── Form submit ──────────────────────────────────── */
+    var feedbackForm = document.getElementById('feedbackForm');
+
+    if (feedbackForm) {
+      feedbackForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (!ratingInput.value || Number(ratingInput.value) < 1) {
+          fbMessage.textContent = 'Please select a star rating.';
+          fbMessage.className   = 'fb-msg error';
+          return;
+        }
+
+        var formData = new FormData(feedbackForm);
+        fbMessage.textContent = 'Submitting…';
+        fbMessage.className   = 'fb-msg';
+
+        try {
+          var res  = await fetch('/feedback', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(Object.fromEntries(formData.entries()))
+          });
+          var data = await res.json();
+
+          fbMessage.textContent = data.message || data.error || 'Thank you.';
+          fbMessage.className   = res.ok ? 'fb-msg' : 'fb-msg error';
+
+          if (res.ok) {
+            feedbackForm.reset();
+            setRating(0);
+          }
+        } catch (err) {
+          fbMessage.textContent = 'Unable to submit right now. Please try again.';
+          fbMessage.className   = 'fb-msg error';
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

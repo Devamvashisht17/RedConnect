@@ -1,7 +1,6 @@
 // services/locationService.js — Geospatial donor matching
 
-const DonorStats = require('../models/DonorStats');
-const mongoose   = require('mongoose');
+const mongoose = require('mongoose');
 
 const BLOOD_COMPATIBILITY = {
   'O-':  ['O-','O+','A-','A+','B-','B+','AB-','AB+'],
@@ -23,23 +22,14 @@ async function findNearbyDonors(lat, lng, bloodGroup, options = {}) {
   const compatibleGroups = BLOOD_COMPATIBILITY[bloodGroup] || [bloodGroup];
   const radii = [5, 10, 20, maxRadiusKm];
 
+  const Donor = mongoose.model('Donor');
+
   for (const radiusKm of radii) {
-    const donors = await DonorStats.find({
-      location: {
-        $near: {
-          $geometry:    { type: 'Point', coordinates: [lng, lat] },
-          $maxDistance: radiusKm * 1000 // metres
-        }
-      },
-      bloodGroup:    { $in: compatibleGroups },
-      isAvailable:   true,
-      $or: [
-        { cooldownUntil: { $exists: false } },
-        { cooldownUntil: { $lt: new Date() } }
-      ]
+    const donors = await Donor.find({
+      bloodGroup: { $in: compatibleGroups },
+      availability: { $ne: false }
     })
-    .limit(limit)
-    .populate('user', 'name email phone profilePic');
+    .limit(limit);
 
     if (donors.length > 0) {
       return { donors, radiusKm, expanded: radiusKm > 5 };

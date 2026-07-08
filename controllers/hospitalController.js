@@ -1,6 +1,5 @@
 // controllers/hospitalController.js
 const Hospital   = require('../models/Hospital');
-const Donation   = require('../models/Donation');
 const mongoose   = require('mongoose');
 const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
@@ -49,8 +48,7 @@ exports.dashboard = async (req, res) => {
   try {
     const BloodRequest = mongoose.model('BloodRequest');
     const requests = await BloodRequest.find({ hospitalRef: req.hospital._id }).sort({ createdAt: -1 }).limit(10);
-    const donations = await Donation.find({ hospitalRef: req.hospital._id, status: 'pending' }).limit(10);
-    res.render('hospital/dashboard', { hospital: req.hospital, requests, donations });
+    res.render('hospital/dashboard', { hospital: req.hospital, requests, donations: [] });
   } catch (err) {
     res.status(500).send('Something went wrong.');
   }

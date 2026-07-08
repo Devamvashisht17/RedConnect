@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation Verifications - RedConnect Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="quote-section">
+    <h2>"Verify Donations, Issue Certificates"</h2>
+    <p>Review donor-submitted blood donations and issue digital certificates upon verification.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>🩸 Donation Verifications</h1>
+        <p>Verify donations to automatically generate PDF certificates for donors</p>
+        <a href="/admin/dashboard" style="font-size:14px;color:#e74c3c;text-decoration:none;">← Back to Admin Dashboard</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="sc-stats-row">
+        <div class="sc-stat pending">
+          <div class="sc-stat-icon">⏳</div>
+          <div class="sc-stat-value"><%= stats.pending %></div>
+          <div class="sc-stat-label">Pending</div>
+        </div>
+        <div class="sc-stat fit">
+          <div class="sc-stat-icon">✅</div>
+          <div class="sc-stat-value"><%= stats.verified %></div>
+          <div class="sc-stat-label">Verified</div>
+        </div>
+        <div class="sc-stat unfit">
+          <div class="sc-stat-icon">❌</div>
+          <div class="sc-stat-value"><%= stats.rejected %></div>
+          <div class="sc-stat-label">Rejected</div>
+        </div>
+        <div class="sc-stat total">
+          <div class="sc-stat-icon">📊</div>
+          <div class="sc-stat-value"><%= stats.pending + stats.verified + stats.rejected %></div>
+          <div class="sc-stat-label">Total</div>
+        </div>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="dv-tabs">
+        <a href="/admin/donations?status=pending"  class="dv-tab <%= currentStatus === 'pending'  ? 'active' : '' %>">⏳ Pending <span class="dv-tab-count"><%= stats.pending %></span></a>
+        <a href="/admin/donations?status=verified" class="dv-tab <%= currentStatus === 'verified' ? 'active' : '' %>">✅ Verified <span class="dv-tab-count"><%= stats.verified %></span></a>
+        <a href="/admin/donations?status=rejected" class="dv-tab <%= currentStatus === 'rejected' ? 'active' : '' %>">❌ Rejected <span class="dv-tab-count"><%= stats.rejected %></span></a>
+      </div>
+
+      <!-- Table -->
+      <div class="sc-table-wrap">
+        <% if (donations.length === 0) { %>
+          <div class="admin-empty" style="padding:50px 0;">
+            No <%= currentStatus %> donations found.
+          </div>
+        <% } else { %>
+          <table class="sc-table">
+            <thead>
+              <tr>
+                <th>Donor Name</th>
+                <th>Blood Group</th>
+                <th>Hospital</th>
+                <th>City</th>
+                <th>Donation Date</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Certificate ID</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% donations.forEach(d => { %>
+                <tr>
+                  <td><strong><%= d.donorName %></strong></td>
+                  <td><span class="blood-tag"><%= d.bloodGroup %></span></td>
+                  <td><%= d.hospital %></td>
+                  <td><%= d.city %></td>
+                  <td><%= new Date(d.donatedAt).toLocaleDateString('en-IN') %></td>
+                  <td>
+                    <% if (d.isEmergency) { %>
+                      <span class="admin-emergency-tag">🚨 Emergency</span>
+                    <% } else { %>
+                      <span style="font-size:12px;color:#888;">Regular</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="sc-badge sc-badge-<%= d.status === 'verified' ? 'fit' : d.status === 'rejected' ? 'unfit' : 'pending' %>">
+                      <%= d.status === 'verified' ? '✅' : d.status === 'rejected' ? '❌' : '⏳' %>
+                      <%= d.status.charAt(0).toUpperCase() + d.status.slice(1) %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (d.certificateId) { %>
+                      <code style="font-size:11px;color:#c0392b;"><%= d.certificateId %></code>
+                    <% } else { %>
+                      <span class="sc-sub">—</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div class="sc-actions">
+                      <% if (d.status === 'pending') { %>
+                        <button class="sc-btn-fit"   onclick="verifyDonation('<%= d._id %>')">✓ Verify</button>
+                        <button class="sc-btn-unfit" onclick="rejectDonation('<%= d._id %>')">✗ Reject</button>
+                      <% } else if (d.status === 'verified' && d.certificate) { %>
+                        <a href="/generate-certificate/<%= d.certificate %>" class="sc-btn-cert" target="_blank">📄 Certificate</a>
+                      <% } else { %>
+                        <span class="sc-sub">—</span>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div class="sc-pagination">
+          <% for (let p = 1; p <= totalPages; p++) { %>
+            <a href="/admin/donations?status=<%= currentStatus %>&page=<%= p %>"
+               class="sc-page-btn <%= p === currentPage ? 'active' : '' %>"><%= p %></a>
+          <% } %>
+        </div>
+      <% } %>
+
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    async function verifyDonation(id) {
+      if (!confirm('Verify this donation? A certificate will be generated for the donor.')) return;
+      try {
+        const res  = await fetch(`/admin/verify-donation/${id}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          alert(`✅ Donation verified!\nCertificate ID: ${data.certificateId}`);
+          location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Failed'));
+        }
+      } catch (e) {
+        alert('Network error. Please try again.');
+      }
+    }
+
+    async function rejectDonation(id) {
+      if (!confirm('Reject this donation? This action cannot be undone.')) return;
+      try {
+        const res  = await fetch(`/admin/reject-donation/${id}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) { location.reload(); }
+        else alert('Error: ' + (data.error || 'Failed'));
+      } catch (e) {
+        alert('Network error. Please try again.');
+      }
+    }
+  </script>
+</body>
+</html>

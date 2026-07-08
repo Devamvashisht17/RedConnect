@@ -18,6 +18,9 @@ require('./models/Donor');
 require('./models/User');
 require('./models/Notification');
 require('./models/Request');
+require('./models/DoctorScreening');
+require('./models/Certificate');
+require('./models/Payment');
 
 // Init passport AFTER models are loaded
 const passport = require('./auth/google');
@@ -53,7 +56,7 @@ app.use(session({
     collectionName: 'sessions',
     ttl:            7 * 24 * 60 * 60
   }),
-  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true }
+  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, sameSite: 'lax' }
 }));
 app.use(flash());
 app.use(passport.initialize());
@@ -103,8 +106,31 @@ app.use('/donor',     require('./routes/donor'));
 app.use('/api/donor', require('./routes/donorApi'));
 app.use('/requester', require('./routes/requester'));
 app.use('/hospital',  require('./routes/hospital'));
+app.use('/api', require('./routes/payment'));
 app.use('/chatbot',   require('./routes/chatbot'));
+app.use('/requester', require('./routes/requesterRoutes'));
 
+// Subscribe
+app.post('/subscribe', async (req, res) => {
+  const email = (req.body.email || '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.json({ success: false, error: 'Please enter a valid email.' });
+  }
+  try {
+    const Subscriber = require('./models/Subscriber');
+    const { sendSubscribeConfirmMail } = require('./services/emailService');
+    const existing = await Subscriber.findOne({ email });
+    if (existing) return res.json({ success: false, error: 'You are already subscribed!' });
+    await Subscriber.create({ email });
+    sendSubscribeConfirmMail(email).catch(() => {});
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Something went wrong.' });
+  }
+});
+
+// Certificate download (auth-protected, works for both donor and admin)
+app.get('/generate-certificate/:id', require('./middleware/authMiddleware').protect, require('./controllers/certificateController').generateCertificate);
 // 404
 app.use((req, res) => res.status(404).render('404'));
 

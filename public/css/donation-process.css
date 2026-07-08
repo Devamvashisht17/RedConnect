@@ -46,6 +46,7 @@
     text-align:center;
     box-shadow:0 8px 25px rgba(0,0,0,.08);
     transition:all .3s ease;
+    position:relative;
 }
 
 .hospital-card:hover{
@@ -147,11 +148,28 @@
 .hospital-cards{
     flex-direction:column;
     align-items:center;
+    padding:0 16px;
 }
 
 .hospital-card{
     width:100%;
-    max-width:400px;
+    max-width:100%;
+}
+
+}
+
+@media(max-width:480px){
+
+.hospital-header h2{
+    font-size:1.6rem;
+}
+
+.hospital-card{
+    padding:28px 18px 22px;
+}
+
+.hospital-card h3{
+    font-size:1.4rem;
 }
 
 }

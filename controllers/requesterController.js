@@ -1,5 +1,4 @@
 const Request = require('../models/Request');
-const Donation = require('../models/Donation');
 const User = require('../models/User');
 const Donor = require('../models/Donor');
 const Notification = require('../models/Notification');
@@ -16,7 +15,7 @@ exports.dashboard = async (req, res) => {
 
     const userId = req.user._id;
     const userEmail = req.user.email;
-    const userRoles = req.user.roles || ['donor'];
+    const userRoles = req.user.roles || [];
 
     console.log('Fetching requests for email:', userEmail);
 
@@ -40,32 +39,18 @@ exports.dashboard = async (req, res) => {
 
     console.log('Stats:', { totalRequests, pendingRequests, fulfilledRequests, matchedRequests });
 
-    // Always get donation history for the user
-    console.log('Fetching donations for user:', userId);
-    const donations = await Donation.find({ donor: userId })
-      .sort({ donatedAt: -1 })
-      .limit(10);
-    console.log('Found donations:', donations.length);
-
-    // Calculate donation statistics
-    const totalDonations = donations.length;
-    const completedDonations = donations.filter(d => d.status === 'verified').length;
-    const pendingDonations = donations.filter(d => d.status === 'pending').length;
-
-    console.log('Rendering requester dashboard');
-
     res.render('requester/dashboard', {
       user: req.user,
       requests,
-      donations,
+      donations: [],
       stats: {
         totalRequests,
         pendingRequests,
         fulfilledRequests,
         matchedRequests,
-        totalDonations,
-        completedDonations,
-        pendingDonations
+        totalDonations: 0,
+        completedDonations: 0,
+        pendingDonations: 0
       }
     });
   } catch (err) {
@@ -150,25 +135,23 @@ exports.createRequest = async (req, res) => {
     }
 
     if (notifyResult.totalMatched > 0) {
-      let msg = `We emailed ${notifyResult.newlyNotified.length} donor(s) to come for doctor screening at the hospital.`;
+      let msg = `We found ${notifyResult.newlyNotified.length} compatible donor(s) and emailed them. You will be notified once a donor responds.`;
       if (notifyResult.cooldownCount > 0) {
-        msg += ` ${notifyResult.cooldownCount} compatible donor(s) are on the 90-day cooldown and are shown on the matches page.`;
+        msg += ` ${notifyResult.cooldownCount} donor(s) are on the 90-day cooldown period.`;
       }
       await createRequesterNotification({
         request,
-        title: `${notifyResult.totalMatched} compatible donor(s) found`,
+        title: `${notifyResult.newlyNotified.length} donor(s) notified — waiting for response`,
         message: msg,
         type: 'request-match'
       });
-      console.log('Created notification for matched donors');
     } else {
       await createRequesterNotification({
         request,
         title: 'Request submitted — searching for donors',
-        message: 'No compatible donors in the database yet. Register donors or revisit the matches page later.',
+        message: 'No compatible donors found yet. You will be notified as soon as a donor responds.',
         type: 'admin-alert'
       });
-      console.log('Created notification for no donors found');
     }
 
     req.flash('success', 'Blood request created successfully!');

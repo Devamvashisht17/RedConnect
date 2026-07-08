@@ -2,33 +2,21 @@
 const mongoose = require('mongoose');
 const Donor = require('../models/Donor');
 const Request = require('../models/Request');
-const DonorStats = require('../models/DonorStats');
-const Donation = require('../models/Donation');
 const Notification = require('../models/Notification');
+const Certificate = require('../models/Certificate');
+const Donation = require('../models/Donation');
 const { refId } = require('../utils/refId');
+const { sendRequestMatchedMail } = require('../services/emailService');
 const {
   BLOOD_COMPATIBILITY,
   createRequesterNotification,
   normalize
 } = require('../services/requestMatchingService');
-const { getLeaderboard, isInCooldown, getNextLevelInfo } = require('../services/gamificationService');
 const { BLOOD_GROUP_OPTIONS } = require('../middleware/authMiddleware');
 
 const ACTIVE_REQUEST_STATUSES = new Set(['pending', 'matched', 'accepted']);
 const CLOSED_REQUEST_STATUSES = new Set(['completed', 'fulfilled', 'rejected', 'deleted']);
 const URGENCY_ORDER = { Critical: 3, Urgent: 2, Normal: 1 };
-const DONATION_STATUS_MAP = {
-  verified: { label: 'Completed', tone: 'completed' },
-  pending: { label: 'Scheduled', tone: 'scheduled' },
-  rejected: { label: 'Cancelled', tone: 'cancelled' }
-};
-const HISTORY_FILTER_STATUS = {
-  all: null,
-  completed: 'verified',
-  scheduled: 'pending',
-  cancelled: 'rejected'
-};
-
 function normalizeStatus(status) {
   return (status || '').toString().trim().toLowerCase();
 }
@@ -55,63 +43,7 @@ function requestTimeValue(request) {
   return request.createdAt || request.timestamp || new Date(0);
 }
 
-function formatDateValue(date) {
-  if (!date) return 'N/A';
-  const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) return 'N/A';
-  return parsed.toLocaleString();
-}
-
-function formatDateOnly(date) {
-  if (!date) return 'N/A';
-  const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) return 'N/A';
-  return parsed.toLocaleDateString();
-}
-
-function donationDisplayStatus(status) {
-  const normalized = normalizeStatus(status);
-  return DONATION_STATUS_MAP[normalized] || { label: 'Scheduled', tone: 'scheduled' };
-}
-
-function donationTypeLabel(donation) {
-  return donation.isEmergency ? 'Emergency Donation' : 'Regular Donation';
-}
-
-function nextEligibleFromDonation(donation) {
-  if (!donation?.donatedAt) return null;
-  return new Date(new Date(donation.donatedAt).getTime() + 90 * 24 * 60 * 60 * 1000);
-}
-
-function cooldownProgress(lastDonationAt, nextEligibleAt) {
-  if (!lastDonationAt || !nextEligibleAt) return 100;
-  const start = new Date(lastDonationAt).getTime();
-  const end = new Date(nextEligibleAt).getTime();
-  const now = Date.now();
-  if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return 100;
-  if (now <= start) return 0;
-  if (now >= end) return 100;
-  return Math.max(0, Math.min(100, Math.round(((now - start) / (end - start)) * 100)));
-}
-
-function buildDonationCard(donation) {
-  const status = donationDisplayStatus(donation.status);
-  return {
-    _id: donation._id,
-    donatedAt: donation.donatedAt || donation.createdAt,
-    bloodGroup: donation.bloodGroup,
-    hospital: donation.hospital,
-    city: donation.city,
-    donationType: donationTypeLabel(donation),
-    statusLabel: status.label,
-    statusTone: status.tone,
-    recipientName: donation.recipientName || 'Anonymous Recipient',
-    requestId: donation.requestId || donation.request?.toString?.() || null,
-    requestLabel: donation.requestId || donation.request ? `Request #${String(donation.requestId || donation.request).slice(-6).toUpperCase()}` : null
-  };
-}
-
-function synthesizeNotificationItems({ notifications, latestDonation, nextEligibleDate, compatibleRequest }) {
+function synthesizeNotificationItems({ notifications, compatibleRequest }) {
   const items = [];
 
   for (const notification of notifications) {
@@ -122,17 +54,6 @@ function synthesizeNotificationItems({ notifications, latestDonation, nextEligib
       message: notification.message,
       createdAt: notification.createdAt,
       tone: notification.type === 'request-declined' ? 'muted' : notification.type === 'request-accepted' ? 'good' : 'neutral'
-    });
-  }
-
-  if (latestDonation) {
-    items.push({
-      _id: `donation-${latestDonation._id}`,
-      icon: '🧾',
-      title: 'Donation verified',
-      message: `Your ${latestDonation.bloodGroup} donation at ${latestDonation.hospital} was recorded successfully.`,
-      createdAt: latestDonation.donatedAt,
-      tone: 'good'
     });
   }
 
@@ -147,59 +68,9 @@ function synthesizeNotificationItems({ notifications, latestDonation, nextEligib
     });
   }
 
-  if (nextEligibleDate) {
-    const isEligible = nextEligibleDate.getTime() <= Date.now();
-    items.push({
-      _id: 'eligibility-reminder',
-      icon: isEligible ? '🎉' : '⏳',
-      title: isEligible ? 'Eligible to donate again' : 'Donation reminder',
-      message: isEligible
-        ? 'You can schedule your next donation now.'
-        : `You can donate again on ${formatDateOnly(nextEligibleDate)}.`,
-      createdAt: nextEligibleDate,
-      tone: isEligible ? 'good' : 'neutral'
-    });
-  }
-
   return items
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
-}
-
-async function buildDonationHistory(user, filters = {}) {
-  const donorStats = await DonorStats.findOne({ user: user._id });
-  const baseQuery = { donor: user._id };
-  const year = filters.year && filters.year !== 'all' ? Number(filters.year) : null;
-  const statusKey = (filters.status || 'all').toString().toLowerCase();
-  const status = HISTORY_FILTER_STATUS[statusKey];
-
-  if (status) baseQuery.status = status;
-
-  const donations = await Donation.find(baseQuery).sort({ donatedAt: -1 }).lean();
-  const filtered = year
-    ? donations.filter(donation => new Date(donation.donatedAt).getFullYear() === year)
-    : donations;
-
-  const verifiedDonations = donations.filter(donation => normalizeStatus(donation.status) === 'verified');
-  const latestDonation = donations[0] || null;
-  const latestVerifiedDonation = verifiedDonations[0] || null;
-  const eligibleDate = donorStats?.cooldownUntil || nextEligibleFromDonation(latestVerifiedDonation || latestDonation);
-
-  return {
-    donations: filtered.map(buildDonationCard),
-    summary: {
-      totalDonations: donations.length,
-      lastDonationDate: latestDonation?.donatedAt || null,
-      nextEligibleDonationDate: eligibleDate,
-      livesHelped: donorStats?.livesSaved || verifiedDonations.length
-    },
-    latestVerifiedDonations: verifiedDonations.slice(0, 5).map(buildDonationCard),
-    historyYears: Array.from(new Set(donations.map(donation => new Date(donation.donatedAt).getFullYear()).filter(Number.isFinite))).sort((a, b) => b - a),
-    selectedYear: year ? String(year) : 'all',
-    selectedStatus: statusKey,
-    nextEligibleDate: eligibleDate,
-    cooldownProgress: cooldownProgress(latestVerifiedDonation?.donatedAt || latestDonation?.donatedAt, eligibleDate)
-  };
 }
 
 async function buildNotificationWidget(user, donorProfile, requestFeed) {
@@ -207,17 +78,9 @@ async function buildNotificationWidget(user, donorProfile, requestFeed) {
     .sort({ createdAt: -1 })
     .limit(5)
     .lean();
-  const donationHistory = await Donation.find({ donor: user._id }).sort({ donatedAt: -1 }).limit(1).lean();
-  const latestDonation = donationHistory[0] || null;
   const compatibleRequest = (requestFeed || []).find(request => request.isCompatible) || null;
-  const nextEligibleDate = latestDonation ? nextEligibleFromDonation(latestDonation) : null;
 
-  return synthesizeNotificationItems({
-    notifications,
-    latestDonation,
-    nextEligibleDate,
-    compatibleRequest
-  });
+  return synthesizeNotificationItems({ notifications, compatibleRequest });
 }
 
 function toFeedItem(request, donorProfile, user) {
@@ -300,13 +163,24 @@ exports.patchProfile = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Please select a valid blood group.' });
     }
 
-    const donor = await Donor.findOne({ user: req.user._id });
+    const User = require('../models/User');
+    let donor = await Donor.findOne({ user: req.user._id });
     if (!donor) {
-      return res.status(404).json({ success: false, error: 'Donor profile not found.' });
+      donor = await Donor.create({
+        user: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        bloodGroup
+      });
+    } else {
+      donor.bloodGroup = bloodGroup;
+      await donor.save();
     }
 
-    donor.bloodGroup = bloodGroup;
-    await donor.save();
+    // Assign donor role if not already set
+    if (!req.user.roles?.includes('donor')) {
+      await User.findByIdAndUpdate(req.user._id, { $addToSet: { roles: 'donor' } });
+    }
 
     res.json({ success: true, donor: { bloodGroup: donor.bloodGroup } });
   } catch (err) {
@@ -348,43 +222,29 @@ async function buildRequestFeed(user, filters = {}) {
 
 exports.dashboard = async (req, res) => {
   try {
-    let stats = await DonorStats.findOne({ user: req.user._id });
-    if (!stats) stats = await DonorStats.create({ user: req.user._id });
+    const donorProfile = await resolveDonorProfile(req.user);
 
-    const [leaderboard, requestFeed, donationHistory, notificationsWidget] = await Promise.all([
-      getLeaderboard(10),
+    let certificates = [];
+    if (donorProfile) {
+      certificates = await Certificate.find({ donor: donorProfile._id }).sort({ issuedAt: -1 }).lean();
+      if (certificates.length === 0) {
+        certificates = await Certificate.find({ user: req.user._id }).sort({ issuedAt: -1 }).lean();
+      }
+    }
+    console.log(`[CERT DASHBOARD] user=${req.user._id} donor=${donorProfile?._id} certs=${certificates.length}`);
+
+    const [requestFeed, notificationsWidget] = await Promise.all([
       buildRequestFeed(req.user),
-      buildDonationHistory(req.user),
       buildNotificationWidget(req.user)
     ]);
 
-    const rank = await DonorStats.countDocuments({ totalPoints: { $gt: stats.totalPoints } }) + 1;
-    const cooldown = await isInCooldown(req.user._id);
-    const nextLevelInfo = getNextLevelInfo(stats);
-
     res.render('donor/dashboard', {
       user: req.user,
-      stats,
-      donations: [],
-      leaderboard,
-      rank,
-      cooldown,
-      nextLevelInfo,
       donorProfile: requestFeed.donorProfile,
       requestFeed: requestFeed.feed,
       requestSummary: requestFeed.summary,
-      donationHistoryPreview: donationHistory.latestVerifiedDonations,
-      donationHistorySummary: donationHistory.summary,
-      eligibility: {
-        eligibleDate: donationHistory.nextEligibleDate,
-        countdownText: donationHistory.nextEligibleDate
-          ? (donationHistory.nextEligibleDate.getTime() <= Date.now()
-            ? 'Eligible now'
-            : `${Math.max(1, Math.ceil((donationHistory.nextEligibleDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)))} day(s) left`)
-          : 'No active waiting period',
-        progress: donationHistory.cooldownProgress
-      },
-      notificationsWidget
+      notificationsWidget,
+      certificates
     });
   } catch (err) {
     console.error('Donor dashboard error:', err.message);
@@ -392,24 +252,6 @@ exports.dashboard = async (req, res) => {
   }
 };
 
-exports.historyPage = async (req, res) => {
-  try {
-    const history = await buildDonationHistory(req.user, req.query);
-    res.render('donor/history', {
-      user: req.user,
-      summary: history.summary,
-      donations: history.donations,
-      historyYears: history.historyYears,
-      selectedYear: history.selectedYear,
-      selectedStatus: history.selectedStatus,
-      nextEligibleDate: history.nextEligibleDate,
-      cooldownProgress: history.cooldownProgress
-    });
-  } catch (err) {
-    console.error('Donation history error:', err.message);
-    res.status(500).send('Something went wrong.');
-  }
-};
 
 exports.notificationsPage = async (req, res) => {
   try {
@@ -490,91 +332,94 @@ exports.requestDetails = async (req, res) => {
 exports.respondToRequest = async (req, res) => {
   try {
     if (!req.user) {
-      console.error('Donor respond: missing authentication.', { requestId: req.params.id });
       return res.status(401).json({ success: false, error: 'Missing authentication.' });
     }
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      console.error('Donor respond: invalid request id.', { requestId: req.params.id, userId: req.user._id?.toString(), userRole: req.user.roles });
       return res.status(404).json({ success: false, error: 'Blood request not found.' });
     }
 
     const donorProfile = await resolveDonorProfile(req.user);
     const request = await Request.findById(req.params.id);
 
-    console.log('Donor respond debug:', {
-      loggedInUser: req.user?._id?.toString(),
-      userRole: req.user?.roles,
-      requestId: req.params.id,
-      request: request ? { id: request._id.toString(), status: request.status, bloodGroupRequired: request.bloodGroupRequired } : null,
-      donor: donorProfile ? { id: donorProfile._id.toString(), bloodGroup: donorProfile.bloodGroup, user: donorProfile.user?.toString() } : null
-    });
-
-    if (!request) {
-      console.error('Donor respond: blood request not found.', { requestId: req.params.id, userId: req.user._id?.toString() });
-      return res.status(404).json({ success: false, error: 'Blood request not found.' });
-    }
-
-    if (!donorProfile) {
-      console.error('Donor respond: donor profile not found.', { userId: req.user._id?.toString() });
-      return res.status(404).json({ success: false, error: 'Donor profile not found.' });
-    }
-
-    if (!req.user.roles?.includes('donor')) {
-      console.error('Donor respond: user is not registered as a donor.', { userId: req.user._id?.toString(), roles: req.user.roles });
-      return res.status(403).json({ success: false, error: 'User is not registered as a donor.' });
-    }
-
-    if (!isRequestOpen(request)) {
-      return res.status(404).json({ success: false, error: 'Request is no longer available.' });
-    }
-
+    if (!request) return res.status(404).json({ success: false, error: 'Blood request not found.' });
+    if (!donorProfile) return res.status(404).json({ success: false, error: 'Donor profile not found.' });
+    if (!req.user.roles?.includes('donor')) return res.status(403).json({ success: false, error: 'User is not registered as a donor.' });
+    if (!isRequestOpen(request)) return res.status(404).json({ success: false, error: 'Request is no longer available.' });
     if (!isCompatible(donorProfile.bloodGroup, request.bloodGroupRequired)) {
       return res.status(400).json({ success: false, error: 'Your blood type does not match this request.' });
     }
 
     const donorId = donorProfile._id.toString();
-    const userId = req.user._id.toString();
-    const now = new Date();
-    const responseEntryIndex = (request.matchedDonors || []).findIndex(entry => {
-      return refId(entry.donor) === donorId || refId(entry.user) === userId;
-    });
+    const userId  = req.user._id.toString();
+    const now     = new Date();
+    const { getSuggestedVisitTime } = require('../services/requestMatchingService');
+    const { sendDonorScreeningVisitMail } = require('../services/emailService');
+    const visitTime = getSuggestedVisitTime(request.emergencyLevel);
 
-    if (responseEntryIndex >= 0) {
-      request.matchedDonors[responseEntryIndex].responseStatus = 'accepted';
-      request.matchedDonors[responseEntryIndex].respondedAt = now;
-      request.matchedDonors[responseEntryIndex].note = 'Responded from donor dashboard';
+    const existingIndex = (request.matchedDonors || []).findIndex(
+      entry => refId(entry.donor) === donorId || refId(entry.user) === userId
+    );
+
+    if (existingIndex >= 0) {
+      // Already in list — update to scheduled
+      request.matchedDonors[existingIndex].responseStatus   = 'accepted';
+      request.matchedDonors[existingIndex].healthStatus     = 'scheduled';
+      request.matchedDonors[existingIndex].respondedAt      = now;
+      request.matchedDonors[existingIndex].scheduledVisitAt = visitTime;
+      request.matchedDonors[existingIndex].note             = 'Responded from donor dashboard';
     } else {
+      // New entry
       request.matchedDonors = request.matchedDonors || [];
       request.matchedDonors.push({
-        donor: donorProfile._id,
-        user: req.user._id,
-        cityMatch: normalize(donorProfile.city) === normalize(request.city),
-        notifiedAt: now,
-        responseStatus: 'accepted',
-        healthStatus: 'pending',
-        respondedAt: now,
-        note: 'Responded from donor dashboard'
+        donor:            donorProfile._id,
+        user:             req.user._id,
+        cityMatch:        normalize(donorProfile.city) === normalize(request.city),
+        notifiedAt:       now,
+        responseStatus:   'accepted',
+        healthStatus:     'scheduled',
+        respondedAt:      now,
+        scheduledVisitAt: visitTime,
+        note:             'Responded from donor dashboard'
       });
     }
 
+    // Ensure request status is visible to admin screening query
+    if (!['accepted', 'matched'].includes(request.status)) {
+      request.status = 'accepted';
+    } else if (request.status === 'matched') {
+      request.status = 'accepted';
+    }
+    request.awaitingAdminVerification = true;
     request.markModified('matchedDonors');
     await request.save();
 
+    // Send screening appointment email to donor
+    try {
+      await sendDonorScreeningVisitMail(donorProfile, request, visitTime);
+    } catch (mailErr) {
+      console.error('Screening visit email error:', mailErr.message);
+    }
+
+    // Notify requester
     try {
       await createRequesterNotification({
         request,
         title: 'Donor responded to your request',
-        message: `${req.user.name} is available for ${request.bloodGroupRequired} support in ${request.city}.`,
+        message: `${donorProfile.name} is available and has been sent a screening appointment for ${request.bloodGroupRequired} support in ${request.city}.`,
         type: 'request-accepted'
       });
     } catch (notifErr) {
       console.error('Requester notification error:', notifErr.message);
     }
 
+    // Email requester only now that a donor has actually responded
+    if (request.requesterEmail) {
+      sendRequestMatchedMail(request, null, 1).catch(e => console.error('Requester response email:', e.message));
+    }
     res.json({
       success: true,
-      message: 'Your availability has been sent.',
+      message: 'Your response has been sent. Check your email for the screening appointment details.',
       requestId: request._id.toString()
     });
   } catch (err) {
@@ -583,41 +428,12 @@ exports.respondToRequest = async (req, res) => {
   }
 };
 
-exports.leaderboard = async (req, res) => {
-  try {
-    const leaderboard = await getLeaderboard(20);
-    res.render('donor/leaderboard', { user: req.user, leaderboard });
-  } catch (err) {
-    res.status(500).send('Something went wrong.');
-  }
-};
-
-exports.logDonation = async (req, res) => {
-  try {
-    const cooldown = await isInCooldown(req.user._id);
-    if (cooldown) { req.flash('error', 'You are in a 90-day cooldown period.'); return res.redirect('/donor/dashboard'); }
-    const { bloodGroup, hospital, city, isEmergency } = req.body;
-    await Donation.create({
-      donor: req.user._id, bloodGroup, hospital, city,
-      isEmergency: isEmergency === 'on',
-      isRareBlood: ['AB-','B-','A-','O-'].includes(bloodGroup),
-      status: 'pending'
-    });
-    req.flash('success', 'Donation logged! Awaiting admin verification.');
-    res.redirect('/donor/dashboard');
-  } catch (err) {
-    res.status(500).send('Something went wrong.');
-  }
-};
-
 exports.updateLocation = async (req, res) => {
   try {
-    const { lat, lng, bloodGroup } = req.body;
-    await DonorStats.findOneAndUpdate(
-      { user: req.user._id },
-      { location: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] }, bloodGroup, isAvailable: true },
-      { upsert: true }
-    );
+    const { lat, lng } = req.body;
+    const donor = await Donor.findOne({ user: req.user._id });
+    if (!donor) return res.status(404).json({ error: 'Donor not found.' });
+    await donor.save();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -647,5 +463,46 @@ exports.setAvailability = async (req, res) => {
     res.json({ success: true, availability: donor.availability });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+exports.myDonations = async (req, res) => {
+  try {
+    const donorProfile = await resolveDonorProfile(req.user);
+    const donations = donorProfile
+      ? await Donation.find({ donor: donorProfile._id }).sort({ donatedAt: -1 }).lean()
+      : [];
+    res.render('donor/my-donations', { user: req.user, donor: donorProfile, donations });
+  } catch (err) {
+    console.error('My donations error:', err.message);
+    res.status(500).send('Something went wrong.');
+  }
+};
+
+exports.logDonation = async (req, res) => {
+  try {
+    const donorProfile = await resolveDonorProfile(req.user);
+    if (!donorProfile) return res.status(404).json({ success: false, error: 'Donor profile not found.' });
+
+    const { bloodGroup, hospital, city, donatedAt, isEmergency } = req.body;
+    if (!bloodGroup || !hospital || !city || !donatedAt) {
+      return res.status(400).json({ success: false, error: 'All fields are required.' });
+    }
+
+    await Donation.create({
+      donor:       donorProfile._id,
+      user:        req.user._id,
+      donorName:   donorProfile.name,
+      bloodGroup,
+      hospital,
+      city,
+      donatedAt:   new Date(donatedAt),
+      isEmergency: isEmergency === 'on' || isEmergency === true
+    });
+
+    res.json({ success: true, message: 'Donation submitted for verification.' });
+  } catch (err) {
+    console.error('Log donation error:', err.message);
+    res.status(500).json({ success: false, error: 'Something went wrong.' });
   }
 };

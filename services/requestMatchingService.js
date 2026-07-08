@@ -1,6 +1,5 @@
 const Donor = require('../models/Donor');
 const User = require('../models/User');
-const DonorStats = require('../models/DonorStats');
 const Notification = require('../models/Notification');
 
 const BLOOD_COMPATIBILITY = {
@@ -29,10 +28,6 @@ async function getCooldownUntil(donor, user) {
   if (donor?.lastDonationAt) {
     const nextEligible = new Date(donor.lastDonationAt.getTime() + COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
     if (nextEligible > now) return nextEligible;
-  }
-  if (user?._id) {
-    const stats = await DonorStats.findOne({ user: user._id }).select('cooldownUntil');
-    if (stats?.cooldownUntil && stats.cooldownUntil > now) return stats.cooldownUntil;
   }
   return null;
 }
@@ -87,10 +82,7 @@ async function findCompatibleDonors({ bloodGroupRequired, city }) {
     const user = await getDonorUser(donor);
     const cityMatch = cityKey && normalize(donor.city) === cityKey;
 
-    if (donor.availability === false) {
-      candidates.push({ donor, user, cityMatch, eligible: false, cooldownUntil: null });
-      continue;
-    }
+    if (donor.availability === false) continue;
 
     const cooldownUntil = await getCooldownUntil(donor, user);
     candidates.push({

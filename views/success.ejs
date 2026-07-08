@@ -3,17 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Success - RedConnect</title>
+  <title>Welcome - RedConnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
-  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/auth.css?v=2">
+  <style>
+    .success-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fff7f7 0%, #ffffff 100%);
+      padding: 24px;
+    }
+
+    .success-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      padding: 56px 48px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .success-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+    }
+
+    .success-icon-wrap {
+      width: 88px;
+      height: 88px;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      box-shadow: 0 12px 32px rgba(192,57,43,0.3);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon-wrap svg {
+      width: 40px;
+      height: 40px;
+      stroke: white;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-card h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .success-card .welcome-name {
+      color: #e74c3c;
+    }
+
+    .success-card p {
+      font-size: 15px;
+      color: #777;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .success-quote {
+      background: #fff5f5;
+      border-left: 3px solid #e74c3c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 32px;
+      font-style: italic;
+      font-size: 14px;
+      color: #555;
+      text-align: left;
+    }
+
+    .success-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-primary {
+      display: block;
+      padding: 13px;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(192,57,43,0.35);
+    }
+
+    .btn-secondary {
+      display: block;
+      padding: 13px;
+      background: white;
+      color: #e74c3c;
+      border: 1.5px solid #e74c3c;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #fff5f5;
+    }
+
+    @media (max-width: 480px) {
+      .success-card { padding: 36px 24px; }
+      .success-card h1 { font-size: 22px; }
+    }
+  </style>
 </head>
 <body>
-  <div class="auth-container">
-    <div class="auth-card success-card">
-      <h1>✅ Registration Successful</h1>
-      <div class="quote">"The blood you donate gives someone another chance at life."</div>
-      <h2>Thank you for joining us, <%= name %> ❤️</h2>
-      <a href="/login" class="auth-btn">Login Now</a>
+  <div class="success-wrapper">
+    <div class="success-card">
+
+      <div class="success-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+
+      <h1>Welcome, <span class="welcome-name"><%= name %></span>! 🎉</h1>
+      <p>Your account has been created successfully. You're now part of the RedConnect community.</p>
+
+      <div class="success-quote">
+        "The blood you donate gives someone another chance at life. One donation can save up to 3 lives."
+      </div>
+
+      <div class="success-actions">
+        <a href="/login" class="btn-primary">Login to Your Account →</a>
+        <a href="/" class="btn-secondary">Back to Home</a>
+      </div>
+
     </div>
   </div>
 </body>

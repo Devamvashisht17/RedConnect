@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signup - RedConnect</title>
+  <title>Sign Up - RedConnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
-  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/auth.css?v=2">
+  <link rel="stylesheet" href="/css/mobile.css">
 </head>
 <body>
+
   <nav class="navbar">
-    <div class="logo">🩸 RedConnect</div>
+    <div class="logo"><a href="/"><img src="/images/logo.svg" alt="RedConnect" style="height:44px;"></a></div>
     <div class="nav-links">
       <a href="/">Home</a>
       <a href="/login">Login</a>
@@ -17,46 +19,69 @@
   </nav>
 
   <div class="auth-container">
-    <div class="auth-card">
-      <h1>🩸 Join RedConnect</h1>
+
+    <!-- LEFT PANEL -->
+    <div class="auth-panel">
+      <div class="auth-panel-logo">
+        <img src="/images/logo.svg" alt="RedConnect">
+      </div>
+      <h2>Be a Hero Today</h2>
+      <p>Register as a donor or requester and become part of a community that saves lives every single day.</p>
+      <div class="auth-panel-stats">
+        <div class="auth-stat">
+          <div class="auth-stat-value"><%= stats.donors %>+</div>
+          <div class="auth-stat-label">Registered Donors</div>
+        </div>
+        <div class="auth-stat">
+          <div class="auth-stat-value"><%= stats.donations %>+</div>
+          <div class="auth-stat-label">Lives Saved</div>
+        </div>
+        <div class="auth-stat">
+          <div class="auth-stat-value"><%= stats.hospitals %>+</div>
+          <div class="auth-stat-label">Partner Hospitals</div>
+        </div>
+        <div class="auth-stat">
+          <div class="auth-stat-value">🏅</div>
+          <div class="auth-stat-label">Earn Badges</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="auth-form-panel">
+      <h1>Create Account 🩸</h1>
+      <p class="auth-subtitle">Join RedConnect and start saving lives</p>
 
       <% if (error) { %>
         <div class="error-msg"><%= error %></div>
       <% } %>
 
       <form action="/signup" method="POST" enctype="multipart/form-data">
-
         <div class="form-group">
-          <label>Full Name *</label>
-          <input type="text" name="name" placeholder="Enter your name" required>
+          <label>Full Name</label>
+          <input type="text" name="name" placeholder="Your full name" required>
         </div>
-
         <div class="form-group">
-          <label>Email *</label>
-          <input type="email" name="email" placeholder="Enter your email" required>
+          <label>Email</label>
+          <input type="email" name="email" placeholder="you@example.com" required>
         </div>
-
         <div class="form-group">
-          <label>Password *</label>
-          <input type="password" name="password" placeholder="Create password" required>
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Create a password" required>
         </div>
-
         <div class="form-group">
-          <label>Confirm Password *</label>
-          <input type="password" name="confirmPassword" placeholder="Confirm password" required>
+          <label>Confirm Password</label>
+          <input type="password" name="confirmPassword" placeholder="Confirm your password" required>
         </div>
-
         <div class="form-group">
-          <label>Profile Picture</label>
+          <label>Profile Picture <span style="color:#aaa;font-weight:400">(optional)</span></label>
           <input type="file" name="profilePic" accept="image/*">
         </div>
-
-        <button type="submit" class="auth-btn">Sign Up</button>
+        <button type="submit" class="auth-btn">Create Account →</button>
       </form>
 
-      <div class="divider">or</div>
+      <div class="divider">or continue with</div>
 
-      <!-- Google OAuth login -->
       <a href="/auth/google" class="google-btn">
         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
         Continue with Google
@@ -64,7 +89,7 @@
 
       <p class="switch-link">Already have an account? <a href="/login">Login</a></p>
     </div>
-  </div>
 
+  </div>
 </body>
 </html>

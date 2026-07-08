@@ -1,6 +1,5 @@
 const Donor         = require('../models/Donor');
-const Donation      = require('../models/Donation');
-const DonorStats    = require('../models/DonorStats');
+const User          = require('../models/User');
 const Request       = require('../models/Request');
 const Notification  = require('../models/Notification');
 const { bloodData } = require('./homeController');
@@ -10,20 +9,6 @@ const { createRequesterNotification } = require('../services/requestMatchingServ
 const COOLDOWN_DAYS = 90;
 
 async function checkCooldown(userId) {
-  if (!userId) return null;
-  // check DonorStats cooldownUntil (set after admin verifies)
-  const stats = await DonorStats.findOne({ user: userId });
-  if (stats?.cooldownUntil && new Date() < stats.cooldownUntil)
-    return stats.cooldownUntil;
-  // also check if a pending donation exists within 90 days
-  const recent = await Donation.findOne({
-    donor: userId,
-    donatedAt: { $gte: new Date(Date.now() - COOLDOWN_DAYS * 24 * 60 * 60 * 1000) }
-  }).sort({ donatedAt: -1 });
-  if (recent) {
-    const until = new Date(recent.donatedAt.getTime() + COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
-    return until;
-  }
   return null;
 }
 
@@ -77,6 +62,11 @@ exports.postRegister = async (req, res) => {
       });
     }
 
+    // Assign donor role to logged-in user if not already set
+    if (user?._id && !user.roles?.includes('donor')) {
+      await User.findByIdAndUpdate(user._id, { $addToSet: { roles: 'donor' } });
+    }
+
     // Check for pending blood requests that match this donor's blood group
     if (isNewDonor || bloodGroupChanged) {
       console.log('=== DONOR REGISTRATION - CHECKING PENDING REQUESTS ===');
@@ -128,13 +118,6 @@ exports.postRegister = async (req, res) => {
     }
 
     if (res.locals.user) {
-      await Donation.create({
-        donor:       res.locals.user._id,
-        bloodGroup,  hospital: city, city,
-        isEmergency: false,
-        isRareBlood: ['AB-','B-','A-','O-'].includes(bloodGroup),
-        status: 'pending'
-      });
       return res.redirect('/donor/dashboard');
     }
 

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Screening - RedConnect Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="quote-section">
+    <h2>"Screen Today, Save Tomorrow"</h2>
+    <p>Review donor medical screenings, mark fitness status, and trigger donation emails.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>🩺 Doctor Screening Dashboard</h1>
+        <p>Manage all donor medical screenings linked to blood requests</p>
+        <a href="/admin/dashboard" style="font-size:14px;color:#e74c3c;text-decoration:none;">← Back to Admin Dashboard</a>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="sc-stats-row">
+        <div class="sc-stat pending">
+          <div class="sc-stat-icon">⏳</div>
+          <div class="sc-stat-value"><%= stats.Pending %></div>
+          <div class="sc-stat-label">Pending</div>
+        </div>
+        <div class="sc-stat fit">
+          <div class="sc-stat-icon">✅</div>
+          <div class="sc-stat-value"><%= stats.Fit %></div>
+          <div class="sc-stat-label">Fit</div>
+        </div>
+        <div class="sc-stat unfit">
+          <div class="sc-stat-icon">❌</div>
+          <div class="sc-stat-value"><%= stats.Unfit %></div>
+          <div class="sc-stat-label">Unfit</div>
+        </div>
+        <div class="sc-stat total">
+          <div class="sc-stat-icon">📊</div>
+          <div class="sc-stat-value"><%= stats.Pending + stats.Fit + stats.Unfit %></div>
+          <div class="sc-stat-label">Total</div>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <form method="GET" action="/admin/screening" class="sc-toolbar">
+        <input
+          type="text"
+          name="search"
+          value="<%= currentSearch %>"
+          placeholder="Search donor name, blood group..."
+          class="sc-search-input"
+        >
+        <select name="status" class="sc-filter-select">
+          <option value="">All Statuses</option>
+          <option value="Pending"  <%= currentStatus === 'Pending'  ? 'selected' : '' %>>⏳ Pending</option>
+          <option value="Fit"      <%= currentStatus === 'Fit'      ? 'selected' : '' %>>✅ Fit</option>
+          <option value="Unfit"    <%= currentStatus === 'Unfit'    ? 'selected' : '' %>>❌ Unfit</option>
+        </select>
+        <button type="submit" class="sc-search-btn">Search</button>
+        <% if (currentSearch || currentStatus) { %>
+          <a href="/admin/screening" class="sc-clear-btn">Clear</a>
+        <% } %>
+      </form>
+
+      <!-- Table -->
+      <div class="sc-table-wrap">
+        <% if (records.length === 0) { %>
+          <div class="admin-empty" style="padding:50px 0;">
+            🩺 No screening records found<% if (currentSearch || currentStatus) { %> for the current filter<% } %>.
+          </div>
+        <% } else { %>
+          <table class="sc-table">
+            <thead>
+              <tr>
+                <th>Donor</th>
+                <th>Blood Group</th>
+                <th>Request / Patient</th>
+                <th>Hospital</th>
+                <th>Screening Status</th>
+                <th>Donation Status</th>
+                <th>Screening Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% records.forEach(r => { %>
+                <tr>
+                  <td>
+                    <strong><%= r.donorName %></strong>
+                    <div class="sc-sub"><%= r.donorEmail %></div>
+                    <% if (r.donorPhone) { %><div class="sc-sub"><%= r.donorPhone %></div><% } %>
+                  </td>
+                  <td><span class="blood-tag"><%= r.bloodGroup %></span></td>
+                  <td>
+                    <% if (r.request) { %>
+                      <strong><%= r.request.patientName %></strong>
+                      <div class="sc-sub">Needs: <%= r.request.bloodGroupRequired %></div>
+                      <div class="sc-sub"><%= r.request.emergencyLevel %></div>
+                    <% } else { %>
+                      <span class="sc-sub">—</span>
+                    <% } %>
+                  </td>
+                  <td><%= r.hospitalName %></td>
+                  <td>
+                    <span class="sc-badge sc-badge-<%= r.screeningStatus.toLowerCase() %>">
+                      <%= r.screeningStatus === 'Pending' ? '⏳' : r.screeningStatus === 'Fit' ? '✅' : '❌' %>
+                      <%= r.screeningStatus %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="sc-donation-badge sc-ds-<%= r.donationStatus.toLowerCase().replace(/ /g,'-') %>">
+                      <%= r.donationStatus %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (r.screeningDate) { %>
+                      <%= new Date(r.screeningDate).toLocaleDateString() %>
+                    <% } else { %>
+                      <span class="sc-sub">Not yet</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div class="sc-actions">
+                      <button class="sc-btn-view" onclick="viewDetails('<%= r._id %>')">👁 Details</button>
+                      <% if (r.screeningStatus === 'Pending') { %>
+                        <button class="sc-btn-fit"   onclick="markFit('<%= r._id %>')">✓ Fit</button>
+                        <button class="sc-btn-unfit" onclick="markUnfit('<%= r._id %>')">✗ Unfit</button>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div class="sc-pagination">
+          <% for (let p = 1; p <= totalPages; p++) { %>
+            <a
+              href="/admin/screening?page=<%= p %>&status=<%= currentStatus %>&search=<%= currentSearch %>"
+              class="sc-page-btn <%= p === currentPage ? 'active' : '' %>"
+            ><%= p %></a>
+          <% } %>
+        </div>
+      <% } %>
+
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div id="scModal" class="sc-modal-overlay" style="display:none;" onclick="closeModal(event)">
+    <div class="sc-modal">
+      <button class="sc-modal-close" onclick="document.getElementById('scModal').style.display='none'">✕</button>
+      <h3>🩺 Screening Details</h3>
+      <div id="scModalBody" class="sc-modal-body">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Fit Modal -->
+  <div id="fitModal" class="sc-modal-overlay" style="display:none;" onclick="closeModal(event)">
+    <div class="sc-modal sc-modal-sm">
+      <button class="sc-modal-close" onclick="document.getElementById('fitModal').style.display='none'">✕</button>
+      <h3>✅ Mark Donor as Fit</h3>
+      <p class="sc-modal-desc">The donor will be emailed that they are eligible to donate. The requester will also be notified.</p>
+      <input type="hidden" id="fitRecordId">
+      <div class="sc-form-group">
+        <label>Doctor Name</label>
+        <input type="text" id="fitDoctorName" placeholder="Dr. Name" class="sc-input">
+      </div>
+      <div class="sc-form-group">
+        <label>Remarks (optional)</label>
+        <textarea id="fitRemarks" rows="3" placeholder="Any remarks..." class="sc-input"></textarea>
+      </div>
+      <div class="sc-modal-actions">
+        <button class="sc-btn-fit" onclick="submitFit()">✓ Confirm — Mark Fit & Send Emails</button>
+        <button class="sc-btn-cancel" onclick="document.getElementById('fitModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unfit Modal -->
+  <div id="unfitModal" class="sc-modal-overlay" style="display:none;" onclick="closeModal(event)">
+    <div class="sc-modal sc-modal-sm">
+      <button class="sc-modal-close" onclick="document.getElementById('unfitModal').style.display='none'">✕</button>
+      <h3>❌ Mark Donor as Unfit</h3>
+      <p class="sc-modal-desc">Only the donor will be emailed. The requester will not be notified.</p>
+      <input type="hidden" id="unfitRecordId">
+      <div class="sc-form-group">
+        <label>Doctor Name</label>
+        <input type="text" id="unfitDoctorName" placeholder="Dr. Name" class="sc-input">
+      </div>
+      <div class="sc-form-group">
+        <label>Remarks (optional)</label>
+        <textarea id="unfitRemarks" rows="3" placeholder="Reason for rejection..." class="sc-input"></textarea>
+      </div>
+      <div class="sc-modal-actions">
+        <button class="sc-btn-unfit" onclick="submitUnfit()">✗ Confirm — Mark Unfit & Send Email</button>
+        <button class="sc-btn-cancel" onclick="document.getElementById('unfitModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    function closeModal(e) {
+      if (e.target.classList.contains('sc-modal-overlay')) {
+        e.target.style.display = 'none';
+      }
+    }
+
+    async function viewDetails(id) {
+      document.getElementById('scModal').style.display = 'flex';
+      document.getElementById('scModalBody').innerHTML = 'Loading...';
+      try {
+        const res = await fetch(`/admin/screening/${id}`);
+        const data = await res.json();
+        if (!data.success) { document.getElementById('scModalBody').innerHTML = 'Error loading details.'; return; }
+        const r = data.record;
+        document.getElementById('scModalBody').innerHTML = `
+          <table class="sc-detail-table">
+            <tr><td>Donor Name</td><td><strong>${r.donorName}</strong></td></tr>
+            <tr><td>Email</td><td>${r.donorEmail}</td></tr>
+            <tr><td>Phone</td><td>${r.donorPhone || '—'}</td></tr>
+            <tr><td>Blood Group</td><td><span class="blood-tag">${r.bloodGroup}</span></td></tr>
+            <tr><td>Hospital</td><td>${r.hospitalName}</td></tr>
+            <tr><td>Requester</td><td>${r.requesterName || '—'}</td></tr>
+            <tr><td>Patient</td><td>${r.request ? r.request.patientName : '—'}</td></tr>
+            <tr><td>Blood Needed</td><td>${r.request ? r.request.bloodGroupRequired : '—'}</td></tr>
+            <tr><td>Urgency</td><td>${r.request ? r.request.emergencyLevel : '—'}</td></tr>
+            <tr><td>Request Date</td><td>${r.request ? new Date(r.request.createdAt).toLocaleString() : '—'}</td></tr>
+            <tr><td>Screening Status</td><td><span class="sc-badge sc-badge-${r.screeningStatus.toLowerCase()}">${r.screeningStatus}</span></td></tr>
+            <tr><td>Donation Status</td><td>${r.donationStatus}</td></tr>
+            <tr><td>Doctor</td><td>${r.doctorName || '—'}</td></tr>
+            <tr><td>Remarks</td><td>${r.remarks || '—'}</td></tr>
+            <tr><td>Screening Date</td><td>${r.screeningDate ? new Date(r.screeningDate).toLocaleString() : 'Not yet'}</td></tr>
+            <tr><td>Created</td><td>${new Date(r.createdAt).toLocaleString()}</td></tr>
+          </table>
+        `;
+      } catch (e) {
+        document.getElementById('scModalBody').innerHTML = 'Failed to load details.';
+      }
+    }
+
+    function markFit(id) {
+      document.getElementById('fitRecordId').value = id;
+      document.getElementById('fitDoctorName').value = '';
+      document.getElementById('fitRemarks').value = '';
+      document.getElementById('fitModal').style.display = 'flex';
+    }
+
+    function markUnfit(id) {
+      document.getElementById('unfitRecordId').value = id;
+      document.getElementById('unfitDoctorName').value = '';
+      document.getElementById('unfitRemarks').value = '';
+      document.getElementById('unfitModal').style.display = 'flex';
+    }
+
+    async function submitFit() {
+      const id = document.getElementById('fitRecordId').value;
+      const doctorName = document.getElementById('fitDoctorName').value.trim();
+      const remarks = document.getElementById('fitRemarks').value.trim();
+      try {
+        const res = await fetch(`/admin/screening/${id}/fit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ doctorName, remarks })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('fitModal').style.display = 'none';
+          alert('✅ ' + (data.message || 'Donor marked as Fit. Emails sent.'));
+          location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Failed'));
+        }
+      } catch (e) {
+        alert('Network error. Please try again.');
+      }
+    }
+
+    async function submitUnfit() {
+      const id = document.getElementById('unfitRecordId').value;
+      const doctorName = document.getElementById('unfitDoctorName').value.trim();
+      const remarks = document.getElementById('unfitRemarks').value.trim();
+      try {
+        const res = await fetch(`/admin/screening/${id}/unfit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ doctorName, remarks })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('unfitModal').style.display = 'none';
+          alert('✅ ' + (data.message || 'Donor marked as Unfit. Email sent.'));
+          location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Failed'));
+        }
+      } catch (e) {
+        alert('Network error. Please try again.');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -13,9 +13,13 @@ exports.postVolunteer = async (req, res) => {
       availability: req.body.availability,
       skills:       req.body.skills
     });
+    if (req.headers['content-type']?.includes('application/json') || req.xhr)
+      return res.json({ success: true, name: v.name });
     res.redirect('/thankyou?name=' + encodeURIComponent(v.name));
   } catch (err) {
     console.error('Volunteer error:', err.message);
+    if (req.headers['content-type']?.includes('application/json') || req.xhr)
+      return res.status(500).json({ error: 'Registration failed. Please try again.' });
     res.redirect('/volunteer');
   }
 };

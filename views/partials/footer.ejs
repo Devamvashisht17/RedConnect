@@ -4,7 +4,7 @@
       <div class="footer-logo">
         <h3>🩸 RedConnect</h3>
       </div>
-      <p>Saving lives through blood donation since 2024. Every drop counts — join us in making a difference.</p>
+      <p>Saving lives through blood donation since 2026. Every drop counts — join us in making a difference.</p>
       <div class="footer-socials">
         <a href="#" class="social-icon">📘</a>
         <a href="#" class="social-icon">📸</a>
@@ -27,7 +27,8 @@
     <div class="footer-section">
       <h4>Contact Info</h4>
       <ul class="footer-contact">
-        <li><span class="icon">📧</span> support@redconnect.com</li>
+        <li><span class="icon">📧</span> https://redconnect-svoo.onrender.com/</li>
+        <li><span class="icon">📩</span> japnoorkd@gmail.com</li>
         <li><span class="icon">📍</span> Rajpura, Punjab</li>
         <li><span class="icon">📱</span> 6239864134</li>
       </ul>
@@ -36,10 +37,11 @@
     <div class="footer-section">
       <h4>Subscribe Us</h4>
       <p>Get updates about blood donation campaigns and health tips.</p>
-      <form class="subscribe-form">
-        <input type="email" placeholder="Enter your email" required>
+      <form class="subscribe-form" id="subscribeForm">
+        <input type="email" id="subscribeEmail" placeholder="Enter your email" required>
         <button type="submit">Subscribe Now</button>
       </form>
+      <p id="subscribeMsg" style="margin-top:8px;font-size:13px;font-weight:600;"></p>
     </div>
   </div>
 
@@ -49,5 +51,39 @@
 
   <button class="scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
 </footer>
+
+<script>
+  document.getElementById('subscribeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('subscribeEmail').value.trim();
+    const msg   = document.getElementById('subscribeMsg');
+    const btn   = this.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Subscribing...';
+    try {
+      const res  = await fetch('/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.success) {
+        msg.style.color = '#27ae60';
+        msg.textContent = '✅ Subscribed! Check your email.';
+        this.reset();
+      } else {
+        msg.style.color = '#e74c3c';
+        msg.textContent = '❌ ' + (data.error || 'Failed.');
+        btn.disabled = false;
+        btn.textContent = 'Subscribe Now';
+      }
+    } catch {
+      msg.style.color = '#e74c3c';
+      msg.textContent = '❌ Network error. Try again.';
+      btn.disabled = false;
+      btn.textContent = 'Subscribe Now';
+    }
+  });
+</script>
 
 <%- include('./chatbot-widget') %>

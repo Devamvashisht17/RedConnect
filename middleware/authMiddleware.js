@@ -2,7 +2,6 @@
 const jwt  = require('jsonwebtoken');
 const User = require('../models/User');
 const Donor = require('../models/Donor');
-const { ensureDonorProfileForUser } = require('../services/donorProfileService');
 
 const BLOOD_GROUP_OPTIONS = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
 
@@ -15,10 +14,9 @@ function redirectToOwnDashboard(req, res) {
   const user = req.user;
   if (!user) return res.redirect('/login');
 
-  if (hasRole(user, 'requester') && !hasRole(user, 'donor')) {
-    return res.redirect('/requester/dashboard');
-  }
-  return res.redirect('/donor/dashboard');
+  if (hasRole(user, 'donor')) return res.redirect('/donor/dashboard');
+  if (hasRole(user, 'requester')) return res.redirect('/requester/dashboard');
+  return res.redirect('/dashboard-select');
 }
 
 const protect = async (req, res, next) => {
@@ -29,14 +27,6 @@ const protect = async (req, res, next) => {
     req.user      = await User.findById(decoded.id).select('-password');
     if (!req.user) return res.redirect('/login');
 
-    const isDonorUser = !req.user.roles || req.user.roles.length === 0 || req.user.roles.includes('donor');
-    if (isDonorUser) {
-      await ensureDonorProfileForUser(req.user, {
-        name: req.user.name,
-        email: req.user.email
-      });
-    }
-
     next();
   } catch (err) {
     res.clearCookie('token');
@@ -46,9 +36,7 @@ const protect = async (req, res, next) => {
 
 const requireDonor = (req, res, next) => {
   if (!req.user) return res.redirect('/login');
-  if (!hasRole(req.user, 'donor')) {
-    return redirectToOwnDashboard(req, res);
-  }
+  if (!hasRole(req.user, 'donor')) return res.redirect('/register');
   next();
 };
 

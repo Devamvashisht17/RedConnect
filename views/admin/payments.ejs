@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payments — Admin | RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="content-wrapper">
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>💳 Donation Payments</h1>
+        <p>All Razorpay payments received via the Support Us section</p>
+      </div>
+
+      <div class="admin-stats-row">
+        <div class="admin-stat-card" style="border-top:4px solid #d32f2f">
+          <div class="admin-stat-icon" style="background:#fff0f0">💳</div>
+          <div class="admin-stat-value"><%= totalPayments %></div>
+          <div class="admin-stat-label">Total Payments</div>
+        </div>
+        <div class="admin-stat-card" style="border-top:4px solid #27ae60">
+          <div class="admin-stat-icon" style="background:#f0fff4">₹</div>
+          <div class="admin-stat-value">₹<%= (totalAmount / 100).toLocaleString('en-IN') %></div>
+          <div class="admin-stat-label">Total Amount Raised</div>
+        </div>
+      </div>
+
+      <div class="admin-card admin-full-width" style="margin-top:24px;">
+        <div class="admin-card-header">
+          <h3>Payment Records</h3>
+          <span class="admin-badge" style="background:#d32f2f;color:#fff"><%= totalPayments %></span>
+        </div>
+
+        <% if (payments.length === 0) { %>
+          <div class="admin-empty">No payments received yet.</div>
+        <% } else { %>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+              <thead>
+                <tr style="background:#fff0f0;">
+                  <th style="padding:12px 10px;text-align:left;">#</th>
+                  <th style="padding:12px 10px;text-align:left;">Donor Name</th>
+                  <th style="padding:12px 10px;text-align:left;">Email</th>
+                  <th style="padding:12px 10px;text-align:left;">Amount</th>
+                  <th style="padding:12px 10px;text-align:left;">Payment ID</th>
+                  <th style="padding:12px 10px;text-align:left;">Order ID</th>
+                  <th style="padding:12px 10px;text-align:left;">Date & Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% payments.forEach((p, i) => { %>
+                  <tr style="border-bottom:1px solid #f5f5f5;">
+                    <td style="padding:10px;color:#9ca3af;"><%= ((currentPage - 1) * 20) + i + 1 %></td>
+                    <td style="padding:10px;font-weight:600;color:#1f2937;"><%= p.name %></td>
+                    <td style="padding:10px;color:#4b5563;"><%= p.email || '—' %></td>
+                    <td style="padding:10px;font-weight:700;color:#d32f2f;">₹<%= (p.amount / 100).toLocaleString('en-IN') %></td>
+                    <td style="padding:10px;font-family:monospace;font-size:12px;color:#374151;"><%= p.razorpayPaymentId %></td>
+                    <td style="padding:10px;font-family:monospace;font-size:12px;color:#6b7280;"><%= p.razorpayOrderId %></td>
+                    <td style="padding:10px;color:#4b5563;white-space:nowrap;"><%= new Date(p.paidAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+
+          <% if (totalPages > 1) { %>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+              <% for (let p = 1; p <= totalPages; p++) { %>
+                <a href="/admin/payments?page=<%= p %>"
+                   style="padding:6px 14px;border-radius:6px;border:1px solid #d32f2f;text-decoration:none;font-size:13px;font-weight:600;
+                          background:<%= p === currentPage ? '#d32f2f' : '#fff' %>;
+                          color:<%= p === currentPage ? '#fff' : '#d32f2f' %>;">
+                  <%= p %>
+                </a>
+              <% } %>
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+
+      <a href="/admin/dashboard" class="back-link">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

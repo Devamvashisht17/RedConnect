@@ -6,57 +6,237 @@
   <title>Select Dashboard - RedConnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/register.css">
   <link rel="stylesheet" href="/css/dashboard.css">
   <link rel="stylesheet" href="/css/footer.css">
+  <style>
+    .ds-hero {
+      background: linear-gradient(135deg, #c0392b 0%, #922b21 100%);
+      color: white;
+      padding: 52px 24px 44px;
+      text-align: center;
+    }
+    .ds-hero-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    .ds-hero h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0 0 8px;
+    }
+    .ds-hero p {
+      font-size: 15px;
+      opacity: 0.85;
+      margin: 0;
+    }
+
+    .ds-wrapper {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    .ds-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .ds-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .ds-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      border: 2px solid transparent;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .ds-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.13);
+    }
+    .ds-card.donor:hover  { border-color: #e74c3c; }
+    .ds-card.requester:hover { border-color: #2980b9; }
+
+    .ds-card-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .ds-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .ds-icon.red  { background: #fff0f0; }
+    .ds-icon.blue { background: #eff6ff; }
+
+    .ds-card-top h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin: 0 0 4px;
+    }
+    .ds-card-top p {
+      font-size: 13px;
+      color: #888;
+      margin: 0;
+    }
+
+    .ds-divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 0 0 20px;
+    }
+
+    .ds-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 28px;
+      display: grid;
+      gap: 10px;
+      flex: 1;
+    }
+    .ds-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #444;
+    }
+    .ds-features li .fi {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .fi.red  { background: #fff0f0; }
+    .fi.blue { background: #eff6ff; }
+
+    .ds-btn {
+      display: block;
+      text-align: center;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .ds-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .ds-btn.red  { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+    .ds-btn.blue { background: linear-gradient(135deg, #2980b9, #1a5c8a); color: white; }
+
+    .ds-back {
+      display: block;
+      text-align: center;
+      margin-top: 32px;
+      color: #aaa;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .ds-back:hover { color: #e74c3c; }
+
+    @media (max-width: 600px) {
+      .ds-grid { grid-template-columns: 1fr; }
+      .ds-hero h1 { font-size: 22px; }
+    }
+  </style>
 </head>
 <body>
-  <%- include('../partials/header') %>
+  <%- include('partials/header') %>
 
-  <div class="quote-section">
-    <h2>"Choose Your Role"</h2>
-    <p>You have both donor and requester roles. Select which dashboard you'd like to access.</p>
+  <div class="ds-hero">
+    <div class="ds-hero-avatar">👤</div>
+    <h1>Welcome back, <%= user.name %></h1>
+    <p>Choose which dashboard you'd like to access</p>
   </div>
 
-  <div class="content-wrapper">
-    <div class="register-container dashboard-page">
-      <div class="register-header">
-        <h1>🩸 Select Dashboard</h1>
-        <p>Welcome, <%= user.name %> — choose your role for this session</p>
+  <div class="ds-wrapper">
+    <p class="ds-label">Select your role</p>
+
+    <div class="ds-grid">
+
+      <!-- Donor Card -->
+      <div class="ds-card donor">
+        <div class="ds-card-top">
+          <div class="ds-icon red">🩸</div>
+          <div>
+            <h2>Donor</h2>
+            <p>Track donations & earn rewards</p>
+          </div>
+        </div>
+        <div class="ds-divider"></div>
+        <ul class="ds-features">
+          <li><span class="fi red">📝</span> Log new donations</li>
+          <li><span class="fi red">📊</span> View donation history</li>
+          <li><span class="fi red">🏅</span> Earn points and badges</li>
+          <li><span class="fi red">🏆</span> Check leaderboard rankings</li>
+        </ul>
+        <a href="/donor/dashboard" class="ds-btn red">Go to Donor Dashboard →</a>
       </div>
 
-      <div class="role-selection-grid">
-        <div class="role-card donor-card">
-          <div class="role-icon">🩸</div>
-          <h2>Donor Dashboard</h2>
-          <p>Track your donations, earn badges, and see how many lives you've helped save.</p>
-          <ul class="role-features">
-            <li>✓ Log new donations</li>
-            <li>✓ View donation history</li>
-            <li>✓ Earn points and badges</li>
-            <li>✓ Check leaderboard rankings</li>
-          </ul>
-          <a href="/donor/dashboard" class="role-btn primary">Go to Donor Dashboard →</a>
+      <!-- Requester Card -->
+      <div class="ds-card requester">
+        <div class="ds-card-top">
+          <div class="ds-icon blue">📋</div>
+          <div>
+            <h2>Requester</h2>
+            <p>Manage blood requests & status</p>
+          </div>
         </div>
-
-        <div class="role-card requester-card">
-          <div class="role-icon">📋</div>
-          <h2>Requester Dashboard</h2>
-          <p>Create blood requests, track their status, and manage your request history.</p>
-          <ul class="role-features">
-            <li>✓ Create blood requests</li>
-            <li>✓ Track request status</li>
-            <li>✓ View request history</li>
-            <li>✓ Manage emergency requests</li>
-          </ul>
-          <a href="/requester/dashboard" class="role-btn primary">Go to Requester Dashboard →</a>
-        </div>
+        <div class="ds-divider"></div>
+        <ul class="ds-features">
+          <li><span class="fi blue">➕</span> Create blood requests</li>
+          <li><span class="fi blue">🔍</span> Track request status</li>
+          <li><span class="fi blue">📂</span> View request history</li>
+          <li><span class="fi blue">🚨</span> Manage emergency requests</li>
+        </ul>
+        <% if (user.roles && user.roles.includes('requester')) { %>
+          <a href="/requester/dashboard" class="ds-btn blue">Go to Requester Dashboard →</a>
+        <% } else { %>
+          <form action="/requester/enable-role" method="POST" style="margin:0">
+            <button type="submit" class="ds-btn blue">Enable & Go to Requester Dashboard →</button>
+          </form>
+        <% } %>
       </div>
 
-      <a href="/" class="back-link">← Back to Home</a>
     </div>
+
+    <a href="/" class="ds-back">← Back to Home</a>
   </div>
 
-  <%- include('../partials/footer') %>
+  <%- include('partials/footer') %>
 </body>
 </html>

@@ -1,0 +1,485 @@
+/* ============================================================
+   mobile.css — Global mobile responsiveness for all pages
+   Included last so it overrides everything
+   ============================================================ */
+
+/* ── Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+img, video, iframe { max-width: 100%; height: auto; }
+
+/* ── Navbar ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+  }
+
+  .nav-toggle { display: inline-flex !important; }
+
+  .nav-panel {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0 4px;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 4px;
+  }
+
+  .nav-panel.open { display: flex; }
+
+  .nav-menu {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .nav-menu li { width: 100%; }
+  .nav-menu a { display: block; padding: 6px 0; font-size: 15px; }
+
+  .nav-buttons {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .nav-action-btn { width: 100%; text-align: center; }
+  .user-info { display: none; }
+}
+
+/* ── Quote / Banner sections ──────────────────────────────── */
+@media (max-width: 768px) {
+  .quote-section {
+    padding: 28px 16px;
+  }
+  .quote-section h2 { font-size: 20px; }
+  .quote-section p  { font-size: 14px; }
+}
+
+/* ── Content wrapper (register/request pages) ─────────────── */
+@media (max-width: 768px) {
+  .content-wrapper {
+    flex-direction: column !important;
+    padding: 0 12px !important;
+    margin: 16px auto !important;
+    gap: 16px !important;
+  }
+
+  .faq-section {
+    flex: 1 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .register-container,
+  .request-container,
+  .form-wrapper {
+    padding: 20px 16px !important;
+    width: 100% !important;
+  }
+
+  .register-header h1 { font-size: 22px; }
+  .register-header p  { font-size: 14px; }
+}
+
+/* ── Forms ────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px !important; /* prevents iOS zoom */
+    width: 100%;
+  }
+
+  .submit-btn,
+  .auth-btn {
+    font-size: 16px;
+    padding: 14px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-home, .btn-register {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ── Dashboard stats rows ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .stats-row,
+  .admin-stats-row,
+  .sc-stats-row,
+  .admin-queue-summary,
+  .admin-screening-stats,
+  .hospital-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .queue-tabs { grid-template-columns: repeat(2, 1fr) !important; }
+
+  .dashboard-grid,
+  .admin-grid,
+  .hospital-dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dash-card,
+  .admin-card,
+  .hospital-panel {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-row,
+  .admin-stats-row,
+  .sc-stats-row,
+  .admin-queue-summary,
+  .admin-screening-stats,
+  .hospital-summary-grid,
+  .queue-tabs {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Admin pending items ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .admin-pending-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .admin-action-btns {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .admin-btn-verify,
+  .admin-btn-reject {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* ── Screening table ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sc-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sc-table { min-width: 700px; }
+
+  .sc-toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sc-search-input,
+  .sc-filter-select,
+  .sc-search-btn,
+  .sc-clear-btn {
+    width: 100%;
+  }
+}
+
+/* ── Donor feed ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .donor-feed-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .feed-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .feed-select-wrap { width: 100%; min-width: 0; }
+
+  .donor-feed-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .donor-feed-actions .btn-primary,
+  .donor-feed-actions .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .section-head-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ── Queue cards ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .queue-entry-card {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .qe-score, .qe-wait { min-width: 60px; }
+
+  .qe-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .qe-escalate-btn,
+  .qe-fulfill-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* ── Hospital hero ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hospital-hero {
+    grid-template-columns: 1fr !important;
+    padding: 20px !important;
+  }
+
+  .hospital-hero-copy h1 { font-size: 1.6rem; }
+  .hospital-rail-list { display: none; }
+
+  .hospital-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .inventory-group-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Donation list (my-donations) ────────────────────────── */
+@media (max-width: 600px) {
+  .don-item {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  .don-item-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .don-cert-btn,
+  .don-submit-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .don-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Role selection grid ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .role-selection-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Auth page ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .auth-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-panel { display: none !important; }
+
+  .auth-form-panel {
+    padding: 28px 20px 36px !important;
+    min-height: calc(100vh - 60px);
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .footer {
+    padding: 28px 16px 16px;
+    margin-top: 32px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px;
+  }
+
+  /* Show all footer sections on mobile */
+  .footer-section:nth-child(3),
+  .footer-section:nth-child(4) {
+    display: block !important;
+  }
+
+  .footer-section h3,
+  .footer-section h4 { font-size: 0.9rem; margin-bottom: 10px; }
+  .footer-section p  { font-size: 0.8rem; }
+  .footer-links a    { font-size: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Modals ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .sc-modal {
+    padding: 20px 16px !important;
+    max-height: 90vh;
+    margin: 10px;
+    width: calc(100% - 20px) !important;
+  }
+
+  .sc-modal-actions {
+    flex-direction: column;
+  }
+
+  .sc-modal-actions button,
+  .sc-modal-actions a {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ── Tables — horizontal scroll ───────────────────────────── */
+@media (max-width: 768px) {
+  .leaderboard-table-wrap,
+  .request-table-wrap,
+  .sc-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .leaderboard-table,
+  .hospital-request-table {
+    min-width: 600px;
+  }
+}
+
+/* ── Leaderboard medals ───────────────────────────────────── */
+@media (max-width: 600px) {
+  .leaderboard-medal-stage {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .medal-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .medal-card.gold { transform: none !important; }
+}
+
+/* ── Volunteer section ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .volunteer-section {
+    height: auto !important;
+    padding: 40px 16px !important;
+  }
+
+  .volunteer-content h2 { font-size: 22px; }
+
+  .volunteer-btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+}
+
+/* ── Chatbot widget ───────────────────────────────────────── */
+@media (max-width: 480px) {
+  #chatbot-widget {
+    width: calc(100vw - 24px) !important;
+    right: 12px !important;
+    bottom: 70px !important;
+    max-height: 70vh !important;
+  }
+
+  #chatbot-toggle {
+    width: 48px !important;
+    height: 48px !important;
+    bottom: 16px !important;
+    right: 16px !important;
+    font-size: 20px !important;
+  }
+}
+
+/* ── Scroll-to-top button ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .scroll-top {
+    width: 38px !important;
+    height: 38px !important;
+    bottom: 70px !important;
+    right: 12px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* ── Live notification banner ─────────────────────────────── */
+@media (max-width: 480px) {
+  .live-notif {
+    left: 12px;
+    right: 12px;
+    max-width: 100%;
+    top: 70px;
+  }
+}
+
+/* ── Pagination ───────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .sc-pagination { gap: 4px; }
+  .sc-page-btn   { padding: 6px 10px; font-size: 13px; }
+}
+
+/* ── dv-tabs (admin donations filter) ────────────────────── */
+@media (max-width: 600px) {
+  .dv-tabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dv-tab { width: 100%; justify-content: space-between; }
+}
+
+/* ── Misc utility ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-action-btn { width: 100%; min-width: 0; }
+
+  .history-item-top { flex-direction: column; gap: 8px; }
+
+  .eligibility-meta-row,
+  .history-meta-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .request-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -16,42 +16,12 @@
 
   <div class="quote-section">
     <h2>"Your Blood, Their Hope"</h2>
-    <p>Track your donations, earn badges, and see how many lives you've helped save.</p>
+    <p>Browse active blood requests and respond to save lives.</p>
   </div>
 
   <div class="content-wrapper">
     <div class="faq-section">
       <h3>Donor Dashboard Help</h3>
-
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>How do I log a donation?</h4>
-          <span class="arrow">▼</span>
-        </div>
-        <div class="faq-answer">
-          <p>Fill in the Log a Donation form with hospital and city details. An admin will verify it before points are awarded.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>What is the 90-day cooldown?</h4>
-          <span class="arrow">▼</span>
-        </div>
-        <div class="faq-answer">
-          <p>After a verified donation you must wait 90 days before logging another, for your health and safety.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>How are points and levels earned?</h4>
-          <span class="arrow">▼</span>
-        </div>
-        <div class="faq-answer">
-          <p>Each verified donation adds points. Reach higher donor levels as you donate more. Emergency donations may earn bonus points.</p>
-        </div>
-      </div>
 
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
@@ -67,32 +37,9 @@
     <div class="register-container dashboard-page">
       <div class="register-header">
         <h1>🩸 Donor Dashboard</h1>
-        <p>Welcome back, <%= user.name %> — here's your donation journey</p>
+        <p>Welcome back, <%= user.name %></p>
         <div class="role-switcher">
           <a href="/requester/dashboard" class="role-btn">Switch to Requester Dashboard →</a>
-        </div>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat-card red">
-          <div class="stat-icon">🩸</div>
-          <div class="stat-value"><%= stats.verifiedDonations %></div>
-          <div class="stat-label">Donations</div>
-        </div>
-        <div class="stat-card gold">
-          <div class="stat-icon">⭐</div>
-          <div class="stat-value"><%= stats.totalPoints %></div>
-          <div class="stat-label">Points</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-icon">❤️</div>
-          <div class="stat-value"><%= stats.livesSaved %></div>
-          <div class="stat-label">Lives Saved</div>
-        </div>
-        <div class="stat-card blue">
-          <div class="stat-icon">🏆</div>
-          <div class="stat-value">#<%= rank %></div>
-          <div class="stat-label">Your Rank</div>
         </div>
       </div>
 
@@ -202,53 +149,6 @@
 
       <div class="dashboard-grid">
         <div class="dash-col">
-          <div class="dash-card eligibility-card">
-            <div class="card-title-row">
-              <h3>Donor Level</h3>
-              <span class="level-badge level-<%= stats.donorLevel.toLowerCase() %>"><%= stats.donorLevel %></span>
-            </div>
-            <div class="eligibility-block">
-              <div class="eligibility-label">Eligible Again</div>
-              <div class="eligibility-value"><%= eligibility?.eligibleDate ? new Date(eligibility.eligibleDate).toLocaleDateString() : 'No active waiting period' %></div>
-            </div>
-            <div class="eligibility-meta-row">
-              <div>
-                <span class="eligibility-label">Countdown</span>
-                <strong><%= eligibility?.countdownText || 'No active waiting period' %></strong>
-              </div>
-              <div>
-                <span class="eligibility-label">Waiting Progress</span>
-                <strong><%= eligibility?.progress || 100 %>%</strong>
-              </div>
-            </div>
-            <div class="progress-bar-wrap eligibility-bar">
-              <div class="progress-bar" style="width:<%= eligibility?.progress || 100 %>%"></div>
-            </div>
-            <% if (nextLevelInfo.nextLevel !== 'Max') { %>
-              <p class="subtle-note">Next level: <strong><%= nextLevelInfo.nextLevel %></strong> — <%= nextLevelInfo.needed %> more donation(s)</p>
-            <% } else { %>
-              <p class="subtle-note">🎉 You've reached the highest level — Platinum Lifesaver!</p>
-            <% } %>
-          </div>
-
-          <div class="dash-card">
-            <h3>Your Badges</h3>
-            <% if (stats.badges.length === 0) { %>
-              <p class="muted">No badges yet. Make your first donation!</p>
-            <% } else { %>
-              <div class="badges-row">
-                <% stats.badges.forEach(b => { %>
-                  <div class="badge-item" title="<%= b.description %>">
-                    <span class="badge-icon"><%= b.icon %></span>
-                    <span class="badge-name"><%= b.name %></span>
-                  </div>
-                <% }) %>
-              </div>
-            <% } %>
-          </div>
-        </div>
-
-        <div class="dash-col">
           <div class="dash-card notifications-card">
             <div class="card-title-row">
               <h3>Notifications</h3>
@@ -272,39 +172,30 @@
             <% } %>
           </div>
 
-          <div class="dash-card history-card">
-            <div class="card-title-row">
-              <div>
-                <h3>Donation History</h3>
-                <p class="muted">Last verified donations at a glance.</p>
-              </div>
-              <a href="/donor/history" class="view-all">View Full History</a>
-            </div>
-            <% if (!donationHistoryPreview || donationHistoryPreview.length === 0) { %>
-              <div class="empty-state compact">You haven't donated blood yet.</div>
-            <% } else { %>
-              <div class="history-stack">
-                <% donationHistoryPreview.forEach(donation => { %>
-                  <article class="history-item">
-                    <div class="history-item-top">
-                      <div>
-                        <h4><%= new Date(donation.donatedAt).toLocaleDateString() %></h4>
-                        <p><%= donation.hospital %> · <%= donation.city %></p>
-                      </div>
-                      <span class="history-status <%= donation.statusTone %>"><%= donation.statusLabel %></span>
-                    </div>
-                    <div class="history-meta-grid">
-                      <div><span>Blood Group</span><strong><%= donation.bloodGroup %></strong></div>
-                      <div><span>Recipient</span><strong><%= donation.recipientName %></strong></div>
-                      <div><span>Donation Type</span><strong><%= donation.donationType %></strong></div>
-                      <div><span>Request ID</span><strong><%= donation.requestLabel || '—' %></strong></div>
-                    </div>
-                  </article>
-                <% }) %>
-              </div>
-            <% } %>
-          </div>
+          <a href="/" class="back-link">← Back to Home</a>
         </div>
+      </div>
+
+      <div class="dash-card full-width" style="margin-top:20px;">
+        <div class="card-title-row">
+          <h3>🏅 My Donation Certificates</h3>
+        </div>
+        <% if (!certificates || certificates.length === 0) { %>
+          <div class="empty-state compact">No certificates yet. Certificates are issued after admin verifies your donation.</div>
+        <% } else { %>
+          <div class="history-stack">
+            <% certificates.forEach(cert => { %>
+              <article class="history-item" style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <h4 style="color:#c0392b;"><%= cert.certificateId %></h4>
+                  <p><%= cert.hospital %> · <%= cert.city %></p>
+                  <p style="font-size:12px;color:#aaa;">Donated: <%= new Date(cert.donatedAt).toLocaleDateString() %> · Issued: <%= new Date(cert.issuedAt).toLocaleDateString() %></p>
+                </div>
+                <a href="/generate-certificate/<%= cert._id %>" class="btn-primary" style="white-space:nowrap;">⬇ Download PDF</a>
+              </article>
+            <% }) %>
+          </div>
+        <% } %>
       </div>
 
       <a href="/" class="back-link">← Back to Home</a>

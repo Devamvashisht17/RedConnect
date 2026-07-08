@@ -1,8 +1,7 @@
 // services/notificationService.js
 // Socket.IO only — no database notifications
 
-const DonorStats = require('../models/DonorStats');
-const mongoose   = require('mongoose');
+const mongoose = require('mongoose');
 const { findNearbyDonors } = require('./locationService');
 
 /**

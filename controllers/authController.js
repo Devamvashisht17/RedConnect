@@ -1,7 +1,15 @@
 const jwt  = require('jsonwebtoken');
 const User = require('../models/User');
 const Donor = require('../models/Donor');
-const { ensureDonorProfileForUser } = require('../services/donorProfileService');
+const Hospital = require('../models/Hospital');
+
+async function getLiveStats() {
+  const [donors, hospitals] = await Promise.all([
+    Donor.countDocuments({}),
+    Hospital.countDocuments({ isVerified: true })
+  ]);
+  return { donors, donations: 0, hospitals };
+}
 
 const BLOOD_GROUP_OPTIONS = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
 
@@ -12,23 +20,26 @@ const isAdminEmail = (email) => ADMIN_EMAILS.includes(String(email || '').trim()
 const cookieOpts = { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 };
 
 async function getPostLoginRedirect(user) {
-  const roles = user.roles || ['donor'];
-  const isDonor = roles.includes('donor');
-  const isRequesterOnly = roles.includes('requester') && !isDonor;
+  const roles = user.roles || [];
 
-  if (isRequesterOnly) return '/requester/dashboard';
-
-  if (isDonor) {
+  if (roles.includes('donor')) {
+    // Verify they actually have a donor record with a valid blood group
     const donor = await Donor.findOne({ user: user._id }).select('bloodGroup');
     const valid = BLOOD_GROUP_OPTIONS.includes(String(donor?.bloodGroup || '').trim());
-    return valid ? '/donor/dashboard' : '/donor/complete-profile';
+    if (valid) return '/donor/dashboard';
+    // Has donor role but no valid blood group — strip the stale role
+    await User.findByIdAndUpdate(user._id, { $pull: { roles: 'donor' } });
   }
 
-  return '/dashboard';
+  if (roles.includes('requester')) return '/requester/dashboard';
+
+  return '/dashboard-select';
 }
 
-exports.getSignup = (req, res) =>
-  res.render('signup', { error: req.flash('error')[0] || null });
+exports.getSignup = async (req, res) => {
+  const stats = await getLiveStats();
+  res.render('signup', { error: req.flash('error')[0] || null, stats });
+};
 
 exports.postSignup = async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
@@ -42,8 +53,7 @@ exports.postSignup = async (req, res) => {
       return res.redirect('/signup');
     }
     const profilePic = req.file ? '/uploads/' + req.file.filename : '';
-    const user = await User.create({ name, email, password, profilePic, roles: ['donor'] });
-    await ensureDonorProfileForUser(user, { name, email });
+    const user = await User.create({ name, email, password, profilePic });
     res.render('success', { name });
   } catch (err) {
     req.flash('error', err.message || 'Something went wrong.');
@@ -51,8 +61,10 @@ exports.postSignup = async (req, res) => {
   }
 };
 
-exports.getLogin = (req, res) =>
-  res.render('login', { error: req.flash('error')[0] || null });
+exports.getLogin = async (req, res) => {
+  const stats = await getLiveStats();
+  res.render('login', { error: req.flash('error')[0] || null, stats });
+};
 
 exports.postLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -61,10 +73,6 @@ exports.postLogin = async (req, res) => {
     if (!user)                              { req.flash('error', 'Not registered. Please signup.'); return res.redirect('/login'); }
     if (!user.password)                     { req.flash('error', 'Please login with Google.');      return res.redirect('/login'); }
     if (!await user.matchPassword(password)){ req.flash('error', 'Incorrect password.');            return res.redirect('/login'); }
-    const isDonorUser = !user.roles || user.roles.length === 0 || user.roles.includes('donor');
-    if (isDonorUser) {
-      await ensureDonorProfileForUser(user, { name: user.name, email: user.email });
-    }
     res.cookie('token', generateToken(user._id), cookieOpts);
     if (isAdminEmail(user.email)) return res.redirect('/admin/dashboard');
     res.redirect(await getPostLoginRedirect(user));
@@ -82,10 +90,6 @@ exports.logout = (req, res) => {
 };
 
 exports.googleCallback = async (req, res) => {
-  const isDonorUser = !req.user?.roles || req.user.roles.length === 0 || req.user.roles.includes('donor');
-  if (isDonorUser) {
-    await ensureDonorProfileForUser(req.user, { name: req.user.name, email: req.user.email });
-  }
   res.cookie('token', generateToken(req.user._id), cookieOpts);
   if (isAdminEmail(req.user?.email)) return res.redirect('/admin/dashboard');
   res.redirect(await getPostLoginRedirect(req.user));

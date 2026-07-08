@@ -1,5 +1,4 @@
 const Donor = require('../models/Donor');
-const Donation = require('../models/Donation');
 const Hospital = require('../models/Hospital');
 const Feedback = require('../models/Feedback');
 
@@ -24,24 +23,21 @@ exports.index = async (req, res) => {
   ];
   const bloodGroups = ['O+','A+','B+','AB+','O-','A-','B-','AB-'];
 
-  const [registeredDonors, successfulDonations, partnerHospitals, donorCities, hospitalCities, donationCities] = await Promise.all([
+  const [registeredDonors, partnerHospitals, donorCities, hospitalCities] = await Promise.all([
     Donor.countDocuments({}),
-    Donation.countDocuments({ status: 'verified' }),
     Hospital.countDocuments({ isVerified: true }),
     Donor.distinct('city', { city: { $exists: true, $ne: '' } }),
-    Hospital.distinct('city', { city: { $exists: true, $ne: '' } }),
-    Donation.distinct('city', { city: { $exists: true, $ne: '' } })
+    Hospital.distinct('city', { city: { $exists: true, $ne: '' } })
   ]);
 
   const citySet = new Set([
     ...donorCities,
-    ...hospitalCities,
-    ...donationCities
+    ...hospitalCities
   ].map(city => String(city).trim().toLowerCase()).filter(Boolean));
 
   const impactStats = {
     registeredDonors,
-    successfulDonations,
+    successfulDonations: 0,
     partnerHospitals,
     citiesCovered: citySet.size
   };
@@ -61,13 +57,27 @@ exports.index = async (req, res) => {
     location: item.category === 'hospital' ? 'Delhi, India' : 'Kathmandu, Nepal'
   }));
 
-  res.render('index', { volunteers, counts, bloodGroups, impactStats, testimonials: featuredTestimonials });
+  res.render('index', { volunteers, counts, bloodGroups, impactStats, testimonials: featuredTestimonials, razorpayKeyId: process.env.RAZORPAY_KEY_ID });
 };
 
 exports.blood        = (req, res) => res.render('blood', { bloodData });
 exports.howItWorks   = (req, res) => res.render('how-it-works');
 exports.thankyou     = (req, res) => res.render('thankyou', { donorName: req.query.name || 'Valued Donor' });
 exports.notFound     = (req, res) => res.status(404).render('404');
+
+exports.feedbackPage = async (req, res) => {
+  const testimonials = await Feedback.find({ isPublic: true, rating: { $gte: 4 } })
+    .sort({ rating: -1, createdAt: -1 })
+    .limit(12)
+    .lean();
+
+  const featured = testimonials.map((item) => ({
+    ...item,
+    subtitle: item.category === 'hospital' ? 'Hospital Partner' : 'Helpline Requester'
+  }));
+
+  res.render('feedback', { testimonials: featured });
+};
 
 exports.submitFeedback = async (req, res) => {
   try {
@@ -92,32 +102,21 @@ exports.submitFeedback = async (req, res) => {
   }
 };
 
-exports.dashboard    = (req, res) => {
-  if (!res.locals.user) {
-    req.flash('error', 'Please login to access dashboard');
-    return res.redirect('/login');
-  }
+exports.dashboard = (req, res) => {
+  const user = req.user;
+  if (!user) return res.redirect('/login');
 
-  const user = res.locals.user;
-  
-  // Ensure roles field exists (for existing users without it)
-  const userRoles = user.roles || ['donor'];
-  
-  // If user has both roles, show role selection page
-  if (userRoles.includes('donor') && userRoles.includes('requester')) {
+  const roles = user.roles || [];
+
+  if (roles.includes('donor') && roles.includes('requester'))
     return res.render('dashboard-select', { user });
-  }
-  
-  // If user is only donor, redirect to donor dashboard
-  if (userRoles.includes('donor')) {
+
+  if (roles.includes('donor'))
     return res.redirect('/donor/dashboard');
-  }
-  
-  // If user is only requester, redirect to requester dashboard
-  if (userRoles.includes('requester')) {
+
+  if (roles.includes('requester'))
     return res.redirect('/requester/dashboard');
-  }
-  
-  // If user has no roles, default to donor dashboard
-  return res.redirect('/donor/dashboard');
+
+  // No roles — show select page so user can choose
+  return res.render('dashboard-select', { user });
 };

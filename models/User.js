@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   profilePic: { type: String, default: '' },
   googleId:   { type: String },
   activity:   { type: String },
-  roles:      { type: [String], enum: ['donor', 'requester'], default: ['donor'] },
+  roles:      { type: [String], enum: ['donor', 'requester'], default: [] },
   createdAt:  { type: Date, default: Date.now }
 });
 

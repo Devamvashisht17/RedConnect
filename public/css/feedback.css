@@ -1,0 +1,483 @@
+/* ============================================================
+   feedback.css — Mobile-first, fully responsive
+   Breakpoints: 480px (large mobile), 768px (tablet), 1025px (desktop)
+   ============================================================ */
+
+/* ── Reset & base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Page background ──────────────────────────────────── */
+.fb-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #fff7f7 0%, #fef2f2 60%, #fff 100%);
+  font-family: 'Poppins', 'Manrope', sans-serif;
+  color: #1f2937;
+}
+
+/* ── Shell (max-width container) ──────────────────────── */
+.fb-shell {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* ── Page hero ────────────────────────────────────────── */
+.fb-hero {
+  padding: 2.5rem 1rem 2rem;
+  text-align: center;
+}
+
+.fb-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: #fff1ef;
+  color: #b42318;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.fb-hero h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.fb-hero h1 span {
+  color: #b42318;
+}
+
+.fb-hero p {
+  margin: 0 auto;
+  max-width: 560px;
+  font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+  line-height: 1.7;
+  color: #6b7280;
+}
+
+/* ── Section label ────────────────────────────────────── */
+.fb-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.fb-section-label h2 {
+  margin: 0;
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+  font-weight: 700;
+  color: #111827;
+}
+
+.fb-section-label .fb-count-pill {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: #fff1ef;
+  color: #b42318;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Testimonials section ─────────────────────────────── */
+.fb-testimonials-section {
+  padding: 0 0 2rem;
+}
+
+/* ── Swiper overrides ─────────────────────────────────── */
+.fb-swiper {
+  padding: 0.5rem 0.125rem 3rem !important;
+  overflow: visible !important;
+}
+
+.fb-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.fb-swiper .swiper-slide {
+  height: auto;
+}
+
+/* Pagination dots */
+.fb-swiper .swiper-pagination {
+  bottom: 0.25rem;
+}
+
+.fb-swiper .swiper-pagination-bullet {
+  width: 0.6rem;
+  height: 0.6rem;
+  background: #f6c5bf;
+  opacity: 1;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.fb-swiper .swiper-pagination-bullet-active {
+  width: 1.75rem;
+  border-radius: 999px;
+  background: #ef4444;
+}
+
+/* ── Testimonial card ─────────────────────────────────── */
+.fb-card {
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #f6d8d3;
+  box-shadow: 0 8px 28px rgba(17, 24, 39, 0.07);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.swiper-slide-active .fb-card {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(180, 35, 24, 0.14);
+}
+
+.fb-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #fff1ef;
+  color: #b42318;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  width: fit-content;
+  margin-bottom: 0.5rem;
+}
+
+.fb-card-quote {
+  margin: 0 0 0.75rem;
+  font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+  font-weight: 600;
+  line-height: 1.6;
+  color: #111827;
+}
+
+.fb-card-stars {
+  display: flex;
+  gap: 0.25rem;
+  color: #ef4444;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.fb-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid #fde8e4;
+}
+
+.fb-card-avatar {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ef4444, #b42318);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 6px 14px rgba(180, 35, 24, 0.2);
+}
+
+.fb-card-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.fb-card-role {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-top: 0.15rem;
+}
+
+/* ── Empty state ──────────────────────────────────────── */
+.fb-empty {
+  padding: 2.5rem 1.5rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px dashed #f4c2bb;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+/* ── Divider ──────────────────────────────────────────── */
+.fb-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f4c2bb 30%, #f4c2bb 70%, transparent);
+  margin: 1.5rem 0;
+}
+
+/* ── Form section ─────────────────────────────────────── */
+.fb-form-section {
+  padding-bottom: 3rem;
+}
+
+.fb-form-shell {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #f7d7d3;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 12px 40px rgba(180, 35, 24, 0.09);
+  backdrop-filter: blur(8px);
+}
+
+/* ── Form grid ────────────────────────────────────────── */
+.fb-form {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.fb-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+}
+
+/* ── Input base ───────────────────────────────────────── */
+.fb-input,
+.fb-select,
+.fb-textarea {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #f4c2bb;
+  border-radius: 0.875rem;
+  background: #fffaf7;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-family: inherit;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  color: #374151;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.fb-input:focus,
+.fb-select:focus,
+.fb-textarea:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.fb-input::placeholder,
+.fb-textarea::placeholder {
+  color: #b0b7c3;
+}
+
+.fb-textarea {
+  resize: vertical;
+  min-height: 7rem;
+}
+
+/* ── Rating block ─────────────────────────────────────── */
+.fb-rating-block {
+  padding: 0.875rem;
+  border: 1px solid #f4c2bb;
+  border-radius: 0.875rem;
+  background: #fffaf7;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fb-rating-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b42318;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fb-stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.fb-star {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: clamp(1.6rem, 6vw, 2rem);
+  color: #f4c2bb;
+  cursor: pointer;
+  line-height: 1;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.fb-star:hover,
+.fb-star.active {
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+
+/* ── Submit button ────────────────────────────────────── */
+.fb-submit-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fb-submit-btn {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e53935, #b42318);
+  color: #fff;
+  font-family: inherit;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 20px rgba(181, 35, 24, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.fb-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(181, 35, 24, 0.32);
+}
+
+.fb-submit-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Feedback message ─────────────────────────────────── */
+.fb-msg {
+  min-height: 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f766e;
+  text-align: center;
+}
+
+.fb-msg.error {
+  color: #b42318;
+}
+
+/* ── Outer card wrapper (testimonials + form together) ── */
+.fb-outer-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #f7d7d3;
+  border-radius: 1.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 18px 50px rgba(180, 35, 24, 0.1);
+  backdrop-filter: blur(8px);
+  margin-bottom: 2rem;
+}
+
+/* ============================================================
+   TABLET  481px – 1024px
+   ============================================================ */
+@media (min-width: 481px) {
+  .fb-hero {
+    padding: 3rem 1.5rem 2.5rem;
+  }
+
+  .fb-outer-card {
+    padding: 2rem;
+  }
+
+  .fb-form-shell {
+    padding: 2rem;
+  }
+
+  .fb-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fb-submit-btn {
+    width: auto;
+    min-width: 14rem;
+  }
+
+  .fb-submit-wrap {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .fb-msg {
+    text-align: left;
+  }
+}
+
+@media (min-width: 640px) {
+  .fb-swiper .swiper-slide {
+    /* Swiper JS handles this via breakpoints, but CSS fallback: */
+    max-width: 90%;
+  }
+}
+
+/* ============================================================
+   DESKTOP  1025px+
+   ============================================================ */
+@media (min-width: 1025px) {
+  .fb-hero {
+    padding: 4rem 2rem 3rem;
+  }
+
+  .fb-outer-card {
+    padding: 2.5rem;
+  }
+
+  .fb-form-shell {
+    padding: 2.5rem;
+  }
+
+  .fb-card {
+    padding: 2rem;
+  }
+
+  .fb-card-quote {
+    font-size: 1.05rem;
+  }
+
+  /* Two-column layout: testimonials left, form right */
+  .fb-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .fb-submit-btn {
+    min-width: 12rem;
+  }
+}
+
+/* ============================================================
+   OVERFLOW GUARD — no horizontal scroll on any screen
+   ============================================================ */
+.fb-page,
+.fb-shell,
+.fb-outer-card,
+.fb-form-shell {
+  overflow-x: hidden;
+}

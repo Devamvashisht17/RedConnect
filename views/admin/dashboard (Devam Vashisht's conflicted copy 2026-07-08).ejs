@@ -76,13 +76,11 @@
           <div class="admin-stat-value"><%= volunteerCount %></div>
           <div class="admin-stat-label">Volunteers</div>
         </div>
-        <a href="/admin/payments" style="text-decoration:none;">
-          <div class="admin-stat-card" style="border-top:4px solid #d32f2f;cursor:pointer;">
-            <div class="admin-stat-icon" style="background:#fff0f0">💳</div>
-            <div class="admin-stat-value">₹<%= (totalAmountRaised / 100).toLocaleString('en-IN') %></div>
-            <div class="admin-stat-label">Raised · <%= totalPayments %> payments</div>
-          </div>
-        </a>
+        <div class="admin-stat-card" style="border-top:4px solid #27ae60;cursor:pointer;" onclick="location.href='/admin/donations'">
+          <div class="admin-stat-icon" style="background:#f0fff4">🩸</div>
+          <div class="admin-stat-value"><%= pendingDonationsCount %></div>
+          <div class="admin-stat-label">Pending Donations</div>
+        </div>
       </div>
 
       <div class="admin-grid">
@@ -96,17 +94,17 @@
             <div class="admin-empty">✅ No low-rating feedback</div>
           <% } else { %>
             <% lowRatingFeedback.forEach(f => { %>
-              <div class="admin-pending-item" style="flex-direction:column;align-items:stretch;">
+              <div class="admin-pending-item">
                 <div class="admin-pending-info">
                   <strong><%= f.name %></strong>
                   <span class="admin-badge red" style="margin-left:8px;"><%= f.rating %> ★</span>
                   <div class="admin-pending-sub"><%= f.email %> &middot; <%= f.category %></div>
                   <div class="admin-pending-sub" style="margin-top:4px;">"<%= f.message %>"</div>
                   <div class="admin-pending-sub"><%= new Date(f.createdAt).toLocaleString() %></div>
-                </div>
-                <div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:0 4px;">
-                  <textarea class="feedback-reply-input" data-id="<%= f._id %>" rows="2" placeholder="Type your reply..." style="flex:1;border:1px solid #f2c7c4;border-radius:8px;padding:8px 10px;resize:vertical;font-size:14px;"></textarea>
-                  <button type="button" class="admin-btn-verify feedback-reply-btn" data-id="<%= f._id %>" style="white-space:nowrap;">✉ Send Reply</button>
+                  <div class="admin-reply-form" style="margin-top:10px;display:flex;gap:8px;align-items:flex-start;">
+                    <textarea id="reply-<%= f._id %>" rows="2" placeholder="Type your reply..." style="flex:1;border:1px solid #f2c7c4;border-radius:8px;padding:8px 10px;resize:vertical;"></textarea>
+                    <button class="admin-btn-verify" onclick="replyFeedback('<%= f._id %>')" style="white-space:nowrap;">&#9993; Send Reply</button>
+                  </div>
                 </div>
               </div>
             <% }) %>
@@ -138,45 +136,6 @@
                 </div>
               </div>
             <% }) %>
-          <% } %>
-        </div>
-
-        <div class="admin-card admin-full-width">
-          <div class="admin-card-header">
-            <h3>🏅 Issued Certificates</h3>
-            <span class="admin-badge" style="background:#27ae60;color:#fff"><%= certificates.length %></span>
-          </div>
-          <% if (certificates.length === 0) { %>
-            <div class="admin-empty">No certificates issued yet.</div>
-          <% } else { %>
-            <table style="width:100%;border-collapse:collapse;font-size:14px;">
-              <thead>
-                <tr style="background:#fff0f0;">
-                  <th style="padding:10px;text-align:left;">Certificate ID</th>
-                  <th style="padding:10px;text-align:left;">Donor</th>
-                  <th style="padding:10px;text-align:left;">Blood Group</th>
-                  <th style="padding:10px;text-align:left;">Hospital</th>
-                  <th style="padding:10px;text-align:left;">City</th>
-                  <th style="padding:10px;text-align:left;">Issued On</th>
-                  <th style="padding:10px;text-align:left;">Download</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% certificates.forEach(c => { %>
-                  <tr style="border-bottom:1px solid #f5f5f5;">
-                    <td style="padding:10px;font-family:monospace;color:#c0392b;font-weight:700;"><%= c.certificateId %></td>
-                    <td style="padding:10px;"><%= c.donorName %></td>
-                    <td style="padding:10px;"><span class="blood-tag"><%= c.bloodGroup %></span></td>
-                    <td style="padding:10px;"><%= c.hospital %></td>
-                    <td style="padding:10px;"><%= c.city %></td>
-                    <td style="padding:10px;"><%= new Date(c.issuedAt).toLocaleDateString() %></td>
-                    <td style="padding:10px;">
-                      <a href="/generate-certificate/<%= c._id %>" class="admin-btn-verify" style="text-decoration:none;padding:6px 12px;font-size:12px;">⬇ PDF</a>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
           <% } %>
         </div>
 
@@ -215,29 +174,6 @@
     }
   </script>
   <script>
-    document.addEventListener('click', async function(e) {
-      if (!e.target.classList.contains('feedback-reply-btn')) return;
-      const id = e.target.dataset.id;
-      const textarea = document.querySelector(`.feedback-reply-input[data-id="${id}"]`);
-      const msg = textarea.value.trim();
-      if (!msg) { alert('Please type a reply message.'); return; }
-      e.target.disabled = true;
-      e.target.textContent = 'Sending...';
-      try {
-        const r = await fetch(`/admin/reply-feedback/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg })
-        });
-        const d = await r.json();
-        if (d.success) { alert('✅ Reply sent!'); textarea.value = ''; }
-        else alert('Error: ' + (d.error || 'Failed'));
-      } catch(err) {
-        alert('Network error. Please try again.');
-      }
-      e.target.disabled = false;
-      e.target.textContent = '✉ Send Reply';
-    });
     async function replyFeedback(id) {
       const msg = document.getElementById('reply-' + id).value.trim();
       if (!msg) { alert('Please type a reply message.'); return; }

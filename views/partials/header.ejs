@@ -1,4 +1,8 @@
 <nav class="navbar">
+  <%
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+    const isAdmin = (typeof user !== 'undefined' && user) ? adminEmails.includes(user.email) : false;
+  %>
   <div class="logo">
     <a href="/" aria-label="RedConnect home">
       <img src="/images/logo.svg" alt="RedConnect" style="height:52px;">
@@ -16,6 +20,11 @@
       <li><a href="/how-it-works">HOW IT WORKS</a></li>
       <li><a href="/register">DONATE</a></li>
       <li><a href="/request">REQUEST</a></li>
+      <li><a href="/feedback">FEEDBACK</a></li>
+      <% if (typeof user !== 'undefined' && user) { %>
+        <li class="mobile-only-link"><% if (isAdmin) { %><a href="/admin/dashboard">⚙️ Admin Dashboard</a><% } else { %><a href="/dashboard">🩸 My Dashboard</a><% } %></li>
+        <li class="mobile-only-link"><a href="/logout">🚪 Logout</a></li>
+      <% } %>
     </ul>
 
     <div class="nav-buttons">
@@ -32,10 +41,6 @@
             <span class="user-name"><%= user.name || 'User' %></span>
           </div>
           <div class="dropdown-menu" id="dropdownMenu">
-            <% 
-              const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
-              const isAdmin = adminEmails.includes(user.email);
-            %>
             <% if (isAdmin) { %>
               <a href="/admin/dashboard">⚙️ Admin Dashboard</a>
             <% } else { %>
@@ -52,7 +57,22 @@
   </div>
 </nav>
 
+<style>
+  .mobile-only-link { display: none; }
+  @media (max-width: 768px) {
+    .mobile-only-link { display: block; }
+    .user-profile { display: none; }
+  }
+</style>
+
 <script>
+  // Inject mobile.css globally
+  (function() {
+    var l = document.createElement('link');
+    l.rel = 'stylesheet'; l.href = '/css/mobile.css';
+    document.head.appendChild(l);
+  })();
+
   function toggleDropdown() {
     const dropdown = document.getElementById('dropdownMenu');
     if (dropdown) dropdown.classList.toggle('show');

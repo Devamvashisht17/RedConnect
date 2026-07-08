@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Donations - RedConnect</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/register.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="quote-section">
+    <h2>"Every Drop Counts"</h2>
+    <p>Track your donation history and download your verified certificates.</p>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="register-container dashboard-page">
+      <div class="register-header">
+        <h1>🩸 My Donations</h1>
+        <p>Log a new donation or download your certificate once verified by admin</p>
+        <a href="/donor/dashboard" style="font-size:14px;color:#e74c3c;text-decoration:none;">← Back to Dashboard</a>
+      </div>
+
+      <!-- Log Donation Form -->
+      <div class="admin-card admin-full-width" style="margin-bottom:28px;">
+        <div class="admin-card-header">
+          <h3>➕ Log a New Donation</h3>
+        </div>
+        <form id="logDonationForm" class="don-form">
+          <div class="don-form-grid">
+            <div class="don-form-group">
+              <label>Blood Group</label>
+              <select name="bloodGroup" required class="don-input">
+                <option value="">Select blood group</option>
+                <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(bg => { %>
+                  <option value="<%= bg %>" <%= donor?.bloodGroup === bg ? 'selected' : '' %>><%= bg %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="don-form-group">
+              <label>Hospital Name</label>
+              <input type="text" name="hospital" required placeholder="e.g. City Hospital" class="don-input">
+            </div>
+            <div class="don-form-group">
+              <label>City</label>
+              <input type="text" name="city" required placeholder="e.g. Delhi" class="don-input" value="<%= donor?.city || '' %>">
+            </div>
+            <div class="don-form-group">
+              <label>Donation Date</label>
+              <input type="date" name="donatedAt" required class="don-input" max="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <div class="don-form-group don-checkbox-group">
+              <label class="don-checkbox-label">
+                <input type="checkbox" name="isEmergency">
+                <span>Emergency Donation</span>
+              </label>
+            </div>
+          </div>
+          <button type="submit" class="don-submit-btn">Submit Donation for Verification</button>
+          <p id="donFormMsg" class="don-form-msg"></p>
+        </form>
+      </div>
+
+      <!-- Donations List -->
+      <div class="admin-card admin-full-width">
+        <div class="admin-card-header">
+          <h3>📋 Donation History</h3>
+          <span class="admin-badge orange"><%= donations.length %></span>
+        </div>
+
+        <% if (donations.length === 0) { %>
+          <div class="admin-empty">No donations logged yet. Submit your first donation above.</div>
+        <% } else { %>
+          <div class="don-list">
+            <% donations.forEach(d => { %>
+              <div class="don-item">
+                <div class="don-item-left">
+                  <span class="blood-tag"><%= d.bloodGroup %></span>
+                  <div class="don-item-info">
+                    <strong><%= d.hospital %></strong>
+                    <span class="sc-sub"><%= d.city %> &middot; <%= new Date(d.donatedAt).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) %></span>
+                    <% if (d.isEmergency) { %><span class="admin-emergency-tag" style="margin-top:4px;display:inline-block;">🚨 Emergency</span><% } %>
+                  </div>
+                </div>
+                <div class="don-item-right">
+                  <span class="sc-badge sc-badge-<%= d.status === 'verified' ? 'fit' : d.status === 'rejected' ? 'unfit' : 'pending' %>">
+                    <%= d.status === 'verified' ? '✅' : d.status === 'rejected' ? '❌' : '⏳' %>
+                    <%= d.status.charAt(0).toUpperCase() + d.status.slice(1) %>
+                  </span>
+                  <% if (d.status === 'verified' && d.certificate) { %>
+                    <a href="/generate-certificate/<%= d.certificate %>" class="don-cert-btn" target="_blank">
+                      📄 Download Certificate
+                    </a>
+                  <% } else if (d.status === 'pending') { %>
+                    <span class="don-pending-note">Awaiting admin verification</span>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <style>
+    .don-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .don-form-group { display: flex; flex-direction: column; gap: 6px; }
+    .don-form-group label { font-size: 13px; font-weight: 700; color: #555; }
+    .don-input {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fafafa;
+      transition: border-color 0.2s;
+    }
+    .don-input:focus { outline: none; border-color: #e74c3c; background: #fff; }
+    .don-checkbox-group { justify-content: flex-end; }
+    .don-checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #555; cursor: pointer; }
+    .don-submit-btn {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .don-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(231,76,60,0.35); }
+    .don-form-msg { margin-top: 10px; font-size: 14px; font-weight: 600; }
+    .don-form-msg.success { color: #27ae60; }
+    .don-form-msg.error   { color: #e74c3c; }
+
+    .don-list { display: flex; flex-direction: column; gap: 0; }
+    .don-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 4px;
+      border-bottom: 1px solid #f5f5f5;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .don-item:last-child { border-bottom: none; }
+    .don-item-left { display: flex; align-items: center; gap: 14px; }
+    .don-item-info { display: flex; flex-direction: column; gap: 3px; }
+    .don-item-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .don-cert-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #27ae60, #1e8449);
+      color: white;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .don-cert-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(39,174,96,0.35); }
+    .don-pending-note { font-size: 12px; color: #aaa; font-style: italic; }
+
+    .sc-btn-cert {
+      padding: 6px 12px;
+      background: #e8f5e9;
+      color: #27ae60;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .sc-btn-cert:hover { background: #27ae60; color: white; }
+
+    .dv-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .dv-tab {
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: white;
+      color: #555;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .dv-tab:hover { background: #fff5f5; color: #e74c3c; }
+    .dv-tab.active { background: #e74c3c; color: white; }
+    .dv-tab-count {
+      background: rgba(255,255,255,0.25);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .dv-tab.active .dv-tab-count { background: rgba(255,255,255,0.3); }
+    .dv-tab:not(.active) .dv-tab-count { background: #f0f0f0; color: #666; }
+  </style>
+
+  <script>
+    document.getElementById('logDonationForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const msg = document.getElementById('donFormMsg');
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      msg.textContent = '';
+      msg.className = 'don-form-msg';
+
+      const formData = new FormData(this);
+      const body = Object.fromEntries(formData.entries());
+
+      try {
+        const res  = await fetch('/donor/log-donation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.textContent = '✅ ' + data.message;
+          msg.className = 'don-form-msg success';
+          this.reset();
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          msg.textContent = '❌ ' + (data.error || 'Failed to submit.');
+          msg.className = 'don-form-msg error';
+        }
+      } catch (err) {
+        msg.textContent = '❌ Network error. Please try again.';
+        msg.className = 'don-form-msg error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Donation for Verification';
+      }
+    });
+  </script>
+</body>
+</html>

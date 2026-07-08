@@ -15,14 +15,14 @@
 
   <div class="quote-section">
     <h2>"When You Need Blood, We're Here"</h2>
-    <p>Manage your blood requests, track their status, and connect with donors.</p>
+    <p>Manage your blood requests and track their status.</p>
   </div>
 
   <div class="content-wrapper">
     <div class="register-container dashboard-page">
       <div class="register-header">
         <h1>🩸 Requester Dashboard</h1>
-        <p>Welcome back, <%= user.name %> — here's your request history</p>
+        <p>Welcome back, <%= user.name %></p>
       </div>
 
       <div class="stats-row">
@@ -48,28 +48,26 @@
         </div>
       </div>
 
-      <div class="stats-row">
-        <div class="stat-card red">
-          <div class="stat-icon">🩸</div>
-          <div class="stat-value"><%= stats.totalDonations %></div>
-          <div class="stat-label">Total Donations</div>
-        </div>
-        <div class="stat-card gold">
-          <div class="stat-icon">✅</div>
-          <div class="stat-value"><%= stats.completedDonations %></div>
-          <div class="stat-label">Completed</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-icon">⏳</div>
-          <div class="stat-value"><%= stats.pendingDonations %></div>
-          <div class="stat-label">Pending Verification</div>
-        </div>
-        <div class="stat-card blue">
-          <div class="stat-icon">❤️</div>
-          <div class="stat-value"><%= stats.completedDonations %></div>
-          <div class="stat-label">Lives Impacted</div>
-        </div>
+      <% const pendingList = requests.filter(r => ['pending','Pending'].includes(r.status)); %>
+      <% if (pendingList.length > 0) { %>
+      <div class="dash-card" style="border-left: 4px solid #e53e3e; margin-bottom: 20px;">
+        <h3>⏳ Pending Requests (<%= pendingList.length %>)</h3>
+        <table class="mini-table">
+          <thead><tr><th>Patient</th><th>Blood</th><th>Level</th><th>Hospital</th><th>Date</th></tr></thead>
+          <tbody>
+            <% pendingList.forEach(r => { %>
+              <tr>
+                <td><%= r.patientName %></td>
+                <td><span class="blood-tag"><%= r.bloodGroupRequired %></span></td>
+                <td><span class="level-badge level-<%= (r.emergencyLevel || '').toLowerCase() %>"><%= r.emergencyLevel %></span></td>
+                <td><%= r.hospitalName %></td>
+                <td><%= new Date(r.createdAt).toLocaleDateString() %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
       </div>
+      <% } %>
 
       <div class="dashboard-grid">
         <div class="dash-col">
@@ -91,7 +89,7 @@
               </div>
               <div class="form-group">
                 <label>Units Required</label>
-                <input type="number" name="unitsRequired" required min="1" value="1" placeholder="Number of units">
+                <input type="number" name="unitsRequired" required min="1" value="1">
               </div>
               <div class="form-group">
                 <label>Hospital Name</label>
@@ -107,7 +105,7 @@
               </div>
               <div class="form-group">
                 <label>Contact Email</label>
-                <input type="email" name="contactEmail" value="<%= user.email %>" placeholder="Email for request updates">
+                <input type="email" name="contactEmail" value="<%= user.email %>">
               </div>
               <div class="form-group">
                 <label>Emergency Level</label>
@@ -128,41 +126,11 @@
               <button type="submit" class="submit-btn">Submit Request</button>
             </form>
           </div>
-
-          <div class="dash-card">
-            <h3>Your Donation History</h3>
-            <% if (donations.length > 0) { %>
-              <table class="mini-table">
-                <thead><tr><th>Blood</th><th>Hospital</th><th>Status</th><th>Date</th></tr></thead>
-                <tbody>
-                  <% donations.forEach(d => { %>
-                    <tr>
-                      <td><span class="blood-tag"><%= d.bloodGroup %></span></td>
-                      <td><%= d.hospital %></td>
-                      <td>
-                        <% if (d.status === 'verified') { %>
-                          <span class="status-tag verified">✅ Completed</span>
-                        <% } else if (d.status === 'pending') { %>
-                          <span class="status-tag pending">⏳ Pending Verification</span>
-                        <% } else { %>
-                          <span class="status-tag <%= d.status %>"><%= d.status %></span>
-                        <% } %>
-                      </td>
-                      <td><%= new Date(d.donatedAt).toLocaleDateString() %></td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-              <a href="/donor/dashboard" class="view-all">View Donor Dashboard →</a>
-            <% } else { %>
-              <p class="muted">No donations yet. Start donating to save lives!</p>
-            <% } %>
-          </div>
         </div>
 
         <div class="dash-col">
           <div class="dash-card">
-            <h3>Recent Blood Requests</h3>
+            <h3>Request History</h3>
             <% if (requests.length === 0) { %>
               <p class="muted">No blood requests yet.</p>
             <% } else { %>
@@ -185,12 +153,6 @@
                 </tbody>
               </table>
             <% } %>
-          </div>
-
-          <div class="dash-card">
-            <h3>Switch to Donor Dashboard</h3>
-            <p>View your donation stats, badges, and log new donations.</p>
-            <a href="/donor/dashboard" class="submit-btn" style="display:inline-block;text-decoration:none;text-align:center;">Go to Donor Dashboard</a>
           </div>
         </div>
       </div>

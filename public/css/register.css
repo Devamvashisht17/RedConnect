@@ -41,6 +41,7 @@ body {
 
 .faq-section {
   flex: 0 0 350px;
+  max-width: 350px;
   background: white;
   padding: 30px;
   border-radius: 10px;

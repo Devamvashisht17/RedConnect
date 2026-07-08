@@ -2,13 +2,9 @@
 
 const Queue      = require('../models/Queue');
 const { calculatePriorityScore, getQueueLevel, estimateWaitTime } = require('./priorityService');
-const DonorStats = require('../models/DonorStats');
 
 async function enqueue(request, requesterUserId = null) {
-  let stats = null;
-  if (requesterUserId) stats = await DonorStats.findOne({ user: requesterUserId });
-
-  const score      = calculatePriorityScore(request, stats);
+  const score      = calculatePriorityScore(request, null);
   const queueLevel = getQueueLevel(request.emergencyLevel);
   const position   = await Queue.countDocuments({ queueLevel, status: 'waiting' });
 
